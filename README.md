@@ -40,12 +40,11 @@ The fastest way to feel the app is the [live demo](https://techresourcehub.netli
 
 ## Why I built this
 
-> _**Fill this in — admissions readers care about story.** A short, honest paragraph about what problem you saw, what you tried, and what surprised you. Aim for 150–250 words. Suggested prompts:_
->
-> - _What problem at school did this solve for you or your classmates?_
-> - _What was the hardest single bug you fixed, and how?_
-> - _What did you discover about software design that you didn't expect?_
-> - _What would you do differently if you started over?_
+I built Technical Resource Hub because I noticed that many students, including me, often study computer science from scattered sources: one website for documentation, another for code examples, another compiler to test ideas, and sometimes a notebook or spreadsheet to track progress. When I sat down to prepare for the AP Computer Science A exam in May, I counted seven tabs open at once — Wikipedia for Merge Sort, a half-broken online Java compiler, a Google Doc for notes, and Discord to ask classmates. I lost my place every time I switched between them. I wanted to create one focused workspace where a student could read a clear explanation, test code immediately, and see their progress without switching between many tools.
+
+The hardest part was making the project feel like a real product instead of just a collection of pages. Adding authentication, per-user progress, synced profiles, automatic streak tracking, and a real online compiler forced me to think about software design more seriously. The lesson that stuck wasn't about features — it was about a single bug. For a week, clicking my own profile picture opened a preview modal instead of the file picker for uploads, and I couldn't figure out why. The answer turned out to be a click handler I had wired up in an earlier version and forgotten about. Fixing it taught me more about reading my own code than any feature I shipped that week.
+
+What surprised me most was how many small details matter: error messages, mobile performance, routing, loading states, and data security. If I started again, I would plan the architecture earlier and write tests from the beginning.
 
 ## Highlights an interviewer might ask about
 
