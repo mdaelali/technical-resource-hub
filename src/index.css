@@ -1,0 +1,252 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root
+{
+  color-scheme: dark;
+}
+
+html, body, #root
+{
+  height: 100%;
+  margin: 0;
+}
+
+body
+{
+  font-family: 'Inter', system-ui, sans-serif;
+  font-feature-settings: 'cv11', 'ss01';
+  letter-spacing: -0.01em;
+  color: #e5e7eb;
+  background-color: #050813;
+  background-image:
+    radial-gradient(ellipse 50% 40% at 12% 0%, rgba(139, 92, 246, 0.22), transparent 60%),
+    radial-gradient(ellipse 40% 35% at 88% 100%, rgba(34, 211, 238, 0.18), transparent 60%),
+    radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.04) 1px, transparent 0);
+  background-size: auto, auto, 32px 32px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Pin the background only on desktop. Mobile browsers repaint heavily on every
+   scroll when background-attachment: fixed is set, which tanks frame rate. */
+@media (min-width: 768px)
+{
+  body
+  {
+    background-attachment: fixed;
+  }
+}
+
+h1, h2, h3, h4
+{
+  letter-spacing: -0.02em;
+}
+
+@layer components
+{
+  .glass
+  {
+    @apply bg-white/[0.04] border border-white/[0.08] shadow-glass;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .glass-strong
+  {
+    @apply bg-white/[0.06] border border-white/[0.1] shadow-glass;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  /* Use for dropdowns, popovers, and floating menus where the user is reading
+     text *over* whatever else is on screen. Heavier background + bigger shadow
+     than .glass so it stays legible against bright dashboard cards on mobile. */
+  .popover
+  {
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background-color: rgb(7 11 26 / 0.96);
+    backdrop-filter: blur(24px) saturate(140%);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    box-shadow:
+      0 24px 48px -12px rgba(0, 0, 0, 0.6),
+      0 0 0 1px rgba(139, 92, 246, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+
+  .pill
+  {
+    @apply text-[10px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full;
+  }
+
+  .gradient-border
+  {
+    position: relative;
+  }
+  .gradient-border::before
+  {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    background: linear-gradient(
+      135deg,
+      rgba(139, 92, 246, 0.45) 0%,
+      rgba(34, 211, 238, 0.25) 50%,
+      rgba(252, 211, 77, 0.18) 100%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .card-hover
+  {
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  }
+  .card-hover:hover
+  {
+    transform: translateY(-2px);
+    box-shadow:
+      0 12px 32px rgba(2, 4, 12, 0.45),
+      0 0 0 1px rgba(139, 92, 246, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  .btn-primary
+  {
+    @apply inline-flex items-center justify-center gap-1.5 text-xs font-medium text-white px-3 py-1.5 rounded-lg transition;
+    background: linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.18),
+      0 4px 14px rgba(124, 58, 237, 0.35),
+      0 1px 2px rgba(0, 0, 0, 0.25);
+  }
+  .btn-primary:hover
+  {
+    filter: brightness(1.1);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      0 6px 18px rgba(124, 58, 237, 0.45),
+      0 1px 2px rgba(0, 0, 0, 0.25);
+  }
+  .btn-primary:active
+  {
+    transform: translateY(1px);
+  }
+  .btn-primary:disabled
+  {
+    opacity: 0.6;
+    cursor: not-allowed;
+    filter: grayscale(0.3);
+  }
+
+  .btn-gold
+  {
+    @apply inline-flex items-center justify-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition;
+    color: #1a1408;
+    background: linear-gradient(135deg, #fcd34d 0%, #f59e0b 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      0 4px 14px rgba(245, 158, 11, 0.3),
+      0 1px 2px rgba(0, 0, 0, 0.25);
+  }
+  .btn-gold:hover
+  {
+    filter: brightness(1.05);
+  }
+
+  .btn-ghost
+  {
+    @apply inline-flex items-center gap-1.5 text-xs text-slate-300 px-2.5 py-1.5 rounded-lg transition;
+  }
+  .btn-ghost:hover
+  {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.06);
+  }
+
+  .input-field
+  {
+    @apply w-full bg-white/[0.04] border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-violet-400/60 focus:ring-2 focus:ring-violet-400/10 transition;
+  }
+
+  .progress-fill
+  {
+    height: 100%;
+    background-image: linear-gradient(to right, #22d3ee, #8b5cf6, #fcd34d);
+    transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: width;
+  }
+}
+
+/* Stronger glass on desktop where the GPU can absorb the cost. */
+@media (min-width: 768px)
+{
+  .glass
+  {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  .glass-strong
+  {
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+  }
+}
+
+/* Honor system reduced-motion: kill animations and transitions, drop blur,
+   leave layout intact. Pairs with framer-motion's MotionConfig
+   reducedMotion="user". */
+@media (prefers-reduced-motion: reduce)
+{
+  *, *::before, *::after
+  {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .glass, .glass-strong
+  {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background-color: rgba(12, 18, 40, 0.85);
+  }
+  .popover
+  {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background-color: rgb(7 11 26 / 0.98);
+  }
+  .card-hover:hover
+  {
+    transform: none !important;
+  }
+}
+
+::-webkit-scrollbar
+{
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track
+{
+  background: transparent;
+}
+::-webkit-scrollbar-thumb
+{
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover
+{
+  background: rgba(255, 255, 255, 0.15);
+}
