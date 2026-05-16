@@ -1,4 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+/* Fonts are now loaded via <link rel="stylesheet"> in index.html — see the
+   preconnect+link block there. Loading from index.html avoids the
+   render-blocking penalty of @import inside the main CSS file. */
 
 @tailwind base;
 @tailwind components;

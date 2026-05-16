@@ -2,9 +2,35 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>technical-resource-hub</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <title>Technical Resource Hub — Study workspace for CS students</title>
+    <meta name="description" content="A focused study workspace for CS students: documentation cards, a real online compiler that runs Java / Python / C++, per-user accounts, and an automatic study-streak tracker." />
+    <meta name="theme-color" content="#050813" />
+
+    <!-- Open Graph / link previews -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://alihasanli.com/" />
+    <meta property="og:title" content="Technical Resource Hub — Study workspace for CS students" />
+    <meta property="og:description" content="Documentation, a real online compiler (Java / Python / C++), and an automatic study-streak system. Built by Ali Hasanli." />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Technical Resource Hub" />
+    <meta name="twitter:description" content="A focused study workspace for CS students with a real online compiler and per-user progress sync." />
+
+    <!-- Warm up the three external origins the app will hit on first paint.
+         Avoids a serial DNS + TLS handshake delay on first render. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://wsgwswwnxfbaqwzdtans.supabase.co" crossorigin />
+
+    <!-- Load fonts as a <link> in HTML instead of @import in CSS.
+         @import inside index.css is render-blocking because the browser has
+         to fetch the CSS file before it even knows the @import URL exists. -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    />
   </head>
   <body>
     <div id="root"></div>
