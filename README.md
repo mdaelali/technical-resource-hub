@@ -17,7 +17,7 @@
 [![Lighthouse Performance](https://img.shields.io/badge/Performance-99-brightgreen?logo=lighthouse&logoColor=white)](https://pagespeed.web.dev/analysis/https-alihasanli-com/?form_factor=desktop)
 [![Lighthouse Accessibility](https://img.shields.io/badge/Accessibility-98-brightgreen?logo=lighthouse&logoColor=white)](https://pagespeed.web.dev/analysis/https-alihasanli-com/?form_factor=desktop)
 [![Lighthouse Best Practices](https://img.shields.io/badge/Best_Practices-100-brightgreen?logo=lighthouse&logoColor=white)](https://pagespeed.web.dev/analysis/https-alihasanli-com/?form_factor=desktop)
-[![Lighthouse SEO](https://img.shields.io/badge/SEO-90-brightgreen?logo=lighthouse&logoColor=white)](https://pagespeed.web.dev/analysis/https-alihasanli-com/?form_factor=desktop)
+[![Lighthouse SEO](https://img.shields.io/badge/SEO-100-brightgreen?logo=lighthouse&logoColor=white)](https://pagespeed.web.dev/analysis/https-alihasanli-com/?form_factor=desktop)
 
 <br />
 
