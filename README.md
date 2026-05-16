@@ -4,14 +4,14 @@
 
 **A focused study workspace for computer science students — documentation, a real online compiler, automatic streak tracking, and per-user progress that syncs across devices.**
 
-🔗 **Live demo:** [techresourcehub.netlify.app](https://techresourcehub.netlify.app/)
+🔗 **Live demo:** [alihasanli.com](https://alihasanli.com) &nbsp;·&nbsp; mirror: [techresourcehub.netlify.app](https://techresourcehub.netlify.app/)
 
 [![Built with React](https://img.shields.io/badge/React-19-149eca?logo=react&logoColor=white)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-38bdf8?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![Supabase](https://img.shields.io/badge/Supabase-Postgres%20%2B%20Auth%20%2B%20Storage-3ecf8e?logo=supabase&logoColor=white)](https://supabase.com/)
 [![Judge0](https://img.shields.io/badge/Judge0-Online%20Compiler-ff7a45)](https://judge0.com/)
-[![Netlify](https://img.shields.io/badge/Deployed-Netlify-00c7b7?logo=netlify&logoColor=white)](https://techresourcehub.netlify.app/)
+[![Netlify](https://img.shields.io/badge/Deployed-Netlify-00c7b7?logo=netlify&logoColor=white)](https://alihasanli.com)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](#license)
 
 </div>
@@ -31,7 +31,7 @@ Every user gets their own account (Supabase Auth), their own profile (name, bio,
 
 ## Screenshots
 
-The fastest way to feel the app is the [live demo](https://techresourcehub.netlify.app/). What you'll see:
+The fastest way to feel the app is the [live demo](https://alihasanli.com). What you'll see:
 
 - **Dashboard** — time-of-day greeting, premium stat widgets for streak and mastery, six quick-access tiles, daily recommendation, tip of the day.
 - **Documentation** — gradient-bordered topic cards with an expandable "Read more" surface that reveals step-by-step solutions, common mistakes, and practice tips.
@@ -149,8 +149,8 @@ When a user signs up, Supabase sends a confirmation email. The link in that emai
 
 | Field | Value |
 |---|---|
-| Site URL | Your deployed URL — for this project: `https://techresourcehub.netlify.app` |
-| Redirect URLs | Add every URL Supabase should be willing to redirect to. Example: `https://techresourcehub.netlify.app/`, `http://localhost:5173/`, plus your custom domain when you add it. |
+| Site URL | Your deployed URL — for this project: `https://alihasanli.com` |
+| Redirect URLs | Add every URL Supabase should be willing to redirect to. Example: `https://alihasanli.com/`, `https://alihasanli.com/**`, `https://www.alihasanli.com/`, `http://localhost:5173/`. |
 
 The client passes `emailRedirectTo: ${window.location.origin}/` to `supabase.auth.signUp`, so the confirmation link always points back to wherever the user signed up — you just have to allow-list those URLs.
 
