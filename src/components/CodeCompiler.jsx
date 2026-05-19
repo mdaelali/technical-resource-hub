@@ -13,7 +13,7 @@ import
   Clock
 } from 'lucide-react';
 import CodeEditor from './CodeEditor.jsx';
-import { LANGUAGES, runCode, CompilerError, MAX_SOURCE_LENGTH } from '../api/judge0.js';
+import { LANGUAGES, runCode, CompilerError, MAX_SOURCE_LENGTH } from '../api/piston.js';
 import useUserStorage from '../hooks/useUserStorage.js';
 import { clampCodeLength } from '../utils/security.js';
 
@@ -74,7 +74,7 @@ export default function CodeCompiler({ onLogActivity })
     try
     {
       const data = await runCode({
-        languageId: language.id,
+        languageKey: language.key,
         source: clampCodeLength(code),
         stdin: typeof stdin === 'string' ? stdin : ''
       });
@@ -198,7 +198,7 @@ export default function CodeCompiler({ onLogActivity })
                     className="flex items-center gap-2 text-slate-400"
                   >
                     <Loader2 size={12} className="animate-spin" />
-                    <span>Compiling and executing on Judge0...</span>
+                    <span>Compiling and running...</span>
                   </motion.div>
                 )}
                 {!running && error && (
@@ -248,7 +248,7 @@ export default function CodeCompiler({ onLogActivity })
                     exit={{ opacity: 0 }}
                     className="text-slate-500"
                   >
-                    Press <span className="text-violet-300">Run</span> to compile and execute via the Judge0 API. Output, stderr, and compile errors appear here.
+                    Press <span className="text-violet-300">Run</span> to compile and execute. Output, stderr, and compile errors appear here.
                   </motion.div>
                 )}
               </AnimatePresence>

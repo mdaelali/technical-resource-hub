@@ -10,7 +10,7 @@
 [![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-38bdf8?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![Supabase](https://img.shields.io/badge/Supabase-Postgres%20%2B%20Auth%20%2B%20Storage-3ecf8e?logo=supabase&logoColor=white)](https://supabase.com/)
-[![Judge0](https://img.shields.io/badge/Judge0-Online%20Compiler-ff7a45)](https://judge0.com/)
+[![Piston](https://img.shields.io/badge/Piston-Online%20Compiler-ff7a45)](https://github.com/engineer-man/piston)
 [![Netlify](https://img.shields.io/badge/Deployed-Netlify-00c7b7?logo=netlify&logoColor=white)](https://alihasanli.com)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](#license)
 
@@ -39,7 +39,7 @@ Resource Hub is a single-page study workspace built around four things students 
 
 - **Documentation Viewer** — 18 hand-written cards across *Algorithms*, *Logic Problems*, and *Exam Prep* with complexity analysis, common mistakes, step-by-step solutions, and practice tips.
 - **Code Playground** — 11 reference Java snippets (Binary Search, Merge Sort, Two Sum, Stack, Tree Traversal, …) with a faux IDE chrome, custom syntax highlighting, and one-click expected-output preview.
-- **Online Compiler** — a real editable code editor that compiles and runs **Java, Python, and C++** in the browser via the Judge0 API. Output, stderr, and compile errors are surfaced separately. Code length is capped and HTTPS-only.
+- **Online Compiler** — a real editable code editor with bracket auto-pair, Enter auto-indent, and Tab indentation. Runs **Java, Python, and C++** in the browser via the open-source [Piston](https://github.com/engineer-man/piston) runtime. Output, stderr, and compile errors are surfaced separately. Code length is capped at 10 000 chars.
 - **Progress Tracker** — a dashboard with a study-streak counter that increments **automatically** when the student reads a topic, marks something as mastered, runs code, or dwells for 2 minutes on a page. No manual "log session" button.
 
 Every user gets their own account (Supabase Auth), their own profile (name, bio, avatar uploaded to Supabase Storage), and their own progress — synced across devices.
@@ -50,7 +50,7 @@ The fastest way to feel the app is the [live demo](https://alihasanli.com). What
 
 - **Dashboard** — time-of-day greeting, premium stat widgets for streak and mastery, six quick-access tiles, daily recommendation, tip of the day.
 - **Documentation** — gradient-bordered topic cards with an expandable "Read more" surface that reveals step-by-step solutions, common mistakes, and practice tips.
-- **Online Compiler** — multi-language editor with tab/indent, run via Judge0, separate panels for `stdout`, `stderr`, and `compile_output`, plus stdin support.
+- **Online Compiler** — multi-language editor with bracket auto-pair, Enter auto-indent, tab indentation; runs via Piston, separate panels for `stdout`, `stderr`, and compile output, plus stdin support.
 - **Profile** — student-ID card with holographic header strip, click-to-upload avatar, badges grid, recently viewed topics, and a Danger Zone for account deletion.
 
 ## Why I built this
@@ -79,7 +79,7 @@ What surprised me most was how many small details matter: error messages, mobile
 | Styling | Tailwind 3 + custom design tokens | Dark glassmorphism with electric-violet / cyan / soft-gold accents |
 | Animation | framer-motion (sparingly) + CSS transitions | Heavy work happens in CSS; framer-motion only for AnimatePresence and drawer slide |
 | Auth + DB + Storage | Supabase (free tier) | bcrypt-hashed passwords server-side, JWT sessions, Postgres with RLS, S3-backed storage |
-| Code execution | Judge0 CE | Sandboxed Java / Python / C++ runtime, base64-encoded payload, HTTPS-only |
+| Code execution | [Piston](https://github.com/engineer-man/piston) | Open-source sandboxed Java / Python / C++ runtime via emkc.org public endpoint, no API key |
 | Icons | lucide-react | Tree-shakeable, per-icon imports |
 | Hosting | Netlify | Auto-deploy on every `main` push, custom domain pending |
 
@@ -102,11 +102,12 @@ npm run preview    # preview the built bundle locally
 
 ```
 src/
-  api/                  Supabase + Judge0 service modules
+  api/                  Supabase + Piston service modules
     supabaseClient.js     single createClient + isSupabaseConfigured flag
     profileService.js     profiles + avatar upload (with magic-byte sniff + cleanup)
     stateService.js       user_state read/write
-    judge0.js             code execution client, HTTPS-only
+    piston.js             code execution client (Piston public endpoint)
+    judge0.js             previous Judge0 client, kept as fallback
   auth/
     AuthContext.jsx       signUp / signIn / signOut / resetPassword / deleteAccount
   state/
@@ -124,7 +125,7 @@ src/
     Dashboard.jsx         greeting, stats, quick access, recommendation
     DocumentationViewer.jsx
     CodePlayground.jsx    read-only reference snippets
-    CodeCompiler.jsx      editable, Judge0-backed
+    CodeCompiler.jsx      editable, Piston-backed
     CodeEditor.jsx        textarea-overlay editor with syntax highlight
     ProgressTracker.jsx   premium stat widgets, mastery bars
     Profile.jsx           student-ID card, badges, recent topics, danger zone
@@ -182,17 +183,11 @@ By default Supabase emails come from a generic `noreply@mail.app.supabase.io` ad
    - Password: the 16-character App Password (no spaces)
    - Sender email: your Gmail address
 
-## Optional: Online Compiler (Judge0)
+## Online Compiler (Piston)
 
-Defaults to the public `https://ce.judge0.com` endpoint. For higher quotas, sign up at [rapidapi.com](https://rapidapi.com) and set:
+The compiler hits the public Piston endpoint at `https://emkc.org/api/v2/piston/execute`. No API key, no env vars, no signup. Supports Java, Python, and C++ out of the box.
 
-```env
-VITE_JUDGE0_URL=https://judge0-ce.p.rapidapi.com
-VITE_JUDGE0_HOST=judge0-ce.p.rapidapi.com
-VITE_JUDGE0_KEY=<your-rapidapi-key>
-```
-
-The client refuses to call any non-HTTPS Judge0 endpoint.
+Rate limit is roughly 5 requests / second per IP — fine for personal use. If you ever need higher throughput, the [Piston repo](https://github.com/engineer-man/piston) includes a Docker image you can self-host.
 
 ## Security model
 
@@ -203,7 +198,7 @@ Briefly:
 - **RLS** policies on `profiles`, `user_state`, and `storage.objects` mean users can physically only read or modify their own data. The anon key shipping in the client bundle is harmless because RLS is the gate.
 - **Account deletion** uses a `SECURITY DEFINER` Postgres function that checks `auth.uid()` so it can only ever delete the calling user.
 - **Avatar uploads** are size-limited (2 MB), extension-limited (jpg / png / gif / webp), and magic-byte verified — the file's actual first bytes must match the claimed MIME, otherwise the upload is rejected before reaching Storage.
-- **Code submitted to Judge0** is length-capped (10 000 chars), the endpoint is HTTPS-only enforced in code, and stdin is capped at 4 000 chars.
+- **Code submitted to Piston** is length-capped (10 000 chars) and stdin is capped at 4 000 chars. The endpoint is fixed to `https://emkc.org` in code — no user-supplied URL.
 - **No `dangerouslySetInnerHTML`** anywhere. React's default escaping prevents XSS via state. A `sanitizeText` helper additionally strips ASCII control characters before persisting user-typed text.
 
 ## Roadmap
@@ -221,4 +216,4 @@ Briefly:
 
 ## Acknowledgements
 
-Built with the documentation and free tiers of [Supabase](https://supabase.com), [Judge0](https://judge0.com), and [Netlify](https://www.netlify.com). Icons by [lucide](https://lucide.dev). Fonts by [Inter](https://rsms.me/inter/) and [JetBrains Mono](https://www.jetbrains.com/lp/mono/).
+Built with the documentation and free tiers of [Supabase](https://supabase.com), [Piston](https://github.com/engineer-man/piston), and [Netlify](https://www.netlify.com). Icons by [lucide](https://lucide.dev). Fonts by [Inter](https://rsms.me/inter/) and [JetBrains Mono](https://www.jetbrains.com/lp/mono/).

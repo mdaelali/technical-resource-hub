@@ -1,6 +1,16 @@
 import { useMemo, useRef } from 'react';
 import { tokenize, classFor } from '../utils/highlightCode.js';
 
+// Characters whose typing should auto-insert the matching closer.
+const PAIR_OPENERS = {
+  '{': '}',
+  '[': ']',
+  '(': ')',
+  '"': '"',
+  "'": "'"
+};
+const PAIR_CLOSERS = new Set(['}', ']', ')', '"', "'"]);
+
 export default function CodeEditor({ value, onChange, language = 'java' })
 {
   const textareaRef = useRef(null);
@@ -13,6 +23,53 @@ export default function CodeEditor({ value, onChange, language = 'java' })
     if (!el)
     {
       return;
+    }
+
+    // ── Auto-pair openers ────────────────────────────────────────────────
+    // Typing {, [, (, ", or ' inserts the matching closer and parks the
+    // cursor between them. Skipped when text is selected (so the user can
+    // still overwrite a selection) and when typing a quote right after an
+    // alphanumeric character (probably writing English in a comment).
+    if (PAIR_OPENERS[event.key])
+    {
+      const { selectionStart, selectionEnd } = el;
+      const isQuote = event.key === '"' || event.key === "'";
+      const prevChar = value[selectionStart - 1] || '';
+      const looksLikeEnglish = isQuote && /\w/.test(prevChar);
+      if (selectionStart === selectionEnd && !looksLikeEnglish)
+      {
+        event.preventDefault();
+        const opener = event.key;
+        const closer = PAIR_OPENERS[opener];
+        const next = value.slice(0, selectionStart) + opener + closer + value.slice(selectionEnd);
+        onChange(next);
+        requestAnimationFrame(() =>
+        {
+          const pos = selectionStart + 1;
+          el.selectionStart = pos;
+          el.selectionEnd = pos;
+        });
+        return;
+      }
+    }
+
+    // ── Skip over an existing closer ────────────────────────────────────
+    // If the user types `}` and the next char already is `}`, just step the
+    // cursor forward instead of inserting a duplicate. Same for ], ), ", '.
+    if (PAIR_CLOSERS.has(event.key))
+    {
+      const { selectionStart, selectionEnd } = el;
+      if (selectionStart === selectionEnd && value[selectionStart] === event.key)
+      {
+        event.preventDefault();
+        requestAnimationFrame(() =>
+        {
+          const pos = selectionStart + 1;
+          el.selectionStart = pos;
+          el.selectionEnd = pos;
+        });
+        return;
+      }
     }
 
     if (event.key === 'Tab')
@@ -90,14 +147,33 @@ export default function CodeEditor({ value, onChange, language = 'java' })
 
     if (event.key === 'Backspace')
     {
-      // If the cursor is at the end of a pure-whitespace indent and there's
-      // no selection, delete the indent in one keypress instead of forcing
-      // the user to press Backspace four times.
       const { selectionStart, selectionEnd } = el;
       if (selectionStart !== selectionEnd || selectionStart === 0)
       {
         return;
       }
+
+      // Pair deletion: cursor sits between an opener and its matching closer.
+      // Deleting the opener removes the closer too — saves a second Backspace.
+      const prev = value[selectionStart - 1];
+      const nextCh = value[selectionStart];
+      if (prev && PAIR_OPENERS[prev] === nextCh)
+      {
+        event.preventDefault();
+        const next = value.slice(0, selectionStart - 1) + value.slice(selectionStart + 1);
+        onChange(next);
+        requestAnimationFrame(() =>
+        {
+          const pos = selectionStart - 1;
+          el.selectionStart = pos;
+          el.selectionEnd = pos;
+        });
+        return;
+      }
+
+      // Indent dedent: if the cursor is at the end of a pure-whitespace
+      // indent, delete 4 spaces in one keypress instead of forcing the user
+      // to press Backspace four times.
       const before = value.slice(0, selectionStart);
       const lineStart = before.lastIndexOf('\n') + 1;
       const currentLineBefore = before.slice(lineStart);
