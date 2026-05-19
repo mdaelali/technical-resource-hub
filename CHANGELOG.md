@@ -2,6 +2,15 @@
 
 All notable changes to Technical Resource Hub.
 
+## v0.8 — Infrastructure overhaul + developer experience
+- **Hosting migrated from Netlify to Vercel.** Netlify free tier paused the site mid-day after hitting its credit limit; Vercel was wired up via CNAME-only DNS in 15 minutes so `alihasanli.com` came back online the same hour. Cloudflare Workers deployment also exists at `*.workers.dev` as a backup.
+- **Online Compiler runtime swapped from Judge0 to [Piston](https://github.com/engineer-man/piston).** No API key required, faster cold starts, simpler JSON-only contract. Old `judge0.js` retained as a fallback client.
+- **Transactional email moved from Gmail SMTP to [Resend](https://resend.com).** Auth emails now send from `noreply@alihasanli.com` with DKIM + SPF + DMARC verified. Default Supabase reset-password template replaced with a styled HTML version that survives spam filters.
+- **Code editor improvements:**
+  - Enter now auto-indents to match the current line's leading whitespace; pressing Enter just after `{`, `[`, or `(` adds a deeper indent; pressing Enter between an opener and its matching closer splits the block.
+  - Typing `{`, `[`, `(`, `"`, or `'` auto-inserts the matching closer and parks the cursor between them. Typing a closer that already exists at the cursor steps over it instead of duplicating. Backspace between a matched pair deletes both.
+  - Tab inserts 4 spaces (unchanged). Backspace at the end of a pure-whitespace indent removes 4 spaces in one keystroke.
+
 ## v0.7 — Auth hardening + UI polish
 - Password reset flow: "Forgot password?" link → email → one-time recovery link → new-password form with strength meter, then forced sign-in.
 - Account deletion: Danger Zone on the Profile page + `delete_my_account()` Postgres function (`SECURITY DEFINER`, scoped to `auth.uid()`) that cascades to `profiles`, `user_state`, and the user's `avatars` folder.

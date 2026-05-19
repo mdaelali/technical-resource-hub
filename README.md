@@ -4,14 +4,15 @@
 
 **A focused study workspace for computer science students — documentation, a real online compiler, automatic streak tracking, and per-user progress that syncs across devices.**
 
-🔗 **Live demo:** [alihasanli.com](https://alihasanli.com) &nbsp;·&nbsp; mirror: [techresourcehub.netlify.app](https://techresourcehub.netlify.app/)
+🔗 **Live demo:** [alihasanli.com](https://alihasanli.com)
 
 [![Built with React](https://img.shields.io/badge/React-19-149eca?logo=react&logoColor=white)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-38bdf8?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![Supabase](https://img.shields.io/badge/Supabase-Postgres%20%2B%20Auth%20%2B%20Storage-3ecf8e?logo=supabase&logoColor=white)](https://supabase.com/)
 [![Piston](https://img.shields.io/badge/Piston-Online%20Compiler-ff7a45)](https://github.com/engineer-man/piston)
-[![Netlify](https://img.shields.io/badge/Deployed-Netlify-00c7b7?logo=netlify&logoColor=white)](https://alihasanli.com)
+[![Resend](https://img.shields.io/badge/Resend-Transactional%20Email-000000?logo=resend&logoColor=white)](https://resend.com)
+[![Vercel](https://img.shields.io/badge/Deployed-Vercel-000000?logo=vercel&logoColor=white)](https://alihasanli.com)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](#license)
 
 [![Lighthouse Performance](https://img.shields.io/badge/Performance-99-brightgreen?logo=lighthouse&logoColor=white)](https://pagespeed.web.dev/analysis/https-alihasanli-com/?form_factor=desktop)
@@ -63,7 +64,7 @@ What surprised me most was how many small details matter: error messages, mobile
 
 ## Highlights an interviewer might ask about
 
-- **Real backend auth, not localStorage.** Supabase email-and-password with verified emails (custom Gmail SMTP), full password reset flow via one-time emailed link, account deletion via a `SECURITY DEFINER` Postgres function that an authenticated user can only invoke on their own row.
+- **Real backend auth, not localStorage.** Supabase email-and-password with verified emails delivered through [Resend](https://resend.com) on a custom-authenticated `noreply@alihasanli.com` sender (DKIM + SPF + DMARC), full password reset flow via one-time emailed link, account deletion via a `SECURITY DEFINER` Postgres function that an authenticated user can only invoke on their own row.
 - **Row-Level Security everywhere.** Two tables (`profiles`, `user_state`) plus the `avatars` storage bucket, all locked down so users can physically only read or write their own rows / their own folder.
 - **Defense-in-depth file upload.** Avatar uploads are sniffed for actual magic bytes (`FF D8 FF` for JPEG, `89 50 4E 47` for PNG, the `RIFF…WEBP` window for WebP, …) — the browser-reported MIME is treated as untrusted because file extensions are spoofable.
 - **Auto-streak via activity inference.** Streak doesn't need a "log session" button. The hook reads `last_activity_date` from Supabase, compares to today, and either increments, resets, or no-ops idempotently. Any user-driven action calls `logActivity()`.
@@ -81,7 +82,8 @@ What surprised me most was how many small details matter: error messages, mobile
 | Auth + DB + Storage | Supabase (free tier) | bcrypt-hashed passwords server-side, JWT sessions, Postgres with RLS, S3-backed storage |
 | Code execution | [Piston](https://github.com/engineer-man/piston) | Open-source sandboxed Java / Python / C++ runtime via emkc.org public endpoint, no API key |
 | Icons | lucide-react | Tree-shakeable, per-icon imports |
-| Hosting | Netlify | Auto-deploy on every `main` push, custom domain pending |
+| Hosting | [Vercel](https://vercel.com) | Auto-deploy on every `main` push, custom domain `alihasanli.com` |
+| Transactional email | [Resend](https://resend.com) | DKIM/SPF/DMARC-authenticated `noreply@alihasanli.com` via the free tier |
 
 ## Quick start
 
@@ -170,18 +172,32 @@ When a user signs up, Supabase sends a confirmation email. The link in that emai
 
 The client passes `emailRedirectTo: ${window.location.origin}/` to `supabase.auth.signUp`, so the confirmation link always points back to wherever the user signed up — you just have to allow-list those URLs.
 
-## Custom email sender (Gmail SMTP)
+## Custom email sender (Resend)
 
-By default Supabase emails come from a generic `noreply@mail.app.supabase.io` address, throttled to a few per hour. To send from your own Gmail with a 500/day quota:
+By default Supabase emails come from a generic `noreply@mail.app.supabase.io` address, rate-limited to a handful of emails per hour. This project sends authenticated transactional email through [Resend](https://resend.com) on the free tier (100 emails / day) so all auth emails arrive from `noreply@alihasanli.com` with proper DKIM, SPF, and DMARC.
 
-1. Enable **2-Step Verification** on your Google account.
-2. Generate an **App Password** at <https://myaccount.google.com/apppasswords> (the regular Gmail password will be rejected by SMTP).
-3. In Supabase: *Authentication → SMTP Settings* → toggle **Enable Custom SMTP** and fill in:
-   - Host: `smtp.gmail.com`
-   - Port: `587`
-   - Username: your Gmail address
-   - Password: the 16-character App Password (no spaces)
-   - Sender email: your Gmail address
+### One-time setup
+
+1. **Create a Resend account** at <https://resend.com> (free).
+2. **Add `alihasanli.com` as a verified sending domain** under *Domains → Add Domain*. Resend will display four DNS records: DKIM (TXT), MX (under the `send` subdomain), SPF (TXT under `send`), and DMARC (TXT under `_dmarc`).
+3. **Add those four records to your DNS provider** (in this project: Vercel-fronted but DNS still managed at the Netlify registrar — alternatively, add to Cloudflare or wherever the domain's nameservers point). Click *Verify DNS Records* in Resend; verification typically takes < 2 minutes.
+4. **Generate an API key** under *API keys → Create API Key* (full or sending-only scope).
+5. **Plug it into Supabase** under *Authentication → SMTP Settings*:
+
+   | Field | Value |
+   |---|---|
+   | Sender email | `noreply@alihasanli.com` |
+   | Sender name | `Technical Resource Hub` |
+   | Host | `smtp.resend.com` |
+   | Port | `465` (or `587`) |
+   | Username | `resend` |
+   | Password | the API key starting with `re_…` |
+
+6. Toggle *Enable Custom SMTP* on, save.
+
+### Why Resend instead of Gmail SMTP
+
+This project originally used Gmail SMTP. Gmail-as-sender works but Gmail flags the resulting auth emails as "this message might be dangerous" because the sender domain (`gmail.com`) doesn't match the link domain (`alihasanli.com`) and there's no SPF/DKIM/DMARC chain authorizing the cross-domain claim. Resend solves all three: emails come from `alihasanli.com`, the records are at `alihasanli.com`, the cryptographic chain checks out.
 
 ## Online Compiler (Piston)
 
@@ -206,7 +222,7 @@ Briefly:
 - [ ] Google OAuth sign-in (one-click, no password to phish)
 - [ ] hCaptcha on signup to block bot accounts
 - [ ] Real test suite (Vitest) — start with `security.js`
-- [ ] PR-grade CI: Netlify deploy preview + Lighthouse budget check
+- [ ] PR-grade CI: Vercel deploy preview + Lighthouse budget check
 - [ ] Public profile pages (read-only, share your streak)
 - [ ] Topic-mastery export to PDF for tutors
 
@@ -216,4 +232,4 @@ Briefly:
 
 ## Acknowledgements
 
-Built with the documentation and free tiers of [Supabase](https://supabase.com), [Piston](https://github.com/engineer-man/piston), and [Netlify](https://www.netlify.com). Icons by [lucide](https://lucide.dev). Fonts by [Inter](https://rsms.me/inter/) and [JetBrains Mono](https://www.jetbrains.com/lp/mono/).
+Built with the documentation and free tiers of [Supabase](https://supabase.com), [Piston](https://github.com/engineer-man/piston), [Resend](https://resend.com), and [Vercel](https://vercel.com). Icons by [lucide](https://lucide.dev). Fonts by [Inter](https://rsms.me/inter/) and [JetBrains Mono](https://www.jetbrains.com/lp/mono/).
