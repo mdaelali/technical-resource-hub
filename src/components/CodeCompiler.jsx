@@ -13,7 +13,11 @@ import
   Clock
 } from 'lucide-react';
 import CodeEditor from './CodeEditor.jsx';
-import { LANGUAGES, runCode, CompilerError, MAX_SOURCE_LENGTH } from '../api/piston.js';
+// Reverted from Piston back to Judge0 — Piston's public emkc.org endpoint went
+// whitelist-only on 2026-02-15 and returns HTTP 401. Judge0 CE public endpoint
+// at ce.judge0.com still works for our purposes. See src/api/piston.js if we
+// ever self-host a Piston instance and want to switch back.
+import { LANGUAGES, runCode, CompilerError, MAX_SOURCE_LENGTH } from '../api/judge0.js';
 import useUserStorage from '../hooks/useUserStorage.js';
 import { clampCodeLength } from '../utils/security.js';
 
@@ -74,7 +78,7 @@ export default function CodeCompiler({ onLogActivity })
     try
     {
       const data = await runCode({
-        languageKey: language.key,
+        languageId: language.id,
         source: clampCodeLength(code),
         stdin: typeof stdin === 'string' ? stdin : ''
       });

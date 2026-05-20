@@ -4,7 +4,7 @@ All notable changes to Technical Resource Hub.
 
 ## v0.8 — Infrastructure overhaul + developer experience
 - **Hosting migrated from Netlify to Vercel.** Netlify free tier paused the site mid-day after hitting its credit limit; Vercel was wired up via CNAME-only DNS in 15 minutes so `alihasanli.com` came back online the same hour. Cloudflare Workers deployment also exists at `*.workers.dev` as a backup.
-- **Online Compiler runtime swapped from Judge0 to [Piston](https://github.com/engineer-man/piston).** No API key required, faster cold starts, simpler JSON-only contract. Old `judge0.js` retained as a fallback client.
+- **Online Compiler runtime: Judge0 → Piston → back to Judge0.** Briefly swapped to [Piston](https://github.com/engineer-man/piston) for speed and zero-setup, then reverted to Judge0 the same day when Piston's public emkc.org endpoint went whitelist-only (HTTP 401, dated 2026-02-15). `piston.js` is kept in the repo for use against a self-hosted Piston instance — one import line in `CodeCompiler.jsx` switches between the two.
 - **Transactional email moved from Gmail SMTP to [Resend](https://resend.com).** Auth emails now send from `noreply@alihasanli.com` with DKIM + SPF + DMARC verified. Default Supabase reset-password template replaced with a styled HTML version that survives spam filters.
 - **Code editor improvements:**
   - Enter now auto-indents to match the current line's leading whitespace; pressing Enter just after `{`, `[`, or `(` adds a deeper indent; pressing Enter between an opener and its matching closer splits the block.
