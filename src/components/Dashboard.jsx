@@ -1,4 +1,4 @@
-import { ArrowRight, BookOpen, Code2, Brain, ScrollText, Terminal, UserRound } from 'lucide-react';
+import { ArrowRight, BookOpen, Code2, Brain, ScrollText, Terminal, ClipboardList, UserRound } from 'lucide-react';
 import ProgressTracker from './ProgressTracker.jsx';
 import { useAuth } from '../auth/AuthContext.jsx';
 
@@ -6,9 +6,9 @@ const QUICK_LINKS = [
   { target: 'docs', categoryId: 'algorithms', label: 'Algorithms', icon: BookOpen, hint: 'Sorting, searching, graphs', tone: 'cyan' },
   { target: 'docs', categoryId: 'logic', label: 'Logic Problems', icon: Brain, hint: 'Discrete math & puzzles', tone: 'emerald' },
   { target: 'docs', categoryId: 'exam', label: 'Exam Prep', icon: ScrollText, hint: 'High-yield review notes', tone: 'violet' },
-  { target: 'playground', label: 'Playground', icon: Code2, hint: 'Java reference snippets', tone: 'cyan' },
   { target: 'compiler', label: 'Online Compiler', icon: Terminal, hint: 'Java · Python · C++', tone: 'gold' },
-  { target: 'profile', label: 'Profile', icon: UserRound, hint: 'Badges, stats, recent topics', tone: 'pink' }
+  { target: 'exams', label: 'Mock Exams', icon: ClipboardList, hint: 'Timed MCQ & coding tests', tone: 'rose' },
+  { target: 'playground', label: 'Playground', icon: Code2, hint: 'Java reference snippets', tone: 'cyan' }
 ];
 
 const TONE_CLASS = {
@@ -16,6 +16,7 @@ const TONE_CLASS = {
   emerald: 'from-emerald-500/30 to-emerald-400/10 text-emerald-200',
   violet: 'from-violet-500/30 to-violet-400/10 text-violet-200',
   gold: 'from-amber-400/30 to-amber-500/10 text-amber-200',
+  rose: 'from-rose-500/30 to-rose-400/10 text-rose-200',
   pink: 'from-pink-500/30 to-pink-400/10 text-pink-200'
 };
 

@@ -11,6 +11,7 @@ import './App.css';
 const DocumentationViewer = lazy(() => import('./components/DocumentationViewer.jsx'));
 const CodePlayground = lazy(() => import('./components/CodePlayground.jsx'));
 const CodeCompiler = lazy(() => import('./components/CodeCompiler.jsx'));
+const MockExams = lazy(() => import('./components/MockExams.jsx'));
 const Profile = lazy(() => import('./components/Profile.jsx'));
 
 const PAGE_DWELL_MS = 2 * 60 * 1000;
@@ -19,6 +20,7 @@ const VALID_SECTIONS = new Set([
   'docs',
   'playground',
   'compiler',
+  'exams',
   'progress',
   'profile'
 ]);
@@ -163,6 +165,8 @@ export default function App()
         return <CodePlayground initialSnippetId={snippetId} />;
       case 'compiler':
         return <CodeCompiler onLogActivity={logActivity} />;
+      case 'exams':
+        return <MockExams onLogActivity={logActivity} />;
       case 'progress':
         return <ProgressTracker />;
       case 'profile':

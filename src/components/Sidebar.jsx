@@ -7,6 +7,7 @@ import
   Sparkles,
   GraduationCap,
   Terminal,
+  ClipboardList,
   UserRound,
   X,
   LogOut
@@ -18,6 +19,7 @@ const NAV_ITEMS = [
   { id: 'docs', label: 'Documentation', icon: BookOpenText, accent: 'text-violet-300', glow: 'bg-violet-400/15' },
   { id: 'playground', label: 'Code Playground', icon: Code2, accent: 'text-emerald-300', glow: 'bg-emerald-400/15' },
   { id: 'compiler', label: 'Online Compiler', icon: Terminal, accent: 'text-amber-300', glow: 'bg-amber-400/15' },
+  { id: 'exams', label: 'Mock Exams', icon: ClipboardList, accent: 'text-rose-300', glow: 'bg-rose-400/15' },
   { id: 'progress', label: 'Progress', icon: Sparkles, accent: 'text-pink-300', glow: 'bg-pink-400/15' },
   { id: 'profile', label: 'Profile', icon: UserRound, accent: 'text-cyan-300', glow: 'bg-cyan-400/15' }
 ];

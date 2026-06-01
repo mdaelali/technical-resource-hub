@@ -1,5 +1,7 @@
-import { useMemo, useRef } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { tokenize, classFor } from '../utils/highlightCode.js';
+import { getCompletions, KIND_CLASS } from '../data/completions.js';
+import { getCaretCoordinates } from '../utils/caretCoordinates.js';
 
 // Characters whose typing should auto-insert the matching closer.
 const PAIR_OPENERS = {
@@ -11,11 +13,83 @@ const PAIR_OPENERS = {
 };
 const PAIR_CLOSERS = new Set(['}', ']', ')', '"', "'"]);
 
+const CLOSED_AC = { open: false, items: [], index: 0, top: 0, left: 0, wordStart: 0 };
+
 export default function CodeEditor({ value, onChange, language = 'java' })
 {
   const textareaRef = useRef(null);
+  const blurTimer = useRef(null);
   const tokens = useMemo(() => tokenize(value, language), [value, language]);
   const lineCount = Math.max(value.split('\n').length, 1);
+  const [ac, setAc] = useState(CLOSED_AC);
+
+  function closeAc()
+  {
+    setAc((a) => (a.open ? CLOSED_AC : a));
+  }
+
+  function refreshAutocomplete()
+  {
+    const el = textareaRef.current;
+    if (!el)
+    {
+      return;
+    }
+    if (el.selectionStart !== el.selectionEnd)
+    {
+      closeAc();
+      return;
+    }
+    const pos = el.selectionStart;
+    const before = el.value.slice(0, pos);
+    const match = before.match(/[A-Za-z_][A-Za-z0-9_]*$/);
+    if (!match)
+    {
+      closeAc();
+      return;
+    }
+    const prefix = match[0];
+    const items = getCompletions(language, prefix, el.value);
+    if (items.length === 0)
+    {
+      closeAc();
+      return;
+    }
+    const wordStart = pos - prefix.length;
+    const coords = getCaretCoordinates(el, wordStart);
+    setAc({
+      open: true,
+      items,
+      index: 0,
+      top: coords.top + coords.height + 2,
+      left: coords.left,
+      wordStart
+    });
+  }
+
+  function acceptCompletion(item)
+  {
+    const el = textareaRef.current;
+    if (!el || !item)
+    {
+      return;
+    }
+    const caret = el.selectionStart;
+    const start = ac.wordStart;
+    const raw = item.insert ?? item.label;
+    const markerIdx = raw.indexOf('$0');
+    const text = raw.replace('$0', '');
+    const next = value.slice(0, start) + text + value.slice(caret);
+    onChange(next);
+    const cursorPos = start + (markerIdx >= 0 ? markerIdx : text.length);
+    setAc(CLOSED_AC);
+    requestAnimationFrame(() =>
+    {
+      el.focus();
+      el.selectionStart = cursorPos;
+      el.selectionEnd = cursorPos;
+    });
+  }
 
   function handleKeyDown(event)
   {
@@ -25,11 +99,36 @@ export default function CodeEditor({ value, onChange, language = 'java' })
       return;
     }
 
+    // ── Autocomplete navigation (only when the dropdown is open) ──────────
+    if (ac.open && ac.items.length > 0)
+    {
+      if (event.key === 'ArrowDown')
+      {
+        event.preventDefault();
+        setAc((a) => ({ ...a, index: (a.index + 1) % a.items.length }));
+        return;
+      }
+      if (event.key === 'ArrowUp')
+      {
+        event.preventDefault();
+        setAc((a) => ({ ...a, index: (a.index - 1 + a.items.length) % a.items.length }));
+        return;
+      }
+      if (event.key === 'Enter' || event.key === 'Tab')
+      {
+        event.preventDefault();
+        acceptCompletion(ac.items[ac.index]);
+        return;
+      }
+      if (event.key === 'Escape')
+      {
+        event.preventDefault();
+        closeAc();
+        return;
+      }
+    }
+
     // ── Auto-pair openers ────────────────────────────────────────────────
-    // Typing {, [, (, ", or ' inserts the matching closer and parks the
-    // cursor between them. Skipped when text is selected (so the user can
-    // still overwrite a selection) and when typing a quote right after an
-    // alphanumeric character (probably writing English in a comment).
     if (PAIR_OPENERS[event.key])
     {
       const { selectionStart, selectionEnd } = el;
@@ -43,6 +142,7 @@ export default function CodeEditor({ value, onChange, language = 'java' })
         const closer = PAIR_OPENERS[opener];
         const next = value.slice(0, selectionStart) + opener + closer + value.slice(selectionEnd);
         onChange(next);
+        closeAc();
         requestAnimationFrame(() =>
         {
           const pos = selectionStart + 1;
@@ -54,14 +154,13 @@ export default function CodeEditor({ value, onChange, language = 'java' })
     }
 
     // ── Skip over an existing closer ────────────────────────────────────
-    // If the user types `}` and the next char already is `}`, just step the
-    // cursor forward instead of inserting a duplicate. Same for ], ), ", '.
     if (PAIR_CLOSERS.has(event.key))
     {
       const { selectionStart, selectionEnd } = el;
       if (selectionStart === selectionEnd && value[selectionStart] === event.key)
       {
         event.preventDefault();
+        closeAc();
         requestAnimationFrame(() =>
         {
           const pos = selectionStart + 1;
@@ -88,10 +187,6 @@ export default function CodeEditor({ value, onChange, language = 'java' })
 
     if (event.key === 'Enter')
     {
-      // Real editors don't drop the cursor to column 0 — they match the
-      // current line's leading whitespace, and add an extra indent inside a
-      // freshly opened block. Browsers' default textarea behavior is the
-      // opposite of what every IDE does, hence this override.
       event.preventDefault();
       const { selectionStart, selectionEnd } = el;
       const before = value.slice(0, selectionStart);
@@ -113,23 +208,18 @@ export default function CodeEditor({ value, onChange, language = 'java' })
       let cursorOffset;
       if (closes)
       {
-        // Cursor sits between an opener and its matching closer:
-        //   { | }   →   {\n    |\n}
         const inner = indent + '    ';
         insertion = '\n' + inner + '\n' + indent;
         cursorOffset = 1 + inner.length;
       }
       else if (opens)
       {
-        // Just opened a block:
-        //   {\n        →   {\n    |
         const inner = indent + '    ';
         insertion = '\n' + inner;
         cursorOffset = insertion.length;
       }
       else
       {
-        // Plain line — match current indent.
         insertion = '\n' + indent;
         cursorOffset = insertion.length;
       }
@@ -153,8 +243,6 @@ export default function CodeEditor({ value, onChange, language = 'java' })
         return;
       }
 
-      // Pair deletion: cursor sits between an opener and its matching closer.
-      // Deleting the opener removes the closer too — saves a second Backspace.
       const prev = value[selectionStart - 1];
       const nextCh = value[selectionStart];
       if (prev && PAIR_OPENERS[prev] === nextCh)
@@ -171,9 +259,6 @@ export default function CodeEditor({ value, onChange, language = 'java' })
         return;
       }
 
-      // Indent dedent: if the cursor is at the end of a pure-whitespace
-      // indent, delete 4 spaces in one keypress instead of forcing the user
-      // to press Backspace four times.
       const before = value.slice(0, selectionStart);
       const lineStart = before.lastIndexOf('\n') + 1;
       const currentLineBefore = before.slice(lineStart);
@@ -192,6 +277,26 @@ export default function CodeEditor({ value, onChange, language = 'java' })
         el.selectionEnd = pos;
       });
     }
+  }
+
+  function handleKeyUp(event)
+  {
+    if (['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key))
+    {
+      refreshAutocomplete();
+    }
+  }
+
+  function handleChange(event)
+  {
+    onChange(event.target.value);
+    requestAnimationFrame(refreshAutocomplete);
+  }
+
+  function handleBlur()
+  {
+    // Delay so a mousedown on a dropdown item is registered before we close.
+    blurTimer.current = window.setTimeout(closeAc, 120);
   }
 
   return (
@@ -225,14 +330,53 @@ export default function CodeEditor({ value, onChange, language = 'java' })
         <textarea
           ref={textareaRef}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={handleChange}
           onKeyDown={handleKeyDown}
+          onKeyUp={handleKeyUp}
+          onBlur={handleBlur}
           spellCheck={false}
           autoComplete="off"
           autoCorrect="off"
           autoCapitalize="off"
           className="absolute inset-0 w-full h-full px-3 py-3 bg-transparent text-transparent caret-white resize-none focus:outline-none whitespace-pre-wrap break-words font-mono text-xs leading-[1.55] selection:bg-violet-500/40"
         />
+
+        {ac.open && (
+          <ul
+            className="absolute z-30 min-w-44 max-w-72 max-h-56 overflow-auto rounded-lg border border-white/10 bg-[#0b0f1e] shadow-glass py-1 text-xs"
+            style={{ top: ac.top, left: ac.left }}
+          >
+            {ac.items.map((item, i) => (
+              <li key={item.label}>
+                <button
+                  type="button"
+                  // mousedown fires before blur — prevent default so the
+                  // textarea keeps focus while we insert the completion.
+                  onMouseDown={(e) =>
+                  {
+                    e.preventDefault();
+                    if (blurTimer.current)
+                    {
+                      window.clearTimeout(blurTimer.current);
+                    }
+                    acceptCompletion(item);
+                  }}
+                  onMouseEnter={() => setAc((a) => ({ ...a, index: i }))}
+                  className={`w-full flex items-center justify-between gap-3 px-2.5 py-1 text-left ${
+                    i === ac.index ? 'bg-violet-500/25' : 'hover:bg-white/[0.04]'
+                  }`}
+                >
+                  <span className={`font-mono ${KIND_CLASS[item.kind] || 'text-slate-200'}`}>
+                    {item.label}
+                  </span>
+                  <span className="text-[9px] uppercase tracking-wider text-slate-500 shrink-0">
+                    {item.kind}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );

@@ -40,8 +40,9 @@ Resource Hub is a single-page study workspace built around four things students 
 
 - **Documentation Viewer** — 18 hand-written cards across *Algorithms*, *Logic Problems*, and *Exam Prep* with complexity analysis, common mistakes, step-by-step solutions, and practice tips.
 - **Code Playground** — 11 reference Java snippets (Binary Search, Merge Sort, Two Sum, Stack, Tree Traversal, …) with a faux IDE chrome, custom syntax highlighting, and one-click expected-output preview.
-- **Online Compiler** — a real editable code editor with bracket auto-pair, Enter auto-indent, and Tab indentation. Runs **Java, Python, and C++** in the browser via the [Judge0 CE](https://judge0.com/) public endpoint. Output, stderr, and compile errors are surfaced separately. Code length is capped at 10 000 chars.
-- **Progress Tracker** — a dashboard with a study-streak counter that increments **automatically** when the student reads a topic, marks something as mastered, runs code, or dwells for 2 minutes on a page. No manual "log session" button.
+- **Online Compiler** — a real editable code editor with **autocomplete** (keyword / type / function / snippet suggestions plus locals harvested from your own code), bracket auto-pair, Enter auto-indent, and Tab indentation. Runs **Java, Python, and C++** in the browser via the [Judge0 CE](https://judge0.com/) public endpoint. Output, stderr, and compile errors are surfaced separately. Code length is capped at 10 000 chars.
+- **Mock Exams** — timed-style practice tests mixing auto-graded multiple choice (A–D, with explanations) and AP-CSA-style coding free-response questions (full Java class declarations, self-checked against a model answer). Best score is saved per test.
+- **Progress Tracker** — a dashboard with a study-streak counter that increments **automatically** when the student reads a topic, marks something as mastered, runs code, takes a test, or dwells for 2 minutes on a page. No manual "log session" button.
 
 Every user gets their own account (Supabase Auth), their own profile (name, bio, avatar uploaded to Supabase Storage), and their own progress — synced across devices.
 
@@ -51,7 +52,8 @@ The fastest way to feel the app is the [live demo](https://alihasanli.com). What
 
 - **Dashboard** — time-of-day greeting, premium stat widgets for streak and mastery, six quick-access tiles, daily recommendation, tip of the day.
 - **Documentation** — gradient-bordered topic cards with an expandable "Read more" surface that reveals step-by-step solutions, common mistakes, and practice tips.
-- **Online Compiler** — multi-language editor with bracket auto-pair, Enter auto-indent, tab indentation; runs via Judge0, separate panels for `stdout`, `stderr`, and compile output, plus stdin support.
+- **Online Compiler** — multi-language editor with autocomplete, bracket auto-pair, Enter auto-indent, tab indentation; runs via Judge0, separate panels for `stdout`, `stderr`, and compile output, plus stdin support.
+- **Mock Exams** — pick a test, answer A–D multiple choice and Java coding free-response, submit for an auto-graded score with per-question explanations and model solutions.
 - **Profile** — student-ID card with holographic header strip, click-to-upload avatar, badges grid, recently viewed topics, and a Danger Zone for account deletion.
 
 ## Why I built this

@@ -22,6 +22,7 @@ const TITLES = {
   docs: { title: 'Documentation', subtitle: 'Curated study material across core CS topics' },
   playground: { title: 'Code Playground', subtitle: 'Java reference snippets with syntax highlighting' },
   compiler: { title: 'Online Compiler', subtitle: 'Write and run Java, Python, and C++ in your browser' },
+  exams: { title: 'Mock Exams', subtitle: 'Practice tests — auto-graded MCQs and AP-style coding questions' },
   progress: { title: 'Progress Tracker', subtitle: 'Streak, mastery, and topic-level milestones' },
   profile: { title: 'Profile', subtitle: 'Your study identity, badges, and recent activity' }
 };

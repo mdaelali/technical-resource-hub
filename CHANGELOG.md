@@ -2,6 +2,10 @@
 
 All notable changes to Technical Resource Hub.
 
+## v0.9 — Autocomplete + Mock Exams
+- **Editor autocomplete.** The compiler (and exam coding questions) now show an IntelliSense-style dropdown as you type: language keywords, types, common functions, multi-line snippets (`main`, `fori`, `sout`, …), plus "local" identifiers harvested from your own code. Arrow keys navigate, Enter/Tab accepts, Esc dismisses, click selects. Snippets expand with the cursor parked at a `$0` marker. Caret position is computed with a hidden mirror-div so the dropdown anchors under the word being typed.
+- **Mock Exams page.** A new section with practice tests that mix auto-graded multiple choice (A–D, with per-question explanations) and AP-CSA-style coding free-response (full Java class declarations, self-checked against a model answer). Best MCQ score is saved per test in per-user storage; submitting a test extends the study streak. Initial tests: Primitive Types & Expressions, Boolean Logic & Control Flow, Algorithms & Big O, and a Free-Response coding set.
+
 ## v0.8 — Infrastructure overhaul + developer experience
 - **Hosting migrated from Netlify to Vercel.** Netlify free tier paused the site mid-day after hitting its credit limit; Vercel was wired up via CNAME-only DNS in 15 minutes so `alihasanli.com` came back online the same hour. Cloudflare Workers deployment also exists at `*.workers.dev` as a backup.
 - **Online Compiler runtime: Judge0 → Piston → back to Judge0.** Briefly swapped to [Piston](https://github.com/engineer-man/piston) for speed and zero-setup, then reverted to Judge0 the same day when Piston's public emkc.org endpoint went whitelist-only (HTTP 401, dated 2026-02-15). `piston.js` is kept in the repo for use against a self-hosted Piston instance — one import line in `CodeCompiler.jsx` switches between the two.
