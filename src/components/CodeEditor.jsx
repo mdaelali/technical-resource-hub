@@ -1,4 +1,5 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { tokenize, classFor } from '../utils/highlightCode.js';
 import { getCompletions, KIND_CLASS } from '../data/completions.js';
 import { getCaretCoordinates } from '../utils/caretCoordinates.js';
@@ -56,13 +57,26 @@ export default function CodeEditor({ value, onChange, language = 'java' })
       return;
     }
     const wordStart = pos - prefix.length;
+    // Use getBoundingClientRect for fixed positioning so the dropdown
+    // escapes any overflow:hidden parent and appears over the entire page.
+    const textareaRect = el.getBoundingClientRect();
     const coords = getCaretCoordinates(el, wordStart);
+    const scrollTop = el.scrollTop;
+    const scrollLeft = el.scrollLeft;
+    const rawTop = textareaRect.top + coords.top - scrollTop + coords.height + 4;
+    const rawLeft = textareaRect.left + coords.left - scrollLeft;
+    // Clamp so the dropdown never goes off the right or bottom edge.
+    const dropdownWidth = 288; // max-w-72 = 18rem = 288px
+    const vpW = window.innerWidth;
+    const vpH = window.innerHeight;
+    const left = Math.min(rawLeft, vpW - dropdownWidth - 8);
+    const top = rawTop + 224 > vpH ? rawTop - coords.height - 228 : rawTop;
     setAc({
       open: true,
       items,
       index: 0,
-      top: coords.top + coords.height + 2,
-      left: coords.left,
+      top,
+      left: Math.max(8, left),
       wordStart
     });
   }
@@ -279,6 +293,23 @@ export default function CodeEditor({ value, onChange, language = 'java' })
     }
   }
 
+  // Close the dropdown if the user scrolls the page (portal position would be stale).
+  useEffect(() =>
+  {
+    if (!ac.open)
+    {
+      return undefined;
+    }
+    const close = () => closeAc();
+    window.addEventListener('scroll', close, true);
+    window.addEventListener('resize', close);
+    return () =>
+    {
+      window.removeEventListener('scroll', close, true);
+      window.removeEventListener('resize', close);
+    };
+  }, [ac.open]);
+
   function handleKeyUp(event)
   {
     if (['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key))
@@ -341,9 +372,9 @@ export default function CodeEditor({ value, onChange, language = 'java' })
           className="absolute inset-0 w-full h-full px-3 py-3 bg-transparent text-transparent caret-white resize-none focus:outline-none whitespace-pre-wrap break-words font-mono text-xs leading-[1.55] selection:bg-violet-500/40"
         />
 
-        {ac.open && (
+        {ac.open && createPortal(
           <ul
-            className="absolute z-30 min-w-44 max-w-72 max-h-56 overflow-auto rounded-lg border border-white/10 bg-[#0b0f1e] shadow-glass py-1 text-xs"
+            className="fixed z-[9999] min-w-44 max-w-72 max-h-56 overflow-auto rounded-lg border border-white/10 bg-[#0b0f1e] shadow-glass py-1 text-xs"
             style={{ top: ac.top, left: ac.left }}
           >
             {ac.items.map((item, i) => (
@@ -375,7 +406,8 @@ export default function CodeEditor({ value, onChange, language = 'java' })
                 </button>
               </li>
             ))}
-          </ul>
+          </ul>,
+          document.body
         )}
       </div>
     </div>
