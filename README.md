@@ -70,8 +70,10 @@ What surprised me most was how many small details matter: error messages, mobile
 - **Row-Level Security everywhere.** Two tables (`profiles`, `user_state`) plus the `avatars` storage bucket, all locked down so users can physically only read or write their own rows / their own folder.
 - **Defense-in-depth file upload.** Avatar uploads are sniffed for actual magic bytes (`FF D8 FF` for JPEG, `89 50 4E 47` for PNG, the `RIFF…WEBP` window for WebP, …) — the browser-reported MIME is treated as untrusted because file extensions are spoofable.
 - **Auto-streak via activity inference.** Streak doesn't need a "log session" button. The hook reads `last_activity_date` from Supabase, compares to today, and either increments, resets, or no-ops idempotently. Any user-driven action calls `logActivity()`.
-- **Hash routing without React Router.** A 60-line `parseHash` / `buildHash` pair gives every section a real URL (`/#/docs/algorithms`, `/#/playground/binary-search`, …) so the browser back/forward buttons actually work. Chosen over pathname routing so the static host needs no rewrites.
-- **Performance work for weak devices.** `useReducedMotion` honors the OS preference, `MotionConfig reducedMotion="user"` propagates to framer-motion, `backdrop-blur` is downgraded on `< md` viewports, the background pattern is `attachment: scroll` on mobile, and the four heavy sections (Documentation, Playground, Compiler, Profile) are lazy-loaded as separate chunks.
+- **Hash routing without React Router.** A 60-line `parseHash` / `buildHash` pair gives every section a real URL (`/#/docs/algorithms`, `/#/playground/binary-search`, `/#/exams`, …) so the browser back/forward buttons actually work. Chosen over pathname routing so the static host needs no rewrites.
+- **Editor autocomplete with caret-pixel anchoring.** The compiler shows an IntelliSense-style dropdown for keywords, types, functions, multi-line snippets, and "local" identifiers harvested from the current file. The dropdown anchors under the exact character being typed using a hidden mirror-div technique (`caretCoordinates.js`) to convert a textarea cursor offset into pixel coordinates — the same method used by VS Code's Monaco wrapper in browsers.
+- **Mock exam state machine.** Exam sessions track per-question answers in component state, compute MCQ correctness on submit, persist the best score per exam in per-user Supabase-synced storage, and trigger `logActivity()` on submit. FRQ questions embed the same editor (with autocomplete) so students write real code, not pseudocode.
+- **Performance work for weak devices.** `useReducedMotion` honors the OS preference, `MotionConfig reducedMotion="user"` propagates to framer-motion, `backdrop-blur` is downgraded on `< md` viewports, the background pattern is `attachment: scroll` on mobile, and the five heavy sections are lazy-loaded as separate chunks.
 - **localStorage cache layer.** A module-level `Map` deduplicates `JSON.parse` across hooks reading the same key, with cross-component sync via a custom `trh:localStorage:set` event so writing from one component instantly updates every other consumer.
 
 ## Tech stack
@@ -108,37 +110,41 @@ npm run preview    # preview the built bundle locally
 src/
   api/                  Supabase + Judge0 service modules
     supabaseClient.js     single createClient + isSupabaseConfigured flag
-    profileService.js     profiles + avatar upload (with magic-byte sniff + cleanup)
+    profileService.js     profiles + avatar upload (magic-byte sniff + old-file cleanup)
     stateService.js       user_state read/write
     judge0.js             code execution client (Judge0 CE public endpoint)
-    piston.js             Piston client, retained for use with a self-hosted Piston instance
+    piston.js             Piston client, retained for a self-hosted Piston instance
   auth/
     AuthContext.jsx       signUp / signIn / signOut / resetPassword / deleteAccount
   state/
     RemoteSync.jsx        seeds local cache on login, debounced push to Supabase
   hooks/
-    useLocalStorage.js    cached, event-synced storage
-    useUserStorage.js     per-user scoped storage
+    useLocalStorage.js    module-level cached, custom-event-synced storage
+    useUserStorage.js     per-user scoped storage (key namespaced by user id)
     useStreak.js          idempotent auto-streak logic
-    useRecentlyViewed.js  most-recent-N tracking
-    useReducedMotion.js   prefers-reduced-motion subscription
+    useRecentlyViewed.js  most-recent-N topic tracking
+    useReducedMotion.js   prefers-reduced-motion media query subscription
   components/
     auth/                 Login / Signup / ForgotPassword / ResetPassword pages
-    Sidebar.jsx           desktop static + mobile drawer
-    Topbar.jsx            search, notifications, profile avatar
-    Dashboard.jsx         greeting, stats, quick access, recommendation
-    DocumentationViewer.jsx
-    CodePlayground.jsx    read-only reference snippets
-    CodeCompiler.jsx      editable, Judge0-backed
-    CodeEditor.jsx        textarea-overlay editor with syntax highlight
-    ProgressTracker.jsx   premium stat widgets, mastery bars
-    Profile.jsx           student-ID card, badges, recent topics, danger zone
+    Sidebar.jsx           desktop static + mobile slide-in drawer
+    Topbar.jsx            real-time search, notifications dropdown, profile avatar
+    Dashboard.jsx         greeting, stat widgets, quick access, recommendation
+    DocumentationViewer.jsx 18 topic cards with expandable Read More
+    CodePlayground.jsx    read-only reference snippets with syntax highlighting
+    CodeCompiler.jsx      editable multi-language compiler, Judge0-backed
+    CodeEditor.jsx        textarea-overlay editor: autocomplete, auto-pair, auto-indent
+    MockExams.jsx         auto-graded MCQ + AP-style coding free-response tests
+    ProgressTracker.jsx   premium stat widgets with animated mastery bars
+    Profile.jsx           student-ID card, achievements, recent topics, danger zone
   utils/
-    security.js           SHA-256 helpers, validators, sanitizer, magic-byte sniff
+    security.js           SHA-256+salt helpers, validators, sanitizer, magic-byte sniff
     highlightCode.js      shared Java / Python / C++ tokenizer
+    caretCoordinates.js   mirror-div caret-pixel helper for autocomplete positioning
   data/
     docs.js               18 study cards across 3 categories
     snippets.js           11 Java reference snippets
+    completions.js        autocomplete suggestions (keywords/types/functions/snippets) per language
+    exams.js              4 practice tests (MCQ + FRQ) with model answers
 supabase/
   schema.sql            tables, RLS policies, storage policies, delete_my_account()
 ```
