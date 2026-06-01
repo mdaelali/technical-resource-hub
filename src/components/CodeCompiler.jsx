@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import
 {
@@ -30,9 +30,43 @@ export default function CodeCompiler({ onLogActivity })
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
+  // Resizable split — editorPct is the editor column's share of the row (30–85 %).
+  const [editorPct, setEditorPct] = useState(65);
+  const splitRef = useRef(null);
+  const dragging = useRef(false);
+
+  const onDragStart = useCallback((e) =>
+  {
+    dragging.current = true;
+    e.preventDefault();
+    function onMove(ev)
+    {
+      if (!dragging.current || !splitRef.current)
+      {
+        return;
+      }
+      const rect = splitRef.current.getBoundingClientRect();
+      const clientX = ev.touches ? ev.touches[0].clientX : ev.clientX;
+      const pct = ((clientX - rect.left) / rect.width) * 100;
+      setEditorPct(Math.min(85, Math.max(30, pct)));
+    }
+    function onUp()
+    {
+      dragging.current = false;
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+      window.removeEventListener('touchmove', onMove);
+      window.removeEventListener('touchend', onUp);
+    }
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    window.addEventListener('touchmove', onMove, { passive: false });
+    window.addEventListener('touchend', onUp);
+  }, []);
 
   const language = LANGUAGES.find((l) => l.key === languageKey) || LANGUAGES[0];
-  const code = (sources && sources[language.key]) ?? language.starter;
+  // Use || not ?? so an empty string also falls back to the starter template.
+  const code = (sources && sources[language.key]) || language.starter;
 
   function setCode(next)
   {
@@ -149,8 +183,12 @@ export default function CodeCompiler({ onLogActivity })
         </div>
       </div>
 
-      <div className="flex flex-col gap-3 lg:grid lg:grid-cols-3 lg:gap-3 flex-1 min-h-0">
-        <div className="glass rounded-2xl overflow-hidden flex flex-col lg:col-span-2 min-h-[20rem] lg:min-h-0">
+      {/* Resizable split — stacked on mobile, side-by-side on lg+ */}
+      <div ref={splitRef} className="flex flex-col lg:flex-row gap-3 flex-1 min-h-0 relative select-none">
+        <div
+          className="glass rounded-2xl overflow-hidden flex flex-col min-h-[20rem] lg:min-h-0"
+          style={{ flexBasis: `${editorPct}%`, minWidth: 0, flexShrink: 0, flexGrow: 0 }}
+        >
           <div className="flex items-center justify-between px-3 py-1.5 border-b border-white/10 bg-black/20">
             <div className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-rose-400/80" />
@@ -167,7 +205,17 @@ export default function CodeCompiler({ onLogActivity })
           <CodeEditor value={code} onChange={setCode} language={language.key} />
         </div>
 
-        <div className="flex flex-col gap-3 min-h-0">
+        {/* Drag handle — only visible on lg+ */}
+        <div
+          onMouseDown={onDragStart}
+          onTouchStart={onDragStart}
+          className="hidden lg:flex items-center justify-center w-2 cursor-col-resize shrink-0 group"
+          title="Drag to resize"
+        >
+          <div className="w-0.5 h-12 rounded-full bg-white/10 group-hover:bg-violet-400/60 transition" />
+        </div>
+
+        <div className="flex flex-col gap-3 min-h-0 flex-1" style={{ minWidth: 0 }}>
           <div className="glass rounded-2xl overflow-hidden flex flex-col min-h-[14rem] lg:min-h-0 flex-1">
             <div className="flex items-center justify-between px-3 py-1.5 border-b border-white/10 bg-black/20">
               <div className="flex items-center gap-1.5 text-xs text-slate-300">
