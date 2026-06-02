@@ -10,7 +10,9 @@ import
   Sparkles,
   Calendar,
   Code2,
-  Menu
+  Menu,
+  Sun,
+  Moon
 } from 'lucide-react';
 import useLocalStorage from '../hooks/useLocalStorage.js';
 import useUserStorage from '../hooks/useUserStorage.js';
@@ -110,7 +112,7 @@ function buildReminders({ streak, mastered })
   return reminders;
 }
 
-export default function Topbar({ section, searchQuery, onSearchChange, onNavigate, onMenuOpen })
+export default function Topbar({ section, searchQuery, onSearchChange, onNavigate, onMenuOpen, theme, onThemeToggle })
 {
   const { title, subtitle } = TITLES[section] || TITLES.dashboard;
 
@@ -252,6 +254,14 @@ export default function Topbar({ section, searchQuery, onSearchChange, onNavigat
           </AnimatePresence>
         </div>
 
+        <button
+          onClick={onThemeToggle}
+          className="w-7 h-7 grid place-items-center rounded-lg bg-white/[0.04] border border-white/10 text-slate-300 hover:text-white hover:bg-white/[0.08] transition"
+          aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
+        >
+          {theme === 'dark' ? <Sun size={13} /> : <Moon size={13} />}
+        </button>
         <button
           onClick={() => onNavigate?.('profile')}
           className="w-7 h-7 grid place-items-center rounded-lg bg-gradient-to-br from-violet-500 to-cyan-400 text-white overflow-hidden border border-white/10 hover:opacity-90 transition"

@@ -6,6 +6,7 @@ import Dashboard from './components/Dashboard.jsx';
 import ProgressTracker from './components/ProgressTracker.jsx';
 import { useAuth } from './auth/AuthContext.jsx';
 import useStreak from './hooks/useStreak.js';
+import useTheme from './hooks/useTheme.js';
 import './App.css';
 
 const DocumentationViewer = lazy(() => import('./components/DocumentationViewer.jsx'));
@@ -70,6 +71,7 @@ export default function App()
 {
   const { touchSession } = useAuth();
   const [, logActivity] = useStreak();
+  const [theme, toggleTheme] = useTheme();
 
   const [route, setRoute] = useState(() => parseHash());
   const [searchQuery, setSearchQuery] = useState('');
@@ -193,6 +195,8 @@ export default function App()
           onSearchChange={handleSearchChange}
           onNavigate={handleNavigate}
           onMenuOpen={() => setMobileMenuOpen(true)}
+          theme={theme}
+          onThemeToggle={toggleTheme}
         />
 
         <div className={`flex-1 min-h-0 ${section === 'compiler' ? 'overflow-hidden' : 'overflow-auto'}`}>
