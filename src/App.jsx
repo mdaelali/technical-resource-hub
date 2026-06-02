@@ -199,7 +199,7 @@ export default function App()
           onThemeToggle={toggleTheme}
         />
 
-        <div className={`flex-1 min-h-0 ${section === 'compiler' ? 'overflow-hidden' : 'overflow-auto'}`}>
+        <div className="flex-1 min-h-0 overflow-auto">
           <AnimatePresence mode="wait">
             <motion.div
               key={section + (section === 'docs' ? `:${docCategoryId || 'all'}` : '') + (section === 'playground' ? `:${snippetId || 'first'}` : '')}
@@ -207,7 +207,7 @@ export default function App()
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.2 }}
-              className={section === 'compiler' ? 'h-full' : 'min-h-full'}
+              className="min-h-full"
             >
               <Suspense fallback={<SectionFallback />}>
                 {renderSection()}

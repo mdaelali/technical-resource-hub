@@ -340,7 +340,7 @@ export default function CodeEditor({ value, onChange, language = 'java' })
       <div className="relative flex-1 min-w-0">
         <pre
           aria-hidden="true"
-          className="m-0 px-3 py-3 whitespace-pre-wrap break-words pointer-events-none"
+          className="m-0 px-3 py-3 whitespace-pre-wrap break-words pointer-events-none min-h-full"
         >
           <code>
             {tokens.map((tok, i) =>

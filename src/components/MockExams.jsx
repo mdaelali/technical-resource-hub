@@ -27,21 +27,59 @@ const HIGHLIGHT_COLORS = [
   { id: 'pink',   cls: 'bg-pink-300/70 text-black',   label: 'Pink'   },
 ];
 
-/* ─────────────────────── Weekly unlock system ───────────────────────────── */
-const SCHEDULE_KEY = 'trh.examSchedule';
-const SCHEDULE_START = '2026-06-01'; // first week
+/* ─────────────────────── Weekly ADD system ──────────────────────────────── */
+// All existing exams in exams.js are ALWAYS available.
+// Every week starting from SCHEDULE_START, one bonus exam from the
+// WEEKLY_BONUS_QUEUE below is added to the available list.
+// Week 0 (Jun 1 → Jun 7): 10 tests. Week 1 (Jun 8 → Jun 14): 11 tests. Etc.
 
-function getUnlockedIds()
+const SCHEDULE_START = '2026-06-01';
+
+export const WEEKLY_BONUS_QUEUE = [
+  {
+    id: 'bonus-week1-loops',
+    title: 'Bonus Week 1 · Loops Deep Dive',
+    description: 'Master while, do-while, for, and nested loops with tricky tracing questions.',
+    minutes: 20, tag: 'Loops', difficulty: 'easy', accent: 'from-sky-400/30 to-cyan-400/20',
+    questions: [
+      { id:'bw1-1', type:'mcq', prompt:'How many times does the loop body execute?', code:'int i = 1;\nwhile (i < 100) i *= 2;', options:['6','7','8','100'], answer:1, explanation:'i = 1,2,4,8,16,32,64,128 — condition fails at 128. Loop runs 7 times.' },
+      { id:'bw1-2', type:'mcq', prompt:'What is printed?', code:'for (int i = 10; i > 0; i -= 3) System.out.print(i + " ");', options:['10 7 4 1','10 7 4','10 7 4 1 -2','10 7'], answer:0, explanation:'i = 10,7,4,1. When i = 1 - 3 = -2, condition i > 0 fails. Prints 10 7 4 1.' },
+      { id:'bw1-3', type:'mcq', prompt:'What is the output?', code:'int sum = 0;\nfor (int i = 1; i <= 10; i++) {\n    if (i % 2 == 0) continue;\n    sum += i;\n}\nSystem.out.println(sum);', options:['55','25','30','50'], answer:1, explanation:'Skips evens. Sum of odd 1+3+5+7+9 = 25.' },
+      { id:'bw1-4', type:'mcq', prompt:'What does this print?', code:'outer: for (int i = 0; i < 3; i++) {\n    for (int j = 0; j < 3; j++) {\n        if (j == 1) break outer;\n        System.out.print(i + "" + j + " ");\n    }\n}', options:['00 01 10 11 20 21','00','00 10 20','00 11 22'], answer:1, explanation:'break outer exits both loops when j==1 after printing only i=0,j=0: "00".' },
+      { id:'bw1-f1', type:'frq', points:5, prompt:'Write a method sumOfDigits(int n) that returns the sum of all digits of n (e.g. 1234 → 10). Handle n = 0 as a base case returning 0.', starter:'public class Solution\n{\n    public int sumOfDigits(int n)\n    {\n        // your code here\n    }\n}\n', modelAnswer:'public class Solution\n{\n    public int sumOfDigits(int n)\n    {\n        int sum = 0;\n        n = Math.abs(n);\n        while (n > 0)\n        {\n            sum += n % 10;\n            n /= 10;\n        }\n        return sum;\n    }\n}\n' }
+    ]
+  },
+  {
+    id: 'bonus-week2-strings',
+    title: 'Bonus Week 2 · String Mastery',
+    description: 'charAt, indexOf, substring, compareTo, and immutability edge cases.',
+    minutes: 20, tag: 'Strings', difficulty: 'medium', accent: 'from-violet-400/30 to-pink-400/20',
+    questions: [
+      { id:'bw2-1', type:'mcq', prompt:'What is the output?', code:'String s = "banana";\nSystem.out.println(s.indexOf("a", 2));', options:['1','3','5','-1'], answer:1, explanation:'indexOf("a", 2) starts searching at index 2. The "a" at index 3 is found first.' },
+      { id:'bw2-2', type:'mcq', prompt:'Strings in Java are:', options:['mutable objects','immutable — methods return new Strings','arrays of chars that can be changed','stored on the stack'], answer:1, explanation:'Strings in Java are immutable. String methods return NEW String objects.' },
+      { id:'bw2-3', type:'mcq', prompt:'What prints?', code:'String a = "Hello";\nString b = a;\na = a + " World";\nSystem.out.println(b);', options:['Hello World','Hello','null','Hello Hello'], answer:1, explanation:'b still refers to the original "Hello" object. Reassigning a creates a new object.' },
+      { id:'bw2-f1', type:'frq', points:5, prompt:'Write a method countChar(String s, char c) that returns how many times character c appears in String s (case-sensitive).', starter:'public class Solution\n{\n    public int countChar(String s, char c)\n    {\n        // your code here\n    }\n}\n', modelAnswer:'public class Solution\n{\n    public int countChar(String s, char c)\n    {\n        int count = 0;\n        for (int i = 0; i < s.length(); i++)\n        {\n            if (s.charAt(i) == c) count++;\n        }\n        return count;\n    }\n}\n' }
+    ]
+  }
+];
+
+function getWeeklyBonusAvailable()
 {
   const start = new Date(SCHEDULE_START);
   const now = new Date();
   const msPerWeek = 7 * 24 * 60 * 60 * 1000;
-  const weeksPassed = Math.floor((now - start) / msPerWeek);
-  // Lock nothing for the first N exams that were always available;
-  // unlock one additional exam per week after the initial batch.
-  const ALWAYS_AVAILABLE = 4;
-  const unlocked = ALWAYS_AVAILABLE + Math.max(0, weeksPassed);
-  return exams.map((e) => e.id).slice(0, unlocked);
+  const weeksPassed = Math.max(0, Math.floor((now - start) / msPerWeek));
+  // Return the slice of WEEKLY_BONUS_QUEUE that has been unlocked so far.
+  return WEEKLY_BONUS_QUEUE.slice(0, weeksPassed);
+}
+
+function getDaysUntilNextBonus()
+{
+  const start = new Date(SCHEDULE_START);
+  const now = new Date();
+  const msPerWeek = 7 * 24 * 60 * 60 * 1000;
+  const nextWeekStart = new Date(start.getTime() + (Math.floor((now - start) / msPerWeek) + 1) * msPerWeek);
+  return Math.max(1, Math.ceil((nextWeekStart - now) / (24 * 60 * 60 * 1000)));
 }
 
 /* ─────────────────────── Timer hook ────────────────────────────────────── */
@@ -75,7 +113,10 @@ export default function MockExams({ onLogActivity })
   const [activeId, setActiveId] = useState(null);
   const activeExam = activeId ? exams.find((e) => e.id === activeId) : null;
 
-  const unlockedIds = useMemo(() => getUnlockedIds(), []);
+  const weeklyBonus = useMemo(() => getWeeklyBonusAvailable(), []);
+  const allAvailableExams = useMemo(() => [...exams, ...weeklyBonus], [weeklyBonus]);
+  const daysUntilNext = useMemo(() => getDaysUntilNextBonus(), []);
+  const nextBonusExam = WEEKLY_BONUS_QUEUE[weeklyBonus.length];
 
   function handleComplete(examId, correct, totalMcq)
   {
@@ -101,11 +142,19 @@ export default function MockExams({ onLogActivity })
       />
     );
   }
-  return <ExamList results={results || {}} onStart={setActiveId} unlockedIds={unlockedIds} />;
+  return (
+    <ExamList
+      results={results || {}}
+      onStart={setActiveId}
+      allExams={allAvailableExams}
+      daysUntilNext={daysUntilNext}
+      nextBonusExam={nextBonusExam}
+    />
+  );
 }
 
 /* ─────────────────────── Exam list ─────────────────────────────────────── */
-function ExamList({ results, onStart, unlockedIds })
+function ExamList({ results, onStart, allExams, daysUntilNext, nextBonusExam })
 {
   function countTypes(exam)
   {
@@ -114,17 +163,6 @@ function ExamList({ results, onStart, unlockedIds })
       frq: exam.questions.filter((q) => q.type === 'frq').length
     };
   }
-
-  const nextUnlockDays = useMemo(() =>
-  {
-    const start = new Date(SCHEDULE_START);
-    const now = new Date();
-    const msPerWeek = 7 * 24 * 60 * 60 * 1000;
-    const nextUnlock = new Date(start.getTime() + (Math.floor((now - start) / msPerWeek) + 1) * msPerWeek);
-    return Math.ceil((nextUnlock - now) / (24 * 60 * 60 * 1000));
-  }, []);
-
-  const lockedCount = exams.length - unlockedIds.length;
 
   return (
     <div className="flex flex-col gap-3">
@@ -136,31 +174,31 @@ function ExamList({ results, onStart, unlockedIds })
             <div className="min-w-0">
               <h2 className="text-lg font-semibold text-white tracking-tight">Mock Exams</h2>
               <p className="text-xs text-slate-400">
-                {unlockedIds.length} of {exams.length} exams available
-                {lockedCount > 0 && ` · ${lockedCount} more unlock weekly`}
+                {allExams.length} exams available · new exam added every week
                 {isAIEnabled && ' · AI explanations active'}
               </p>
             </div>
           </div>
-          {lockedCount > 0 && (
-            <span className="pill bg-violet-500/20 text-violet-200 border border-violet-400/30">
-              Next unlock in {nextUnlockDays}d
-            </span>
+          {nextBonusExam && (
+            <div className="flex items-center gap-2">
+              <span className="pill bg-violet-500/20 text-violet-200 border border-violet-400/30">
+                Next: "{nextBonusExam.title}" in {daysUntilNext}d
+              </span>
+            </div>
           )}
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-        {exams.map((exam) =>
+        {allExams.map((exam) =>
         {
           const { mcq, frq } = countTypes(exam);
           const rec = results[exam.id];
           const diff = DIFF_STYLE[exam.difficulty] || DIFF_STYLE.medium;
-          const locked = !unlockedIds.includes(exam.id);
           return (
             <div
               key={exam.id}
-              className={`glass card-hover gradient-border rounded-2xl px-4 py-3.5 flex flex-col gap-2.5 bg-gradient-to-br ${exam.accent} ${locked ? 'opacity-60' : ''}`}
+              className={`glass card-hover gradient-border rounded-2xl px-4 py-3.5 flex flex-col gap-2.5 bg-gradient-to-br ${exam.accent}`}
             >
               <div className="flex items-start justify-between gap-2 flex-wrap">
                 <div className="min-w-0">
@@ -188,15 +226,11 @@ function ExamList({ results, onStart, unlockedIds })
                 ) : rec?.completed ? (
                   <span className="flex items-center gap-1.5 text-[11px] text-emerald-300"><CheckCircle2 size={12} />Completed</span>
                 ) : (
-                  <span className="text-[11px] text-slate-500">{locked ? '🔒 Coming soon' : 'Not attempted'}</span>
+                  <span className="text-[11px] text-slate-500">Not attempted</span>
                 )}
-                <button
-                  onClick={() => !locked && onStart(exam.id)}
-                  disabled={locked}
-                  className={`btn-primary ${locked ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
+                <button onClick={() => onStart(exam.id)} className="btn-primary">
                   {rec?.completed ? <RotateCcw size={12} /> : <ClipboardList size={12} />}
-                  <span>{locked ? 'Locked' : rec?.completed ? 'Retake' : 'Start exam'}</span>
+                  <span>{rec?.completed ? 'Retake' : 'Start exam'}</span>
                 </button>
               </div>
             </div>

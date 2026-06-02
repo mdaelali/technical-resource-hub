@@ -259,42 +259,69 @@ h1, h2, h3, h4
   }
 }
 
-/* ── Light mode: token-driven overrides ─────────────────────────────────── */
-html.light .text-white          { color: #0f172a !important; }
-html.light .text-slate-100      { color: #1e293b !important; }
-html.light .text-slate-200      { color: #334155 !important; }
-html.light .text-slate-300      { color: #475569 !important; }
-html.light .text-slate-400      { color: #64748b !important; }
-html.light .text-slate-500      { color: #94a3b8 !important; }
-html.light .text-slate-600      { color: #94a3b8 !important; }
+/* ── Light mode: comprehensive overrides ─────────────────────────────────── */
+html.light .text-white     { color: #0f172a !important; }
+html.light .text-slate-100 { color: #1e293b !important; }
+html.light .text-slate-200 { color: #334155 !important; }
+html.light .text-slate-300 { color: #475569 !important; }
+html.light .text-slate-400 { color: #64748b !important; }
+html.light .text-slate-500 { color: #94a3b8 !important; }
+html.light .text-slate-600 { color: #94a3b8 !important; }
 
-/* code bg override handled via CSS variable in component styles */
-html.light .bg-black\/20        { background-color: rgba(241,245,251,0.8) !important; }
-html.light .bg-black\/40        { background-color: rgba(241,245,251,0.9) !important; }
-html.light .bg-white\/\[0\.03\] { background-color: rgba(241,245,251,0.6) !important; }
-html.light .bg-white\/\[0\.04\] { background-color: rgba(241,245,251,0.7) !important; }
-html.light .bg-white\/\[0\.06\] { background-color: rgba(255,255,255,0.9) !important; }
-html.light .bg-white\/\[0\.08\] { background-color: rgba(255,255,255,0.95) !important; }
-html.light .border-white\/5     { border-color: rgba(148,163,184,0.15) !important; }
-html.light .border-white\/\[0\.08\] { border-color: rgba(148,163,184,0.20) !important; }
-html.light .border-white\/10    { border-color: rgba(148,163,184,0.25) !important; }
+/* dark overlays become light surfaces */
+html.light .bg-black\/20 { background-color: rgba(248,250,252,0.85) !important; }
+html.light .bg-black\/40 { background-color: rgba(248,250,252,0.95) !important; }
+html.light .bg-black\/60 { background-color: rgba(15,23,42,0.55)    !important; }
+html.light .bg-black\/70 { background-color: rgba(15,23,42,0.60)    !important; }
+html.light .bg-black\/80 { background-color: rgba(15,23,42,0.70)    !important; }
+html.light .bg-black\/85 { background-color: rgba(15,23,42,0.75)    !important; }
 
+/* borders */
+html.light .border-white\/5  { border-color: rgba(148,163,184,0.15) !important; }
+html.light .border-white\/10 { border-color: rgba(148,163,184,0.25) !important; }
+
+/* form inputs */
 html.light .input-field
 {
-  background-color: rgba(255,255,255,0.9) !important;
-  border-color: rgba(148,163,184,0.35) !important;
+  background-color: rgba(255,255,255,0.95) !important;
+  border-color: rgba(148,163,184,0.40) !important;
   color: #0f172a !important;
 }
-html.light .input-field:focus
-{
-  border-color: #8b5cf6 !important;
-}
+html.light .input-field:focus { border-color: #8b5cf6 !important; }
 
-html.light code,
+/* code editor canvas */
 html.light pre
 {
   background-color: var(--code-bg) !important;
   color: #1e293b !important;
+}
+
+/* sidebar lighter */
+html.light aside.glass
+{
+  background-color: rgba(255,255,255,0.88) !important;
+  border-color: rgba(148,163,184,0.20) !important;
+}
+
+/* popover stays dark overlay */
+html.light .popover
+{
+  background-color: rgba(255,255,255,0.97) !important;
+  border-color: rgba(148,163,184,0.25) !important;
+  box-shadow: 0 8px 32px rgba(15,23,42,0.12), 0 0 0 1px rgba(139,92,246,0.08) !important;
+  color: #0f172a !important;
+}
+
+/* card-hover on light — lighter shadow */
+html.light .card-hover:hover
+{
+  box-shadow: 0 8px 24px rgba(15,23,42,0.10), 0 0 0 1px rgba(139,92,246,0.20), inset 0 1px 0 rgba(255,255,255,0.8) !important;
+}
+
+/* gradient border more visible on light */
+html.light .gradient-border::before
+{
+  opacity: 0.6;
 }
 
 /* Honor system reduced-motion: kill animations and transitions, drop blur,
