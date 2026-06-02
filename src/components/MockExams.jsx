@@ -5,7 +5,7 @@ import
   ClipboardList, CheckCircle2, XCircle, Clock, ArrowLeft, ArrowRight,
   Trophy, Code2, ListChecks, RotateCcw, Bookmark, BookmarkCheck,
   Highlighter, Book, X, ChevronDown, ChevronUp, Bot, Send,
-  Loader2, AlertCircle, Zap
+  Loader2, AlertCircle, Zap, ExternalLink
 } from 'lucide-react';
 import useUserStorage from '../hooks/useUserStorage.js';
 import { exams } from '../data/exams.js';
@@ -770,38 +770,49 @@ function ExplanationCard({ question, userAnswer, chatOpen, onToggleChat })
 
   return (
     <div className={`rounded-xl border text-xs overflow-hidden ${isCorrect ? 'border-emerald-400/30 bg-emerald-500/10' : 'border-rose-400/30 bg-rose-500/10'}`}>
-      <div className="px-3 py-2 flex items-center justify-between gap-2">
+      {/* Explanation header — always visible */}
+      <div className="px-3 py-2.5 flex items-start justify-between gap-2">
         <div className="flex items-start gap-2 min-w-0">
-          {isCorrect ? <CheckCircle2 size={13} className="text-emerald-300 mt-0.5 shrink-0" /> : <XCircle size={13} className="text-rose-300 mt-0.5 shrink-0" />}
+          {isCorrect
+            ? <CheckCircle2 size={14} className="text-emerald-400 mt-0.5 shrink-0" />
+            : <XCircle size={14} className="text-rose-400 mt-0.5 shrink-0" />}
           <div className="min-w-0">
-            <div className={`font-semibold ${isCorrect ? 'text-emerald-200' : 'text-rose-200'}`}>
-              {isCorrect ? 'Correct!' : `Incorrect — answer: ${LETTERS[question.answer]}) ${question.options[question.answer]}`}
+            <div className="font-semibold text-white mb-0.5">
+              {isCorrect
+                ? '✓ Correct!'
+                : `✗ Incorrect — correct answer: ${LETTERS[question.answer]}) ${question.options[question.answer]}`}
             </div>
-            <p className="text-slate-300 mt-0.5 leading-relaxed">{question.explanation}</p>
+            {/* Static explanation is always shown — no AI key needed */}
+            <p className="text-slate-200 leading-relaxed">{question.explanation}</p>
           </div>
         </div>
         {!isCorrect && (
           <button
             onClick={onToggleChat}
-            className={`shrink-0 flex items-center gap-1 px-2 py-1 rounded-lg border transition ${chatOpen ? 'border-violet-400/50 bg-violet-500/20 text-violet-200' : 'border-white/10 text-slate-300 hover:text-white hover:border-white/30'}`}
+            className={`shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-medium transition whitespace-nowrap ${
+              chatOpen
+                ? 'border-violet-400/60 bg-violet-500/25 text-violet-200'
+                : 'border-white/20 text-slate-300 hover:text-white hover:border-violet-400/40 hover:bg-violet-500/15'
+            }`}
           >
             <Bot size={12} />
-            <span className="hidden sm:inline">Ask AI</span>
+            <span>{isAIEnabled ? 'Ask AI tutor' : 'Chat'}</span>
           </button>
         )}
       </div>
 
+      {/* Expandable chat panel */}
       {chatOpen && !isCorrect && (
         <div className="border-t border-white/10">
-          {/* AI explanation */}
-          {(aiLoading || aiExplanation) && (
-            <div className="px-3 py-2 bg-violet-500/10 border-b border-white/10">
-              <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-violet-300 mb-1">
-                <Zap size={10} />AI Explanation
+          {/* AI-generated deeper explanation (only when AI is enabled) */}
+          {isAIEnabled && (aiLoading || aiExplanation) && (
+            <div className="px-3 py-2.5 bg-violet-500/10 border-b border-white/10">
+              <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-violet-300 mb-1.5">
+                <Zap size={10} />AI Deeper Explanation
               </div>
               {aiLoading ? (
                 <div className="flex items-center gap-1.5 text-slate-400">
-                  <Loader2 size={12} className="animate-spin" />Generating explanation…
+                  <Loader2 size={12} className="animate-spin" />Generating…
                 </div>
               ) : (
                 <p className="text-slate-200 leading-relaxed">{aiExplanation}</p>
@@ -809,47 +820,65 @@ function ExplanationCard({ question, userAnswer, chatOpen, onToggleChat })
             </div>
           )}
 
-          {/* Chat messages */}
-          <div className="max-h-48 overflow-auto px-3 py-2 flex flex-col gap-2">
-            {messages.map((msg, i) => (
-              <div key={i} className={`flex gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[85%] rounded-xl px-3 py-1.5 leading-relaxed ${msg.role === 'user' ? 'bg-violet-500/30 text-white' : 'bg-white/[0.06] text-slate-200'}`}>
-                  {msg.text}
-                </div>
-              </div>
-            ))}
-            {loading && (
-              <div className="flex gap-2">
-                <div className="bg-white/[0.06] rounded-xl px-3 py-1.5 text-slate-400 flex items-center gap-1.5">
-                  <Loader2 size={11} className="animate-spin" />Thinking…
-                </div>
-              </div>
-            )}
-            <div ref={bottomRef} />
-          </div>
-
-          {/* Input */}
-          <div className="px-3 py-2 border-t border-white/10 flex items-center gap-2">
-            <input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
-              placeholder={isAIEnabled ? "Ask a follow-up question…" : "AI tutor not configured"}
-              disabled={!isAIEnabled || loading}
-              className="input-field py-1.5 text-[11px] flex-1"
-            />
-            <button
-              onClick={sendMessage}
-              disabled={!input.trim() || loading || !isAIEnabled}
-              className="btn-primary py-1.5 px-2 disabled:opacity-50"
-            >
-              <Send size={12} />
-            </button>
-          </div>
+          {/* No AI key — helpful message instead of broken input */}
           {!isAIEnabled && (
-            <p className="px-3 pb-2 text-[10px] text-slate-500">
-              Add VITE_ANTHROPIC_API_KEY to .env.local to enable AI explanations.
-            </p>
+            <div className="px-3 py-3 flex flex-col gap-2">
+              <div className="flex items-start gap-2 text-amber-300/90">
+                <AlertCircle size={13} className="mt-0.5 shrink-0" />
+                <div className="text-[11px] leading-relaxed">
+                  <span className="font-semibold">AI Tutor not configured.</span> The explanation above is from the question data.
+                  To enable the AI chatbot, add <code className="font-mono bg-white/10 px-1 rounded">VITE_ANTHROPIC_API_KEY</code> to
+                  your <strong>Vercel environment variables</strong> and redeploy.
+                  Get a free key at{' '}
+                  <a href="https://console.anthropic.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-white transition">
+                    console.anthropic.com
+                  </a>.
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Chat messages — only shown when AI enabled */}
+          {isAIEnabled && (
+            <>
+              <div className="max-h-48 overflow-auto px-3 py-2 flex flex-col gap-2">
+                {messages.length === 0 && !aiLoading && (
+                  <p className="text-[11px] text-slate-500 text-center py-2">Ask any follow-up question about this concept.</p>
+                )}
+                {messages.map((msg, i) => (
+                  <div key={i} className={`flex gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[88%] rounded-xl px-3 py-1.5 leading-relaxed ${msg.role === 'user' ? 'bg-violet-500/30 text-white' : 'bg-white/[0.07] text-slate-200'}`}>
+                      {msg.text}
+                    </div>
+                  </div>
+                ))}
+                {loading && (
+                  <div className="flex gap-2">
+                    <div className="bg-white/[0.06] rounded-xl px-3 py-1.5 text-slate-400 flex items-center gap-1.5">
+                      <Loader2 size={11} className="animate-spin" />Thinking…
+                    </div>
+                  </div>
+                )}
+                <div ref={bottomRef} />
+              </div>
+              <div className="px-3 py-2 border-t border-white/10 flex items-center gap-2">
+                <input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+                  placeholder="Ask a follow-up question about this concept…"
+                  disabled={loading}
+                  className="input-field py-1.5 text-[11px] flex-1"
+                />
+                <button
+                  onClick={sendMessage}
+                  disabled={!input.trim() || loading}
+                  className="btn-primary py-1.5 px-2.5 disabled:opacity-50"
+                >
+                  <Send size={12} />
+                </button>
+              </div>
+            </>
           )}
         </div>
       )}

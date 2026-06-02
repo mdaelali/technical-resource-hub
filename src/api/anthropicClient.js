@@ -1,18 +1,23 @@
 /*
- * Lightweight Anthropic Claude API client.
+ * Anthropic Claude API client.
  *
- * Calls are made directly from the browser. This is acceptable for a
- * student portfolio project but for production you should proxy through
- * a Supabase Edge Function so the key stays server-side.
+ * Calls are proxied from the browser. This is fine for a student portfolio
+ * project. For production, proxy through a Supabase Edge Function.
  *
- * Set VITE_ANTHROPIC_API_KEY in Vercel → Environment Variables to enable.
- * If the key is not configured the functions return a friendly fallback.
+ * To enable AI features:
+ *   1. Get a free API key at https://console.anthropic.com
+ *   2. In Vercel → Project Settings → Environment Variables, add:
+ *      VITE_ANTHROPIC_API_KEY = sk-ant-...
+ *   3. Redeploy. The AI tutor and explanations will activate automatically.
+ *
+ * Without the key, the static explanation from exams.js still shows — the
+ * chat box is the only part that requires the key.
  */
 
 const API_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY?.trim() || '';
 const ENDPOINT = 'https://api.anthropic.com/v1/messages';
-const MODEL = 'claude-3-haiku-20240307'; // fastest + cheapest, plenty smart enough
-const MAX_TOKENS = 600;
+const MODEL = 'claude-haiku-4-5'; // fastest + cheapest, great for explanations
+const MAX_TOKENS = 500;
 
 export const isAIEnabled = Boolean(API_KEY);
 
@@ -22,76 +27,82 @@ async function callClaude(messages, systemPrompt)
   {
     return null;
   }
-  const body = {
-    model: MODEL,
-    max_tokens: MAX_TOKENS,
-    system: systemPrompt,
-    messages
-  };
   const response = await fetch(ENDPOINT, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'x-api-key': API_KEY,
       'anthropic-version': '2023-06-01',
-      // Required for direct browser calls (Anthropic allows this for dev)
       'anthropic-dangerous-direct-browser-access': 'true'
     },
-    body: JSON.stringify(body)
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: MAX_TOKENS,
+      system: systemPrompt,
+      messages
+    })
   });
   if (!response.ok)
   {
     const err = await response.text().catch(() => '');
-    throw new Error(`Anthropic API error ${response.status}: ${err.slice(0, 200)}`);
+    throw new Error(`API error ${response.status}: ${err.slice(0, 200)}`);
   }
   const data = await response.json();
   return data.content?.[0]?.text || '';
 }
 
 /*
- * Generate a professional explanation of why a student got a question wrong.
+ * explainMistake — called with (question, userAnswerIndex).
+ * Returns a 3-5 sentence explanation or null if AI is disabled.
  */
-export async function explainMistake({ question, studentAnswer, correctAnswer })
+export async function explainMistake(question, userAnswerIndex)
 {
   if (!isAIEnabled)
   {
     return null;
   }
-  const system = `You are an AP Computer Science A teacher explaining exam mistakes.
-Be concise (3-5 sentences), precise, and constructive.
-Avoid vague encouragement — explain the exact concept the student misunderstood.
-Use Java terminology correctly.`;
+  const LETTERS = ['A', 'B', 'C', 'D', 'E'];
+  const system = `You are an AP Computer Science A teacher giving concise, precise feedback on exam mistakes.
+Be educational, direct, and use correct Java terminology.
+Never use vague encouragement. Max 4 sentences total.`;
 
-  const prompt = `Question: ${question.prompt}
+  const prompt = `Question: "${question.prompt}"
 ${question.code ? `\nCode:\n${question.code}\n` : ''}
-Options: ${question.options.map((o, i) => `${['A','B','C','D'][i]}) ${o}`).join(' | ')}
-Student chose: ${['A','B','C','D'][studentAnswer]}. Correct answer: ${['A','B','C','D'][correctAnswer]}.
+Options: ${question.options.map((o, i) => `${LETTERS[i]}) ${o}`).join(' | ')}
+Student chose: ${LETTERS[userAnswerIndex] || '?'} — Correct answer: ${LETTERS[question.answer]}
 
-Explain why the student's answer is wrong and why the correct answer is right. Be direct and educational.`;
+Explain in 2-3 sentences: (1) why the student's choice is wrong, (2) why the correct answer is right. Be concrete.`;
 
   return callClaude([{ role: 'user', content: prompt }], system);
 }
 
 /*
- * Follow-up chatbot — student asks a question about an exam question.
+ * askFollowUp — called with (context, userMessage, previousMessages[]).
+ * context = { question, userAnswer, explanation }
  */
-export async function askFollowUp({ question, conversationHistory, userMessage })
+export async function askFollowUp(context, userMessage, previousMessages = [])
 {
   if (!isAIEnabled)
   {
     return null;
   }
-  const system = `You are an AP Computer Science A tutor. The student is asking about a specific exam question.
-Answer clearly and concisely (max 4 sentences). Use Java-specific terminology.
-If the student asks for the direct answer, explain the reasoning instead of just stating it.`;
+  const LETTERS = ['A', 'B', 'C', 'D', 'E'];
+  const system = `You are a friendly AP Computer Science A tutor. Answer clearly in 2-4 sentences.
+Use correct Java terminology. If the student asks for the answer directly, explain the reasoning instead.`;
 
-  const questionContext = `The exam question is: "${question.prompt}"
-${question.code ? `Code: ${question.code}` : ''}
-${question.options ? `Options: ${question.options.map((o, i) => `${['A','B','C','D'][i]}) ${o}`).join(', ')}` : ''}`;
+  const qContext = `Exam question: "${context.question?.prompt || ''}"
+${context.question?.code ? `Code: ${context.question.code}` : ''}
+${context.question?.options ? `Options: ${context.question.options.map((o, i) => `${LETTERS[i]}) ${o}`).join(', ')}` : ''}
+${context.explanation ? `Explanation already shown: "${context.explanation}"` : ''}`;
+
+  // Build message history: first message includes the question context
+  const history = previousMessages
+    .slice(-6)
+    .map((m) => ({ role: m.role === 'ai' ? 'assistant' : 'user', content: m.text }));
 
   const messages = [
-    { role: 'user', content: `Context: ${questionContext}\n\nStudent question: ${userMessage}` },
-    ...conversationHistory.slice(-6) // keep last 3 exchanges (6 messages)
+    { role: 'user', content: `Context:\n${qContext}\n\nStudent asks: ${userMessage}` },
+    ...history
   ];
 
   return callClaude(messages, system);

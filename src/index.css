@@ -24,22 +24,22 @@
   --selection-bg:     rgba(139, 92, 246, 0.40);
 }
 
-/* Light mode overrides */
+/* Light mode tokens */
 html.light
 {
   color-scheme: light;
-  --bg-base:          #f1f5fb;
-  --bg-surface:       rgba(255,255,255,0.75);
-  --bg-surface-hover: rgba(255,255,255,0.95);
-  --border-color:     rgba(100,116,139,0.20);
+  --bg-base:          #eef2f9;
+  --bg-surface:       rgba(255,255,255,0.90);
+  --bg-surface-hover: rgba(255,255,255,1);
+  --border-color:     rgba(71,85,105,0.18);
   --text-primary:     #0f172a;
-  --text-secondary:   #475569;
-  --text-muted:       #94a3b8;
-  --dot-color:        rgba(99,102,241,0.07);
-  --shadow-glass:     0 4px 24px 0 rgba(15, 23, 42, 0.10);
-  --code-bg:          #f8fafc;
+  --text-secondary:   #334155;
+  --text-muted:       #64748b;
+  --dot-color:        rgba(99,102,241,0.06);
+  --shadow-glass:     0 2px 12px 0 rgba(15,23,42,0.08), 0 1px 3px 0 rgba(15,23,42,0.06);
+  --code-bg:          #f1f5f9;
   --gutter-text:      #94a3b8;
-  --selection-bg:     rgba(139, 92, 246, 0.25);
+  --selection-bg:     rgba(139,92,246,0.20);
 }
 
 html, body, #root
@@ -321,70 +321,145 @@ h1, h2, h3, h4
   }
 }
 
-/* ── Light mode: comprehensive overrides ─────────────────────────────────── */
-html.light .text-white     { color: #0f172a !important; }
-html.light .text-slate-100 { color: #1e293b !important; }
-html.light .text-slate-200 { color: #334155 !important; }
-html.light .text-slate-300 { color: #475569 !important; }
-html.light .text-slate-400 { color: #64748b !important; }
-html.light .text-slate-500 { color: #94a3b8 !important; }
-html.light .text-slate-600 { color: #94a3b8 !important; }
+/* ══════════════════════════════════════════════════════════════════════════
+   LIGHT MODE — Complete coverage
+   Strategy: remap every dark utility that appears in the codebase so
+   text, backgrounds, borders, buttons, pills, and cards all read cleanly
+   against a light (#eef2f9) background.
+   ══════════════════════════════════════════════════════════════════════════ */
 
-/* dark overlays become light surfaces */
-html.light .bg-black\/20 { background-color: rgba(248,250,252,0.85) !important; }
-html.light .bg-black\/40 { background-color: rgba(248,250,252,0.95) !important; }
-html.light .bg-black\/60 { background-color: rgba(15,23,42,0.55)    !important; }
-html.light .bg-black\/70 { background-color: rgba(15,23,42,0.60)    !important; }
-html.light .bg-black\/80 { background-color: rgba(15,23,42,0.70)    !important; }
-html.light .bg-black\/85 { background-color: rgba(15,23,42,0.75)    !important; }
+/* ── Neutral text ─────────────────────────────────────────────────────────── */
+html.light .text-white,
+html.light .text-slate-50,
+html.light .text-slate-100 { color: #0f172a !important; }
+html.light .text-slate-200  { color: #1e293b !important; }
+html.light .text-slate-300  { color: #334155 !important; }
+html.light .text-slate-400  { color: #475569 !important; }
+html.light .text-slate-500  { color: #64748b !important; }
+html.light .text-slate-600  { color: #94a3b8 !important; }
 
-/* borders */
-html.light .border-white\/5  { border-color: rgba(148,163,184,0.15) !important; }
-html.light .border-white\/10 { border-color: rgba(148,163,184,0.25) !important; }
+/* ── Accent text stays vivid but slightly darker in light ────────────────── */
+html.light .text-violet-300  { color: #7c3aed !important; }
+html.light .text-violet-200  { color: #8b5cf6 !important; }
+html.light .text-cyan-300    { color: #0891b2 !important; }
+html.light .text-cyan-200    { color: #06b6d4 !important; }
+html.light .text-emerald-300 { color: #059669 !important; }
+html.light .text-emerald-200 { color: #10b981 !important; }
+html.light .text-amber-300   { color: #d97706 !important; }
+html.light .text-amber-200   { color: #f59e0b !important; }
+html.light .text-rose-300    { color: #e11d48 !important; }
+html.light .text-pink-300    { color: #db2777 !important; }
 
-/* form inputs */
+/* ── Glass surfaces ─────────────────────────────────────────────────────── */
+html.light .glass,
+html.light .glass-strong
+{
+  background-color: rgba(255,255,255,0.88) !important;
+  border-color: rgba(71,85,105,0.16) !important;
+  box-shadow: 0 1px 8px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04) !important;
+}
+
+html.light aside.glass
+{
+  background-color: rgba(255,255,255,0.94) !important;
+  border-color: rgba(71,85,105,0.14) !important;
+}
+
+/* ── Dark overlay surfaces (editor chrome, modal header bars) ────────────── */
+html.light .bg-black\/20 { background-color: rgba(241,245,249,0.90) !important; }
+html.light .bg-black\/40 { background-color: rgba(241,245,249,0.97) !important; }
+/* Modal/drawer backdrops stay dark so content reads */
+html.light .bg-black\/60 { background-color: rgba(15,23,42,0.50) !important; }
+html.light .bg-black\/70 { background-color: rgba(15,23,42,0.58) !important; }
+html.light .bg-black\/80 { background-color: rgba(15,23,42,0.68) !important; }
+html.light .bg-black\/85 { background-color: rgba(15,23,42,0.75) !important; }
+
+/* ── Borders ────────────────────────────────────────────────────────────── */
+html.light .border-white\/5  { border-color: rgba(71,85,105,0.12) !important; }
+html.light .border-white\/10 { border-color: rgba(71,85,105,0.18) !important; }
+
+/* ── Pill / badge ───────────────────────────────────────────────────────── */
+html.light .pill
+{
+  background-color: rgba(71,85,105,0.10) !important;
+  color: #334155 !important;
+}
+/* Specific accent pills — keep their own hue but darken bg */
+html.light .bg-white\/10 { background-color: rgba(71,85,105,0.10) !important; }
+html.light .bg-white\/\[0\.06\] { background-color: rgba(71,85,105,0.08) !important; }
+html.light .bg-white\/\[0\.04\] { background-color: rgba(71,85,105,0.06) !important; }
+html.light .bg-white\/\[0\.03\] { background-color: rgba(71,85,105,0.04) !important; }
+
+/* ── Form inputs ────────────────────────────────────────────────────────── */
 html.light .input-field
 {
-  background-color: rgba(255,255,255,0.95) !important;
-  border-color: rgba(148,163,184,0.40) !important;
+  background-color: #fff !important;
+  border-color: rgba(71,85,105,0.30) !important;
   color: #0f172a !important;
+  box-shadow: 0 1px 2px rgba(15,23,42,0.04) !important;
 }
-html.light .input-field:focus { border-color: #8b5cf6 !important; }
+html.light .input-field::placeholder { color: #94a3b8 !important; }
+html.light .input-field:focus
+{
+  border-color: #7c3aed !important;
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.12) !important;
+}
 
-/* code editor canvas */
-html.light pre
+/* ── Buttons ────────────────────────────────────────────────────────────── */
+/* btn-ghost: dark text on light bg */
+html.light .btn-ghost
+{
+  color: #334155 !important;
+}
+html.light .btn-ghost:hover
+{
+  color: #0f172a !important;
+  background-color: rgba(71,85,105,0.10) !important;
+}
+
+/* btn-primary stays gradient — just tweak shadow */
+html.light .btn-primary
+{
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.20),
+    0 2px 8px rgba(124,58,237,0.30),
+    0 1px 2px rgba(0,0,0,0.12) !important;
+}
+
+/* ── Code / pre ─────────────────────────────────────────────────────────── */
+html.light pre,
+html.light code
 {
   background-color: var(--code-bg) !important;
   color: #1e293b !important;
 }
 
-/* sidebar lighter */
-html.light aside.glass
-{
-  background-color: rgba(255,255,255,0.88) !important;
-  border-color: rgba(148,163,184,0.20) !important;
-}
-
-/* popover stays dark overlay */
+/* ── Popover / floating dropdowns ───────────────────────────────────────── */
 html.light .popover
 {
-  background-color: rgba(255,255,255,0.97) !important;
-  border-color: rgba(148,163,184,0.25) !important;
-  box-shadow: 0 8px 32px rgba(15,23,42,0.12), 0 0 0 1px rgba(139,92,246,0.08) !important;
+  background-color: rgba(255,255,255,0.98) !important;
+  border-color: rgba(71,85,105,0.18) !important;
+  box-shadow:
+    0 8px 24px rgba(15,23,42,0.12),
+    0 2px 6px rgba(15,23,42,0.06),
+    0 0 0 1px rgba(124,58,237,0.08) !important;
   color: #0f172a !important;
 }
 
-/* card-hover on light — lighter shadow */
+/* ── Card hover — lighter lift on light bg ──────────────────────────────── */
 html.light .card-hover:hover
 {
-  box-shadow: 0 8px 24px rgba(15,23,42,0.10), 0 0 0 1px rgba(139,92,246,0.20), inset 0 1px 0 rgba(255,255,255,0.8) !important;
+  box-shadow:
+    0 8px 20px rgba(15,23,42,0.10),
+    0 2px 6px rgba(15,23,42,0.06),
+    0 0 0 1px rgba(124,58,237,0.18) !important;
 }
 
-/* gradient border more visible on light */
-html.light .gradient-border::before
-{
-  opacity: 0.6;
-}
+/* ── Gradient border — subtle on light ─────────────────────────────────── */
+html.light .gradient-border::before { opacity: 0.50; }
+
+/* ── Selection colour ───────────────────────────────────────────────────── */
+html.light ::selection { background: rgba(124,58,237,0.20); color: #0f172a; }
 
 /* Honor system reduced-motion: kill animations and transitions, drop blur,
    leave layout intact. Pairs with framer-motion's MotionConfig
