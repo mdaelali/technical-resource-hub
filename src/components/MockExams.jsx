@@ -181,7 +181,14 @@ function ExamList({ results, onStart, allExams, daysUntilNext, nextBonusExam })
           </div>
           {nextBonusExam && (
             <div className="flex items-center gap-2">
-              <span className="pill bg-violet-500/20 text-violet-200 border border-violet-400/30">
+              <span
+                className="pill border"
+                style={{
+                  background: 'rgba(139,92,246,0.25)',
+                  color: '#c4b5fd',
+                  borderColor: 'rgba(139,92,246,0.45)'
+                }}
+              >
                 Next: "{nextBonusExam.title}" in {daysUntilNext}d
               </span>
             </div>
@@ -404,27 +411,28 @@ function BluebookRunner({ exam, onExit, onComplete })
 
       {/* ── Body: left (stem) + right (choices) ─── */}
       <div className="flex flex-col sm:flex-row flex-1 min-h-0 relative">
-        {/* Left panel – question stem / code */}
+        {/* ── Left panel — always shows the question stem ───────────────────
+            For MCQ: prompt (+ code block if any)
+            For FRQ: prompt + code block                                     */}
         <div className="sm:w-1/2 flex-1 overflow-auto p-5 border-r border-white/10">
-          <div className="text-[10px] uppercase tracking-widest text-slate-400 mb-3">
+          <div className="text-[10px] uppercase tracking-widest text-slate-400 mb-4">
             Question {current + 1} of {totalQ}
           </div>
 
+          {/* Question prompt lives here for ALL question types */}
+          <p className="text-sm text-white leading-relaxed mb-4 select-text">{q.prompt}</p>
+
+          {/* Code block (MCQ "Consider the following code segment" style) */}
           {q.code && (
-            <pre className="text-xs font-mono leading-relaxed rounded-xl border border-white/10 p-4 overflow-auto mb-4" style={{ background: 'var(--code-bg)' }}>
+            <pre className="text-xs font-mono leading-relaxed rounded-xl border border-white/10 p-4 overflow-auto" style={{ background: 'var(--code-bg)' }}>
               {q.code}
             </pre>
-          )}
-
-          {/* Rendered prompt on left for FRQ, or just general context */}
-          {q.type === 'frq' && (
-            <div className="text-sm text-white leading-relaxed whitespace-pre-wrap">{q.prompt}</div>
           )}
 
           {/* Highlights panel */}
           {(highlights[q.id] || []).length > 0 && (
             <div className="mt-4 flex flex-col gap-1">
-              <div className="text-[10px] uppercase tracking-wider text-slate-400">Your highlights</div>
+              <div className="text-[10px] uppercase tracking-wider text-slate-400 mb-1">Your highlights</div>
               {(highlights[q.id] || []).map((h) =>
               {
                 const hc = HIGHLIGHT_COLORS.find((c) => c.id === h.color) || HIGHLIGHT_COLORS[0];
@@ -441,7 +449,7 @@ function BluebookRunner({ exam, onExit, onComplete })
           )}
         </div>
 
-        {/* Right panel – question + choices */}
+        {/* ── Right panel — answer choices (MCQ) or code editor (FRQ) ───── */}
         <div className="sm:w-1/2 overflow-auto p-5 flex flex-col gap-4">
           {/* Question header row */}
           <div className="flex items-center justify-between flex-wrap gap-2">
@@ -457,11 +465,18 @@ function BluebookRunner({ exam, onExit, onComplete })
                 <span>Mark for review</span>
               </button>
             </div>
-            <span className="pill bg-white/10 text-slate-200 text-[10px]">{q.type === 'mcq' ? 'Multiple choice' : 'Free response'}</span>
+            <span className="pill bg-white/10 text-slate-200 text-[10px]">
+              {q.type === 'mcq' ? 'Multiple choice' : 'Free response'}
+            </span>
           </div>
 
-          {/* Question prompt */}
-          <p className="text-sm text-white leading-relaxed">{q.type === 'mcq' ? q.prompt : 'Write your code answer below.'}</p>
+          {submitted && q.type === 'mcq' && (
+            <p className="text-[11px] text-slate-400 -mt-2">
+              {answers[q.id] === q.answer
+                ? '✓ Correct — click any choice to review, then click "Ask AI" below for deeper insight.'
+                : '✗ Incorrect — click the highlighted answer or "Ask AI" below for an explanation.'}
+            </p>
+          )}
 
           {/* MCQ choices */}
           {q.type === 'mcq' && (
@@ -472,15 +487,29 @@ function BluebookRunner({ exam, onExit, onComplete })
                 const isCorrect = submitted && i === q.answer;
                 const isWrong = submitted && chosen && i !== q.answer;
                 const elim = eliminated[`${q.id}-${i}`];
+                // In review mode: clicking a choice scrolls to / expands explanation
+                function handleChoiceClick()
+                {
+                  if (!submitted)
+                  {
+                    setAnswer(q.id, i);
+                  }
+                  else if (submitted && answers[q.id] !== q.answer)
+                  {
+                    // Open the AI chat panel for this question
+                    setChatOpen((prev) => (prev === q.id ? null : q.id));
+                  }
+                }
                 return (
                   <div key={i} className="flex items-center gap-2 group">
                     <button
-                      onClick={() => setAnswer(q.id, i)}
-                      disabled={submitted}
+                      onClick={handleChoiceClick}
                       className={`flex-1 flex items-center gap-3 px-3 py-2.5 rounded-xl border text-left transition text-sm
                         ${isCorrect ? 'bg-emerald-500/20 border-emerald-400/50 text-white' :
-                          isWrong ? 'bg-rose-500/20 border-rose-400/50 text-white' :
+                          isWrong ? 'bg-rose-500/20 border-rose-400/50 text-white cursor-pointer hover:border-rose-400/80' :
+                          chosen && submitted ? 'bg-violet-500/15 border-violet-400/40 text-white' :
                           chosen ? 'bg-violet-500/25 border-violet-400/60 text-white' :
+                          submitted ? 'border-white/10 text-slate-300' :
                           'border-white/10 text-slate-200 hover:border-violet-400/40 hover:bg-white/[0.03]'}
                         ${elim && !submitted ? 'opacity-40' : ''}`}
                     >
