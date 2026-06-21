@@ -111,10 +111,10 @@ export default function MockExams({ onLogActivity })
 {
   const [results, setResults] = useUserStorage('exam.results', {});
   const [activeId, setActiveId] = useState(null);
-  const activeExam = activeId ? exams.find((e) => e.id === activeId) : null;
 
   const weeklyBonus = useMemo(() => getWeeklyBonusAvailable(), []);
   const allAvailableExams = useMemo(() => [...exams, ...weeklyBonus], [weeklyBonus]);
+  const activeExam = activeId ? allAvailableExams.find((e) => e.id === activeId) : null;
   const daysUntilNext = useMemo(() => getDaysUntilNextBonus(), []);
   const nextBonusExam = WEEKLY_BONUS_QUEUE[weeklyBonus.length];
 
@@ -267,6 +267,8 @@ function BluebookRunner({ exam, onExit, onComplete })
   const [submitted, setSubmitted] = useState(false);
   const [reviewMode, setReviewMode] = useState(false);
   const [chatOpen, setChatOpen] = useState(null);
+  const rightPanelRef = useRef(null);
+  const explanationRef = useRef(null);
 
   const { display: timerDisplay, timerHidden, setTimerHidden, pct: timerPct } = useTimer(exam.minutes, !submitted);
 
@@ -450,7 +452,7 @@ function BluebookRunner({ exam, onExit, onComplete })
         </div>
 
         {/* ── Right panel — answer choices (MCQ) or code editor (FRQ) ───── */}
-        <div className="sm:w-1/2 overflow-auto p-5 flex flex-col gap-4">
+        <div ref={rightPanelRef} className="sm:w-1/2 overflow-auto p-5 flex flex-col gap-4">
           {/* Question header row */}
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2">
@@ -487,7 +489,7 @@ function BluebookRunner({ exam, onExit, onComplete })
                 const isCorrect = submitted && i === q.answer;
                 const isWrong = submitted && chosen && i !== q.answer;
                 const elim = eliminated[`${q.id}-${i}`];
-                // In review mode: clicking a choice scrolls to / expands explanation
+                // In review mode: clicking a choice opens explanation + scrolls to it
                 function handleChoiceClick()
                 {
                   if (!submitted)
@@ -496,8 +498,15 @@ function BluebookRunner({ exam, onExit, onComplete })
                   }
                   else if (submitted && answers[q.id] !== q.answer)
                   {
-                    // Open the AI chat panel for this question
                     setChatOpen((prev) => (prev === q.id ? null : q.id));
+                    // Give React one frame to render the explanation, then scroll to it
+                    requestAnimationFrame(() =>
+                    {
+                      setTimeout(() =>
+                      {
+                        explanationRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }, 50);
+                    });
                   }
                 }
                 return (
@@ -567,14 +576,23 @@ function BluebookRunner({ exam, onExit, onComplete })
             </div>
           )}
 
-          {/* Explanation after submit */}
+          {/* Explanation after submit — ref used for auto-scroll when answer clicked */}
           {submitted && q.type === 'mcq' && answers[q.id] !== undefined && (
-            <ExplanationCard
-              question={q}
-              userAnswer={answers[q.id]}
-              chatOpen={chatOpen === q.id}
-              onToggleChat={() => setChatOpen((prev) => prev === q.id ? null : q.id)}
-            />
+            <div ref={explanationRef}>
+              <ExplanationCard
+                question={q}
+                userAnswer={answers[q.id]}
+                chatOpen={chatOpen === q.id}
+                onToggleChat={() =>
+                {
+                  setChatOpen((prev) => (prev === q.id ? null : q.id));
+                  requestAnimationFrame(() =>
+                    setTimeout(() =>
+                      explanationRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
+                  );
+                }}
+              />
+            </div>
           )}
         </div>
       </div>
@@ -768,51 +786,55 @@ function ExplanationCard({ question, userAnswer, chatOpen, onToggleChat })
     }
   }
 
+  const explanationBg = isCorrect
+    ? 'border-emerald-500/40 bg-emerald-500/10'
+    : 'border-slate-400/30 bg-white/[0.03]';
+
   return (
-    <div className={`rounded-xl border text-xs overflow-hidden ${isCorrect ? 'border-emerald-400/30 bg-emerald-500/10' : 'border-rose-400/30 bg-rose-500/10'}`}>
+    <div className={`rounded-xl border text-xs overflow-hidden ${explanationBg}`}>
       {/* Explanation header — always visible */}
-      <div className="px-3 py-2.5 flex items-start justify-between gap-2">
-        <div className="flex items-start gap-2 min-w-0">
+      <div className="px-3 py-3 flex items-start justify-between gap-3">
+        <div className="flex items-start gap-2.5 min-w-0 flex-1">
           {isCorrect
-            ? <CheckCircle2 size={14} className="text-emerald-400 mt-0.5 shrink-0" />
-            : <XCircle size={14} className="text-rose-400 mt-0.5 shrink-0" />}
+            ? <CheckCircle2 size={15} className="text-emerald-400 mt-0.5 shrink-0" />
+            : <XCircle size={15} className="text-rose-400 mt-0.5 shrink-0" />}
           <div className="min-w-0">
-            <div className="font-semibold text-white mb-0.5">
+            <div className={`font-semibold mb-1 ${isCorrect ? 'text-emerald-300' : 'text-rose-300'}`}>
               {isCorrect
-                ? '✓ Correct!'
-                : `✗ Incorrect — correct answer: ${LETTERS[question.answer]}) ${question.options[question.answer]}`}
+                ? 'Correct!'
+                : `Incorrect — correct answer: ${LETTERS[question.answer]}) ${question.options[question.answer]}`}
             </div>
-            {/* Static explanation is always shown — no AI key needed */}
+            {/* Static explanation always shown — no API key needed */}
             <p className="text-slate-200 leading-relaxed">{question.explanation}</p>
           </div>
         </div>
         {!isCorrect && (
           <button
             onClick={onToggleChat}
-            className={`shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-medium transition whitespace-nowrap ${
+            className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[11px] font-semibold transition whitespace-nowrap ${
               chatOpen
-                ? 'border-violet-400/60 bg-violet-500/25 text-violet-200'
-                : 'border-white/20 text-slate-300 hover:text-white hover:border-violet-400/40 hover:bg-violet-500/15'
+                ? 'bg-violet-500 border-violet-400 text-white'
+                : 'border-violet-400/40 text-violet-300 hover:bg-violet-500/20 hover:border-violet-400/60'
             }`}
           >
             <Bot size={12} />
-            <span>{isAIEnabled ? 'Ask AI tutor' : 'Chat'}</span>
+            <span>Ask AI</span>
           </button>
         )}
       </div>
 
-      {/* Expandable chat panel */}
+      {/* Expandable section */}
       {chatOpen && !isCorrect && (
         <div className="border-t border-white/10">
-          {/* AI-generated deeper explanation (only when AI is enabled) */}
+          {/* AI deeper explanation */}
           {isAIEnabled && (aiLoading || aiExplanation) && (
             <div className="px-3 py-2.5 bg-violet-500/10 border-b border-white/10">
               <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-violet-300 mb-1.5">
                 <Zap size={10} />AI Deeper Explanation
               </div>
               {aiLoading ? (
-                <div className="flex items-center gap-1.5 text-slate-400">
-                  <Loader2 size={12} className="animate-spin" />Generating…
+                <div className="flex items-center gap-1.5 text-slate-300">
+                  <Loader2 size={12} className="animate-spin" />Generating explanation…
                 </div>
               ) : (
                 <p className="text-slate-200 leading-relaxed">{aiExplanation}</p>
@@ -820,20 +842,18 @@ function ExplanationCard({ question, userAnswer, chatOpen, onToggleChat })
             </div>
           )}
 
-          {/* No AI key — helpful message instead of broken input */}
+          {/* No AI key — clean setup instructions */}
           {!isAIEnabled && (
-            <div className="px-3 py-3 flex flex-col gap-2">
-              <div className="flex items-start gap-2 text-amber-300/90">
-                <AlertCircle size={13} className="mt-0.5 shrink-0" />
-                <div className="text-[11px] leading-relaxed">
-                  <span className="font-semibold">AI Tutor not configured.</span> The explanation above is from the question data.
-                  To enable the AI chatbot, add <code className="font-mono bg-white/10 px-1 rounded">VITE_ANTHROPIC_API_KEY</code> to
-                  your <strong>Vercel environment variables</strong> and redeploy.
-                  Get a free key at{' '}
-                  <a href="https://console.anthropic.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-white transition">
-                    console.anthropic.com
-                  </a>.
-                </div>
+            <div className="px-3 py-3 bg-slate-800/40 flex items-start gap-2.5">
+              <AlertCircle size={14} className="text-amber-400 mt-0.5 shrink-0" />
+              <div className="text-[11px] text-slate-200 leading-relaxed">
+                <span className="font-semibold text-white">AI Tutor not yet configured.</span> The explanation above is included in the question data.
+                {' '}To enable the live AI chatbot:{' '}
+                <ol className="list-decimal pl-4 mt-1 space-y-0.5 text-slate-300">
+                  <li>Get a free key at <a href="https://console.anthropic.com" target="_blank" rel="noopener noreferrer" className="text-violet-300 underline hover:text-white">console.anthropic.com</a></li>
+                  <li>In Vercel → Project Settings → Environment Variables, add: <code className="font-mono bg-white/10 px-1 py-0.5 rounded text-cyan-200">VITE_ANTHROPIC_API_KEY</code></li>
+                  <li>Trigger a new deploy</li>
+                </ol>
               </div>
             </div>
           )}
