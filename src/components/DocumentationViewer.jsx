@@ -124,7 +124,7 @@ export default function DocumentationViewer({
   }
 
   return (
-    <div className="learning-page dashboard-page h-full">
+    <div className="learning-page dashboard-page docs-page h-full">
       <div className="flex flex-wrap gap-2">
         {docCategories.map((cat) =>
         {
