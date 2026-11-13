@@ -15,62 +15,13 @@ import
 import { useAuth } from '../auth/AuthContext.jsx';
 
 const NAV_ITEMS = [
-  {
-    id: 'dashboard',
-    label: 'Dashboard',
-    icon: LayoutDashboard,
-    accent: 'text-cyan-300',
-    glow: 'bg-cyan-400/15',
-    activeBg: 'from-cyan-500/20 to-cyan-400/10'
-  },
-  {
-    id: 'docs',
-    label: 'Documentation',
-    icon: BookOpenText,
-    accent: 'text-violet-300',
-    glow: 'bg-violet-400/15',
-    activeBg: 'from-violet-500/20 to-violet-400/10'
-  },
-  {
-    id: 'playground',
-    label: 'Code Playground',
-    icon: Code2,
-    accent: 'text-emerald-300',
-    glow: 'bg-emerald-400/15',
-    activeBg: 'from-emerald-500/20 to-emerald-400/10'
-  },
-  {
-    id: 'compiler',
-    label: 'Online Compiler',
-    icon: Terminal,
-    accent: 'text-amber-300',
-    glow: 'bg-amber-400/15',
-    activeBg: 'from-amber-500/20 to-amber-400/10'
-  },
-  {
-    id: 'exams',
-    label: 'Mock Exams',
-    icon: ClipboardList,
-    accent: 'text-rose-300',
-    glow: 'bg-rose-400/15',
-    activeBg: 'from-rose-500/20 to-rose-400/10'
-  },
-  {
-    id: 'progress',
-    label: 'Progress',
-    icon: Sparkles,
-    accent: 'text-pink-300',
-    glow: 'bg-pink-400/15',
-    activeBg: 'from-pink-500/20 to-pink-400/10'
-  },
-  {
-    id: 'profile',
-    label: 'Profile',
-    icon: UserRound,
-    accent: 'text-cyan-300',
-    glow: 'bg-cyan-400/15',
-    activeBg: 'from-cyan-500/20 to-cyan-400/10'
-  }
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { id: 'docs', label: 'Documentation', icon: BookOpenText },
+  { id: 'playground', label: 'Code Playground', icon: Code2 },
+  { id: 'compiler', label: 'Online Compiler', icon: Terminal },
+  { id: 'exams', label: 'Mock Exams', icon: ClipboardList },
+  { id: 'progress', label: 'Progress', icon: Sparkles },
+  { id: 'profile', label: 'Profile', icon: UserRound }
 ];
 
 function SidebarBody({ active, onSelect, layoutKey, onClose })
@@ -109,7 +60,7 @@ function SidebarBody({ active, onSelect, layoutKey, onClose })
 
       {/* Navigation */}
       <nav className="flex-1 px-2.5 py-3 flex flex-col gap-0.5 overflow-y-auto">
-        {NAV_ITEMS.map(({ id, label, icon: Icon, accent, glow, activeBg }) =>
+        {NAV_ITEMS.map(({ id, label, icon: Icon }) =>
         {
           const isActive = active === id;
           return (
@@ -126,7 +77,7 @@ function SidebarBody({ active, onSelect, layoutKey, onClose })
               {isActive && (
                 <motion.span
                   layoutId={`${layoutKey}-active-bg`}
-                  className={`absolute inset-0 rounded-xl bg-gradient-to-r ${activeBg}`}
+                  className="absolute inset-0 rounded-xl bg-gradient-to-r from-emerald-500/20 to-cyan-400/10"
                   transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                 />
               )}
@@ -134,18 +85,18 @@ function SidebarBody({ active, onSelect, layoutKey, onClose })
               {isActive && (
                 <motion.span
                   layoutId={`${layoutKey}-indicator`}
-                  className="absolute left-0 top-2 bottom-2 w-0.5 rounded-r-full bg-gradient-to-b from-cyan-400 to-violet-500"
+                  className="absolute left-0 top-2 bottom-2 w-0.5 rounded-r-full bg-gradient-to-b from-emerald-400 to-cyan-400"
                   transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                 />
               )}
               {/* Icon with glow */}
               <span className={`relative w-7 h-7 rounded-lg grid place-items-center transition-all duration-200 shrink-0 ${
-                isActive ? glow : 'bg-white/[0.03] group-hover:bg-white/[0.06]'
+                isActive ? 'bg-emerald-400/15' : 'bg-white/[0.03] group-hover:bg-white/[0.06]'
               }`}>
                 <Icon
                   size={14}
                   className={`transition-colors duration-200 ${
-                    isActive ? accent : `text-slate-500 group-hover:${accent}`
+                    isActive ? 'text-emerald-200' : 'text-slate-500 group-hover:text-emerald-300'
                   }`}
                 />
               </span>

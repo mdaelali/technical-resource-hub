@@ -3,162 +3,145 @@ import { Flame, Trophy, Target, TrendingUp } from 'lucide-react';
 import useUserStorage from '../hooks/useUserStorage.js';
 import { docCategories } from '../data/docs.js';
 import { localDateKey } from '../utils/dates.js';
+import './Dashboard.css';
 
-const TOTAL_TOPICS = docCategories.reduce((sum, c) => sum + c.cards.length, 0);
+const TOTAL_TOPICS = docCategories.reduce((sum, category) => sum + category.cards.length, 0);
+const EMPTY_MASTERED = [];
 
 export default function ProgressTracker({ compact = false })
 {
   const [mastered] = useUserStorage('mastered', []);
   const [streak] = useUserStorage('streak', { count: 0, last: null });
-
-  const safeMastered = useMemo(() => mastered || [], [mastered]);
+  const safeMastered = mastered || EMPTY_MASTERED;
   const safeStreak = streak || { count: 0, last: null };
-  const masteryPct = Math.round((safeMastered.length / TOTAL_TOPICS) * 100);
+  const masteredCount = safeMastered.length;
+  const remaining = Math.max(0, TOTAL_TOPICS - masteredCount);
+  const masteryPct = TOTAL_TOPICS ? Math.min(100, Math.round((masteredCount / TOTAL_TOPICS) * 100)) : 0;
+  const activeToday = safeStreak.last === localDateKey();
+  const streakHint = activeToday
+    ? 'You showed up today'
+    : safeStreak.count > 0
+      ? 'Keep your momentum going'
+      : 'Start with one short session';
 
   const perCategory = useMemo(() =>
   {
-    return docCategories.map((cat) =>
+    return docCategories.map((category) =>
     {
-      const total = cat.cards.length;
-      const done = cat.cards.filter((card) => safeMastered.includes(`${cat.id}:${card.title}`)).length;
-      return { id: cat.id, title: cat.title, done, total };
+      const total = category.cards.length;
+      const done = category.cards.filter((card) => safeMastered.includes(`${category.id}:${card.title}`)).length;
+      return { id: category.id, title: category.title, done, total };
     });
   }, [safeMastered]);
 
+  const stats = (
+    <div className={`grid grid-cols-1 ${compact ? 'grid-cols-2' : 'md:grid-cols-3'} gap-3`}>
+      <ProgressStat
+        icon={Flame}
+        label="Learning streak"
+        value={safeStreak.count}
+        unit={safeStreak.count === 1 ? 'day' : 'days'}
+        detail={streakHint}
+        tone="peach"
+      />
+      <ProgressStat
+        icon={Trophy}
+        label="Concepts mastered"
+        value={masteredCount}
+        unit={`/ ${TOTAL_TOPICS}`}
+        detail={`${masteryPct}% of the library`}
+        tone="mint"
+      />
+      {!compact && (
+        <ProgressStat
+          icon={Target}
+          label="Still to explore"
+          value={remaining}
+          unit={remaining === 1 ? 'topic' : 'topics'}
+          detail="Across algorithms, logic, and exam prep"
+          tone="blue"
+        />
+      )}
+    </div>
+  );
+
   if (compact)
   {
-    return (
-      <div className="grid grid-cols-2 gap-2">
-        <PremiumStat
-          icon={Flame}
-          label="Study Streak"
-          value={`${safeStreak.count}`}
-          unit={`day${safeStreak.count === 1 ? '' : 's'}`}
-          accent="amber"
-          hint={safeStreak.last === localDateKey() ? 'Active today' : 'Tap any card to log'}
-        />
-        <PremiumStat
-          icon={Trophy}
-          label="Topics Mastered"
-          value={`${safeMastered.length}`}
-          unit={`/ ${TOTAL_TOPICS}`}
-          accent="emerald"
-          hint={`${masteryPct}% complete`}
-        />
-      </div>
-    );
+    return <div className="progress-page dashboard-page">{stats}</div>;
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <PremiumStat
-          icon={Flame}
-          label="Study Streak"
-          value={`${safeStreak.count}`}
-          unit={`day${safeStreak.count === 1 ? '' : 's'}`}
-          hint={safeStreak.last ? `Last active ${safeStreak.last}` : 'No sessions yet'}
-          accent="amber"
-        />
-        <PremiumStat
-          icon={Trophy}
-          label="Topics Mastered"
-          value={`${safeMastered.length}`}
-          unit={`/ ${TOTAL_TOPICS}`}
-          hint={`${masteryPct}% complete`}
-          accent="emerald"
-        />
-        <PremiumStat
-          icon={Target}
-          label="Active Goal"
-          value="Daily"
-          unit="practice"
-          hint="Auto-logged on every action"
-          accent="violet"
-        />
-      </div>
+    <div className="progress-page dashboard-page flex flex-col gap-4 pb-6 sm:gap-5">
+      {stats}
 
-      <div className="glass gradient-border rounded-2xl px-4 py-3 flex flex-col gap-2.5">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <TrendingUp size={14} className="text-cyan-300" />
-            <h3 className="text-sm font-semibold text-white tracking-tight">Mastery by Section</h3>
+      <section className="dashboard-panel rounded-3xl p-5 sm:p-6" aria-labelledby="mastery-heading">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="dashboard-eyebrow">YOUR COVERAGE</p>
+            <h2 id="mastery-heading" className="mt-1 text-xl font-semibold tracking-tight">Mastery by section</h2>
+            <p className="mt-1 text-sm dashboard-muted">A clear view of what you have learned so far.</p>
           </div>
-          <span className="text-[11px] text-slate-400">{masteryPct}% overall</span>
+          <span className="rounded-full bg-emerald-400/10 px-3 py-1.5 text-xs font-semibold text-emerald-300">
+            {masteryPct}% overall
+          </span>
         </div>
-        <div className="flex flex-col gap-2">
-          {perCategory.map((c) =>
+
+        <div className="mt-5 divide-y divide-white/[0.07]">
+          {perCategory.map((category) =>
           {
-            const pct = c.total === 0 ? 0 : Math.round((c.done / c.total) * 100);
+            const pct = category.total === 0 ? 0 : Math.round((category.done / category.total) * 100);
             return (
-              <div key={c.id} className="flex flex-col gap-1">
-                <div className="flex items-center justify-between text-[11px]">
-                  <span className="text-slate-300">{c.title}</span>
-                  <span className="text-slate-500 font-mono">
-                    {c.done}/{c.total}
-                  </span>
+              <div key={category.id} className="py-4 first:pt-0 last:pb-0">
+                <div className="mb-2 flex items-center justify-between gap-3">
+                  <span className="text-sm font-medium">{category.title}</span>
+                  <span className="font-mono text-xs dashboard-muted">{category.done} / {category.total}</span>
                 </div>
-                <div className="h-1.5 rounded-full bg-white/[0.05] overflow-hidden">
-                  <div className="progress-fill" style={{ width: `${pct}%` }} />
+                <div
+                  className="h-2 overflow-hidden rounded-full bg-white/[0.08]"
+                  role="progressbar"
+                  aria-label={`${category.title} mastery`}
+                  aria-valuenow={pct}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                >
+                  <div className="progress-fill rounded-full" style={{ width: `${pct}%` }} />
                 </div>
               </div>
             );
           })}
         </div>
-      </div>
+      </section>
 
-      <div className="glass rounded-2xl px-4 py-3 text-[11px] text-slate-400 flex items-center gap-2">
-        <Flame size={12} className="text-amber-300 shrink-0" />
-        <span>
-          Your streak updates automatically when you read a topic, mark it mastered, run code, or stay on a page for two minutes.
+      <aside className="dashboard-panel flex items-start gap-3 rounded-2xl p-4 sm:items-center">
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl stat-icon stat-peach">
+          <Flame size={18} />
         </span>
-      </div>
+        <div>
+          <p className="text-sm font-semibold">Small sessions keep your streak alive</p>
+          <p className="mt-0.5 text-xs dashboard-muted">
+            Reading a topic, marking one mastered, running code, or spending two minutes learning records activity for today.
+          </p>
+        </div>
+        <TrendingUp size={17} className="ml-auto hidden shrink-0 text-emerald-300 sm:block" aria-hidden="true" />
+      </aside>
     </div>
   );
 }
 
-const ACCENT_STYLES = {
-  amber: {
-    bg: 'from-amber-400/30 via-amber-500/10 to-rose-500/15',
-    text: 'from-amber-200 via-amber-300 to-rose-300',
-    glow: 'bg-amber-400/15',
-    iconColor: 'text-amber-200'
-  },
-  emerald: {
-    bg: 'from-emerald-400/25 via-emerald-500/10 to-cyan-500/15',
-    text: 'from-emerald-200 via-emerald-300 to-cyan-200',
-    glow: 'bg-emerald-400/15',
-    iconColor: 'text-emerald-200'
-  },
-  violet: {
-    bg: 'from-violet-400/25 via-violet-500/10 to-cyan-400/20',
-    text: 'from-violet-200 via-violet-300 to-cyan-200',
-    glow: 'bg-violet-400/15',
-    iconColor: 'text-violet-200'
-  }
-};
-
-function PremiumStat({ icon: Icon, label, value, unit, hint, accent = 'amber' })
+function ProgressStat({ icon: Icon, label, value, unit, detail, tone })
 {
-  const a = ACCENT_STYLES[accent] || ACCENT_STYLES.amber;
   return (
-    <div className={`glass card-hover gradient-border rounded-2xl px-4 py-3 bg-gradient-to-br ${a.bg} relative overflow-hidden`}>
-      <div className={`absolute -top-6 -right-6 w-24 h-24 rounded-full ${a.glow} blur-2xl pointer-events-none`} />
-      <div className="relative">
-        <div className="flex items-center justify-between">
-          <span className="text-[10px] uppercase tracking-widest text-slate-300">{label}</span>
-          <Icon size={14} className={a.iconColor} />
-        </div>
-        <div className="mt-1.5 flex items-baseline gap-1.5">
-          <span
-            className={`text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-br ${a.text} bg-clip-text text-transparent leading-none`}
-          >
-            {value}
-          </span>
-          {unit && <span className="text-xs text-slate-300">{unit}</span>}
-        </div>
-        {hint && <div className="text-[10.5px] text-slate-300/80 mt-1">{hint}</div>}
+    <article className="dashboard-panel flex min-w-0 items-center gap-4 rounded-2xl p-4 sm:p-5">
+      <span className={`stat-icon stat-${tone} grid h-11 w-11 shrink-0 place-items-center rounded-2xl`}>
+        <Icon size={19} />
+      </span>
+      <div className="min-w-0">
+        <p className="text-xs font-medium dashboard-muted">{label}</p>
+        <p className="mt-0.5 text-xl font-semibold tracking-tight">
+          {value} <span className="text-xs font-medium dashboard-muted">{unit}</span>
+        </p>
+        <p className="mt-0.5 truncate text-[11px] dashboard-muted">{detail}</p>
       </div>
-    </div>
+    </article>
   );
 }

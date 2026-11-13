@@ -39,7 +39,7 @@ html.light
   --shadow-glass:     0 2px 12px 0 rgba(15,23,42,0.08), 0 1px 3px 0 rgba(15,23,42,0.06);
   --code-bg:          #f1f5f9;
   --gutter-text:      #94a3b8;
-  --selection-bg:     rgba(139,92,246,0.20);
+  --selection-bg:     rgba(63,180,137,0.20);
 }
 
 html, body, #root
@@ -300,7 +300,7 @@ h1, h2, h3, h4
   .progress-fill
   {
     height: 100%;
-    background-image: linear-gradient(to right, #22d3ee, #8b5cf6, #fcd34d);
+    background-image: linear-gradient(to right, #42a587, #5794c2);
     transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
     will-change: width;
   }
