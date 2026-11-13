@@ -35,7 +35,7 @@ html.light
   --text-primary:     #0f172a;
   --text-secondary:   #334155;
   --text-muted:       #64748b;
-  --dot-color:        rgba(99,102,241,0.06);
+  --dot-color:        rgba(58,139,111,0.055);
   --shadow-glass:     0 2px 12px 0 rgba(15,23,42,0.08), 0 1px 3px 0 rgba(15,23,42,0.06);
   --code-bg:          #f1f5f9;
   --gutter-text:      #94a3b8;
@@ -339,16 +339,21 @@ html.light .text-slate-500  { color: #64748b !important; }
 html.light .text-slate-600  { color: #94a3b8 !important; }
 
 /* ── Accent text stays vivid but slightly darker in light ────────────────── */
-html.light .text-violet-300  { color: #7c3aed !important; }
-html.light .text-violet-200  { color: #8b5cf6 !important; }
-html.light .text-cyan-300    { color: #0891b2 !important; }
-html.light .text-cyan-200    { color: #06b6d4 !important; }
+html.light .text-violet-300  { color: #347c68 !important; }
+html.light .text-violet-200  { color: #438c75 !important; }
+html.light .text-cyan-300    { color: #0e7490 !important; }
+html.light .text-cyan-200    { color: #0e7490 !important; }
 html.light .text-emerald-300 { color: #059669 !important; }
-html.light .text-emerald-200 { color: #10b981 !important; }
-html.light .text-amber-300   { color: #d97706 !important; }
-html.light .text-amber-200   { color: #f59e0b !important; }
-html.light .text-rose-300    { color: #e11d48 !important; }
-html.light .text-pink-300    { color: #db2777 !important; }
+html.light .text-emerald-200 { color: #047857 !important; }
+html.light .text-amber-300   { color: #a16207 !important; }
+html.light .text-amber-200   { color: #a16207 !important; }
+html.light .text-rose-300,
+html.light .text-rose-200    { color: #be123c !important; }
+html.light .text-pink-300    { color: #be185d !important; }
+html.light .from-violet-500 { --tw-gradient-from: #328771 var(--tw-gradient-from-position); --tw-gradient-to: rgb(50 135 113 / 0) var(--tw-gradient-to-position); }
+html.light .from-violet-600 { --tw-gradient-from: #276e5b var(--tw-gradient-from-position); --tw-gradient-to: rgb(39 110 91 / 0) var(--tw-gradient-to-position); }
+html.light .to-cyan-400 { --tw-gradient-to: #508bac var(--tw-gradient-to-position); }
+html.light .via-cyan-500 { --tw-gradient-to: #508bac var(--tw-gradient-to-position); }
 
 /* ── Glass surfaces ─────────────────────────────────────────────────────── */
 html.light .glass,
@@ -401,8 +406,8 @@ html.light .input-field
 html.light .input-field::placeholder { color: #94a3b8 !important; }
 html.light .input-field:focus
 {
-  border-color: #7c3aed !important;
-  box-shadow: 0 0 0 3px rgba(124,58,237,0.12) !important;
+  border-color: #38866f !important;
+  box-shadow: 0 0 0 3px rgba(56,134,111,0.14) !important;
 }
 
 /* ── Buttons ────────────────────────────────────────────────────────────── */
@@ -420,9 +425,10 @@ html.light .btn-ghost:hover
 /* btn-primary stays gradient — just tweak shadow */
 html.light .btn-primary
 {
+  color: #fff !important;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.20),
-    0 2px 8px rgba(124,58,237,0.30),
+    0 2px 8px rgba(50,135,113,0.24),
     0 1px 2px rgba(0,0,0,0.12) !important;
 }
 
@@ -442,7 +448,7 @@ html.light .popover
   box-shadow:
     0 8px 24px rgba(15,23,42,0.12),
     0 2px 6px rgba(15,23,42,0.06),
-    0 0 0 1px rgba(124,58,237,0.08) !important;
+    0 0 0 1px rgba(58,139,111,0.08) !important;
   color: #0f172a !important;
 }
 
@@ -452,14 +458,14 @@ html.light .card-hover:hover
   box-shadow:
     0 8px 20px rgba(15,23,42,0.10),
     0 2px 6px rgba(15,23,42,0.06),
-    0 0 0 1px rgba(124,58,237,0.18) !important;
+    0 0 0 1px rgba(58,139,111,0.18) !important;
 }
 
 /* ── Gradient border — subtle on light ─────────────────────────────────── */
 html.light .gradient-border::before { opacity: 0.50; }
 
 /* ── Selection colour ───────────────────────────────────────────────────── */
-html.light ::selection { background: rgba(124,58,237,0.20); color: #0f172a; }
+html.light ::selection { background: rgba(58,139,111,0.20); color: #0f172a; }
 
 /* Honor system reduced-motion: kill animations and transitions, drop blur,
    leave layout intact. Pairs with framer-motion's MotionConfig

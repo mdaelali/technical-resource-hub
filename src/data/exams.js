@@ -1,13 +1,13 @@
 /*
- * Practice tests for the Mock Exams page.
- * Each test has 20-25 questions: a mix of MCQ (auto-graded) and FRQ (self-checked).
+ * Seed question bank used to compose the public Mock Exams practice forms.
+ * The visible exams are assembled in examLibrary.js.
  *
  * difficulty: 'easy' | 'medium' | 'hard'
  * mcq: { id, type:'mcq', prompt, code?, options[], answer (0-based index), explanation }
  * frq: { id, type:'frq', points, prompt, starter, modelAnswer }
  */
 
-export const exams = [
+export const seedExams = [
   {
     id: 'csa-units-1-4',
     title: 'AP CSA · Units 1–4: Fundamentals',

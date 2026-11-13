@@ -135,7 +135,11 @@ export default function DocumentationViewer({
           return (
             <button
               key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
+              onClick={() =>
+              {
+                setActiveCategory(cat.id);
+                onNavigate?.('docs', { categoryId: cat.id });
+              }}
               className={`glass card-hover flex items-center gap-2 px-3 py-2 rounded-xl text-xs transition ${
                 isActive ? 'border-violet-400/40 text-white' : 'text-slate-400 hover:text-slate-100'
               }`}

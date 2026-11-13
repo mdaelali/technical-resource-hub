@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import { useAuth } from './auth/AuthContext.jsx';
 import LoginPage from './components/auth/LoginPage.jsx';
@@ -12,11 +12,35 @@ import RemoteSync from './state/RemoteSync.jsx';
 export default function AppRoot()
 {
   const { user, loading, isRecovering, isSupabaseConfigured } = useAuth();
-  const [authView, setAuthView] = useState('home');
+  const [authView, setAuthView] = useState(readAuthView);
+
+  useEffect(() =>
+  {
+    function syncAuthRoute()
+    {
+      setAuthView(readAuthView());
+    }
+    window.addEventListener('hashchange', syncAuthRoute);
+    return () => window.removeEventListener('hashchange', syncAuthRoute);
+  }, []);
+
+  function navigateAuth(view)
+  {
+    const hashes = { home: '#/', login: '#/login', signup: '#/signup', forgot: '#/forgot' };
+    const hash = hashes[view] || '#/';
+    if (window.location.hash !== hash)
+    {
+      window.location.hash = hash;
+    }
+    else
+    {
+      setAuthView(view);
+    }
+  }
 
   if (!isSupabaseConfigured && authView !== 'home')
   {
-    return <SetupNotice onBack={() => setAuthView('home')} />;
+    return <SetupNotice onBack={() => navigateAuth('home')} />;
   }
 
   if (loading)
@@ -36,21 +60,21 @@ export default function AppRoot()
   {
     if (authView === 'home')
     {
-      return <LandingPage onLogin={() => setAuthView('login')} onSignup={() => setAuthView('signup')} />;
+      return <LandingPage onLogin={() => navigateAuth('login')} onSignup={() => navigateAuth('signup')} />;
     }
     if (authView === 'signup')
     {
-      return <SignupPage onSwitchToLogin={() => setAuthView('login')} onBack={() => setAuthView('home')} />;
+      return <SignupPage onSwitchToLogin={() => navigateAuth('login')} onBack={() => navigateAuth('home')} />;
     }
     if (authView === 'forgot')
     {
-      return <ForgotPasswordPage onBack={() => setAuthView('login')} />;
+      return <ForgotPasswordPage onBack={() => navigateAuth('login')} />;
     }
     return (
       <LoginPage
-        onSwitchToSignup={() => setAuthView('signup')}
-        onForgotPassword={() => setAuthView('forgot')}
-        onBack={() => setAuthView('home')}
+        onSwitchToSignup={() => navigateAuth('signup')}
+        onForgotPassword={() => navigateAuth('forgot')}
+        onBack={() => navigateAuth('home')}
       />
     );
   }
@@ -61,6 +85,16 @@ export default function AppRoot()
       <App />
     </>
   );
+}
+
+function readAuthView()
+{
+  const path = window.location.hash.replace(/^#\/?/, '').split('/')[0];
+  if (path === 'signup' || path === 'login' || path === 'forgot')
+  {
+    return path;
+  }
+  return 'home';
 }
 
 function FullScreenLoader()

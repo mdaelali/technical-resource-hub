@@ -41,7 +41,7 @@ Resource Hub is a public learning website and study workspace built around:
 - **Documentation Viewer** — 18 hand-written cards across *Algorithms*, *Logic Problems*, and *Exam Prep* with complexity analysis, common mistakes, step-by-step solutions, and practice tips.
 - **Code Playground** — 11 reference Java snippets (Binary Search, Merge Sort, Two Sum, Stack, Tree Traversal, …) with a faux IDE chrome, custom syntax highlighting, and one-click expected-output preview.
 - **Online Compiler** — a real editable code editor with **autocomplete** (keyword / type / function / snippet suggestions plus locals harvested from your own code), bracket auto-pair, Enter auto-indent, and Tab indentation. Runs **Java, Python, and C++** in the browser via the [Judge0 CE](https://judge0.com/) public endpoint. Output, stderr, and compile errors are surfaced separately. Code length is capped at 10 000 chars.
-- **Mock Exams** — timed-style practice tests mixing auto-graded multiple choice (A–D, with explanations) and AP-CSA-style coding free-response questions (full Java class declarations, self-checked against a model answer). Best score is saved per test.
+- **Mock Exams** — 30 original AP-style practice forms: full simulations (42 MCQs + 4 FRQs), MCQ sections, FRQ sections, and shorter mixed practice. MCQs are auto-graded with explanations; coding responses include model answers for student self-review. These are practice materials, not official College Board questions.
 - **Progress Tracker** — a dashboard with a study-streak counter that increments **automatically** when the student reads a topic, marks something as mastered, runs code, takes a test, or dwells for 2 minutes on a page. No manual "log session" button.
 - **Daily learning plan** — a small, checkable sequence of steps to help students move from understanding a concept to practising it.
 
@@ -54,7 +54,7 @@ The fastest way to feel the app is the [live demo](https://alihasanli.com). What
 - **Public homepage and dashboard** — visitors can explore the product before choosing sign in or sign up; signed-in students see progress, a daily plan, and clear next steps.
 - **Documentation** — gradient-bordered topic cards with an expandable "Read more" surface that reveals step-by-step solutions, common mistakes, and practice tips.
 - **Online Compiler** — multi-language editor with autocomplete, bracket auto-pair, Enter auto-indent, tab indentation; runs via Judge0, separate panels for `stdout`, `stderr`, and compile output, plus stdin support.
-- **Mock Exams** — pick a test, answer A–D multiple choice and Java coding free-response, submit for an auto-graded score with per-question explanations and model solutions.
+- **Mock Exams** — choose full, MCQ-only, FRQ-only, or mixed practice. Timed work, answer explanations, model answers, and a student self-check are available.
 - **Profile** — student-ID card with holographic header strip, click-to-upload avatar, badges grid, recently viewed topics, and a Danger Zone for account deletion.
 
 ## Why I built this
@@ -145,7 +145,8 @@ src/
     docs.js               18 study cards across 3 categories
     snippets.js           11 Java reference snippets
     completions.js        autocomplete suggestions (keywords/types/functions/snippets) per language
-    exams.js              4 practice tests (MCQ + FRQ) with model answers
+    exams.js              source question bank for generated practice forms
+    examLibrary.js        30 full, MCQ, FRQ, and mixed AP-style forms
 supabase/
   schema.sql            tables, RLS policies, storage policies, delete_my_account()
 ```

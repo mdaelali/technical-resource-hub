@@ -85,12 +85,20 @@ export default function App()
   // Listen to hash changes (back/forward, manual hash edits, programmatic nav).
   useEffect(() =>
   {
-    if (!window.location.hash || window.location.hash === '#')
+    const currentSection = window.location.hash.replace(/^#\/?/, '').split('/')[0];
+    if (!VALID_SECTIONS.has(currentSection))
     {
       window.history.replaceState(null, '', '#/dashboard');
     }
     function onHashChange()
     {
+      const nextSection = window.location.hash.replace(/^#\/?/, '').split('/')[0];
+      if (!VALID_SECTIONS.has(nextSection))
+      {
+        window.history.replaceState(null, '', '#/dashboard');
+        setRoute({ section: 'dashboard' });
+        return;
+      }
       setRoute(parseHash());
     }
     window.addEventListener('hashchange', onHashChange);

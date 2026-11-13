@@ -1,8 +1,10 @@
-import { ArrowDown, ArrowRight, BookOpen, Braces, Brain, Check, Code2, GraduationCap, Layers3, Menu, Sparkles, Terminal, Trophy } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowDown, ArrowRight, BookOpen, Braces, Brain, Check, Code2, GraduationCap, Layers3, Menu, Sparkles, Terminal, Trophy, X } from 'lucide-react';
 import '../landing.css';
 
 export default function LandingPage({ onLogin, onSignup })
 {
+  const [menuOpen, setMenuOpen] = useState(false);
   return (
     <main className="landing-page min-h-[100dvh] overflow-hidden">
       <header className="landing-nav mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8 lg:px-12">
@@ -18,8 +20,15 @@ export default function LandingPage({ onLogin, onSignup })
         <div className="flex items-center gap-2 sm:gap-3">
           <button onClick={onLogin} className="landing-login rounded-xl px-3 py-2 text-sm font-semibold sm:px-4">Log in</button>
           <button onClick={onSignup} className="landing-signup rounded-xl px-3 py-2.5 text-sm font-semibold sm:px-4">Sign up <ArrowRight size={14}/></button>
-          <button className="landing-menu grid h-10 w-10 place-items-center rounded-xl md:hidden" aria-label="Open navigation" onClick={() => document.getElementById('subjects')?.scrollIntoView({ behavior: 'smooth' })}><Menu size={18}/></button>
+          <button type="button" className="landing-menu grid h-10 w-10 place-items-center rounded-xl md:hidden" aria-label={menuOpen ? 'Close navigation' : 'Open navigation'} aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)}>{menuOpen ? <X size={18}/> : <Menu size={18}/>}</button>
         </div>
+        {menuOpen && (
+          <nav className="landing-mobile-nav md:hidden" aria-label="Mobile navigation">
+            <a href="#how-it-works" onClick={() => setMenuOpen(false)}>How it works</a>
+            <a href="#subjects" onClick={() => setMenuOpen(false)}>What you'll learn</a>
+            <a href="#practice" onClick={() => setMenuOpen(false)}>Practice tools</a>
+          </nav>
+        )}
       </header>
 
       <section id="home" className="landing-hero mx-auto grid max-w-7xl items-center gap-12 px-5 pb-16 pt-10 sm:px-8 sm:pb-20 sm:pt-14 lg:grid-cols-[1fr_0.9fr] lg:px-12 lg:pb-28 lg:pt-16">

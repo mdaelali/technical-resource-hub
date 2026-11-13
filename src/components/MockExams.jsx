@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import
 {
@@ -7,9 +7,10 @@ import
   Highlighter, Book, X, ChevronDown, ChevronUp
 } from 'lucide-react';
 import useUserStorage from '../hooks/useUserStorage.js';
-import { exams } from '../data/exams.js';
+import { exams } from '../data/examLibrary.js';
 import { referenceSheet } from '../data/referenceSheet.js';
 import CodeEditor from './CodeEditor.jsx';
+import { localDateKey } from '../utils/dates.js';
 
 const LETTERS = ['A', 'B', 'C', 'D', 'E'];
 
@@ -25,84 +26,13 @@ const HIGHLIGHT_COLORS = [
   { id: 'pink',   cls: 'bg-pink-300/70 text-black',   label: 'Pink'   },
 ];
 
-/* ─────────────────────── Weekly ADD system ──────────────────────────────── */
-// All existing exams in exams.js are ALWAYS available.
-// Every week starting from SCHEDULE_START, one bonus exam from the
-// WEEKLY_BONUS_QUEUE below is added to the available list.
-// Week 0 (Jun 1 → Jun 7): 10 tests. Week 1 (Jun 8 → Jun 14): 11 tests. Etc.
-
-const SCHEDULE_START = '2026-06-01';
-
-const WEEKLY_BONUS_QUEUE = [
-  {
-    id: 'bonus-week1-loops',
-    title: 'Bonus Week 1 · Loops Deep Dive',
-    description: 'Master while, do-while, for, and nested loops with tricky tracing questions.',
-    minutes: 20, tag: 'Loops', difficulty: 'easy', accent: 'from-sky-400/30 to-cyan-400/20',
-    questions: [
-      { id:'bw1-1', type:'mcq', prompt:'How many times does the loop body execute?', code:'int i = 1;\nwhile (i < 100) i *= 2;', options:['6','7','8','100'], answer:1, explanation:'i = 1,2,4,8,16,32,64,128 — condition fails at 128. Loop runs 7 times.' },
-      { id:'bw1-2', type:'mcq', prompt:'What is printed?', code:'for (int i = 10; i > 0; i -= 3) System.out.print(i + " ");', options:['10 7 4 1','10 7 4','10 7 4 1 -2','10 7'], answer:0, explanation:'i = 10,7,4,1. When i = 1 - 3 = -2, condition i > 0 fails. Prints 10 7 4 1.' },
-      { id:'bw1-3', type:'mcq', prompt:'What is the output?', code:'int sum = 0;\nfor (int i = 1; i <= 10; i++) {\n    if (i % 2 == 0) continue;\n    sum += i;\n}\nSystem.out.println(sum);', options:['55','25','30','50'], answer:1, explanation:'Skips evens. Sum of odd 1+3+5+7+9 = 25.' },
-      { id:'bw1-4', type:'mcq', prompt:'What does this print?', code:'outer: for (int i = 0; i < 3; i++) {\n    for (int j = 0; j < 3; j++) {\n        if (j == 1) break outer;\n        System.out.print(i + "" + j + " ");\n    }\n}', options:['00 01 10 11 20 21','00','00 10 20','00 11 22'], answer:1, explanation:'break outer exits both loops when j==1 after printing only i=0,j=0: "00".' },
-      { id:'bw1-f1', type:'frq', points:5, prompt:'Write a method sumOfDigits(int n) that returns the sum of all digits of n (e.g. 1234 → 10). Handle n = 0 as a base case returning 0.', starter:'public class Solution\n{\n    public int sumOfDigits(int n)\n    {\n        // your code here\n    }\n}\n', modelAnswer:'public class Solution\n{\n    public int sumOfDigits(int n)\n    {\n        int sum = 0;\n        n = Math.abs(n);\n        while (n > 0)\n        {\n            sum += n % 10;\n            n /= 10;\n        }\n        return sum;\n    }\n}\n' }
-    ]
-  },
-  {
-    id: 'bonus-week2-strings',
-    title: 'Bonus Week 2 · String Mastery',
-    description: 'charAt, indexOf, substring, compareTo, and immutability edge cases.',
-    minutes: 20, tag: 'Strings', difficulty: 'medium', accent: 'from-violet-400/30 to-pink-400/20',
-    questions: [
-      { id:'bw2-1', type:'mcq', prompt:'What is the output?', code:'String s = "banana";\nSystem.out.println(s.indexOf("a", 2));', options:['1','3','5','-1'], answer:1, explanation:'indexOf("a", 2) starts searching at index 2. The "a" at index 3 is found first.' },
-      { id:'bw2-2', type:'mcq', prompt:'Strings in Java are:', options:['mutable objects','immutable — methods return new Strings','arrays of chars that can be changed','stored on the stack'], answer:1, explanation:'Strings in Java are immutable. String methods return NEW String objects.' },
-      { id:'bw2-3', type:'mcq', prompt:'What prints?', code:'String a = "Hello";\nString b = a;\na = a + " World";\nSystem.out.println(b);', options:['Hello World','Hello','null','Hello Hello'], answer:1, explanation:'b still refers to the original "Hello" object. Reassigning a creates a new object.' },
-      { id:'bw2-f1', type:'frq', points:5, prompt:'Write a method countChar(String s, char c) that returns how many times character c appears in String s (case-sensitive).', starter:'public class Solution\n{\n    public int countChar(String s, char c)\n    {\n        // your code here\n    }\n}\n', modelAnswer:'public class Solution\n{\n    public int countChar(String s, char c)\n    {\n        int count = 0;\n        for (int i = 0; i < s.length(); i++)\n        {\n            if (s.charAt(i) == c) count++;\n        }\n        return count;\n    }\n}\n' }
-    ]
-  }
+const EXAM_FILTERS = [
+  ['all', 'All formats'],
+  ['full', 'Full exams'],
+  ['mcq', 'MCQ practice'],
+  ['frq', 'FRQ practice'],
+  ['mixed', 'Mixed practice']
 ];
-
-function getWeeklyBonusAvailable()
-{
-  const start = new Date(SCHEDULE_START);
-  const now = new Date();
-  const msPerWeek = 7 * 24 * 60 * 60 * 1000;
-  const weeksPassed = Math.max(0, Math.floor((now - start) / msPerWeek));
-  // Return the slice of WEEKLY_BONUS_QUEUE that has been unlocked so far.
-  return WEEKLY_BONUS_QUEUE.slice(0, weeksPassed);
-}
-
-function getDaysUntilNextBonus()
-{
-  const start = new Date(SCHEDULE_START);
-  const now = new Date();
-  const msPerWeek = 7 * 24 * 60 * 60 * 1000;
-  const nextWeekStart = new Date(start.getTime() + (Math.floor((now - start) / msPerWeek) + 1) * msPerWeek);
-  return Math.max(1, Math.ceil((nextWeekStart - now) / (24 * 60 * 60 * 1000)));
-}
-
-/* ─────────────────────── Timer hook ────────────────────────────────────── */
-function useTimer(minutes, running)
-{
-  const [secondsLeft, setSecondsLeft] = useState(minutes * 60);
-  const [timerHidden, setTimerHidden] = useState(false);
-
-  useEffect(() =>
-  {
-    if (!running || secondsLeft <= 0)
-    {
-      return undefined;
-    }
-    const id = setInterval(() => setSecondsLeft((s) => Math.max(0, s - 1)), 1000);
-    return () => clearInterval(id);
-  }, [running, secondsLeft]);
-
-  const reset = useCallback(() => setSecondsLeft(minutes * 60), [minutes]);
-  const m = Math.floor(secondsLeft / 60);
-  const s = secondsLeft % 60;
-  const display = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-  const pct = (secondsLeft / (minutes * 60)) * 100;
-  return { display, pct, timerHidden, setTimerHidden, expired: secondsLeft === 0, reset };
-}
 
 /* ─────────────────────── Root component ─────────────────────────────────── */
 export default function MockExams({ onLogActivity })
@@ -110,11 +40,8 @@ export default function MockExams({ onLogActivity })
   const [results, setResults] = useUserStorage('exam.results', {});
   const [activeId, setActiveId] = useState(null);
 
-  const weeklyBonus = useMemo(() => getWeeklyBonusAvailable(), []);
-  const allAvailableExams = useMemo(() => [...exams, ...weeklyBonus], [weeklyBonus]);
+  const allAvailableExams = exams;
   const activeExam = activeId ? allAvailableExams.find((e) => e.id === activeId) : null;
-  const daysUntilNext = useMemo(() => getDaysUntilNextBonus(), []);
-  const nextBonusExam = WEEKLY_BONUS_QUEUE[weeklyBonus.length];
 
   function handleComplete(examId, correct, totalMcq)
   {
@@ -124,7 +51,7 @@ export default function MockExams({ onLogActivity })
       const best = totalMcq > 0 ? Math.max(prevRec.best ?? 0, correct) : 0;
       return {
         ...(prev || {}),
-        [examId]: { best, totalMcq, completed: true, takenAt: new Date().toISOString().slice(0, 10) }
+        [examId]: { best, totalMcq, completed: true, takenAt: localDateKey() }
       };
     });
     onLogActivity?.();
@@ -145,15 +72,19 @@ export default function MockExams({ onLogActivity })
       results={results || {}}
       onStart={setActiveId}
       allExams={allAvailableExams}
-      daysUntilNext={daysUntilNext}
-      nextBonusExam={nextBonusExam}
     />
   );
 }
 
 /* ─────────────────────── Exam list ─────────────────────────────────────── */
-function ExamList({ results, onStart, allExams, daysUntilNext, nextBonusExam })
+function ExamList({ results, onStart, allExams })
 {
+  const [formatFilter, setFormatFilter] = useState('all');
+  const visibleExams = useMemo(
+    () => formatFilter === 'all' ? allExams : allExams.filter((exam) => exam.format === formatFilter),
+    [allExams, formatFilter]
+  );
+
   function countTypes(exam)
   {
     return {
@@ -172,29 +103,37 @@ function ExamList({ results, onStart, allExams, daysUntilNext, nextBonusExam })
             <div className="min-w-0">
               <h2 className="text-lg font-semibold text-white tracking-tight">Mock Exams</h2>
               <p className="text-xs text-slate-400">
-                {allExams.length} exams available · new exam added every week
+                {allExams.length} original AP-style practice exams · full, MCQ, FRQ, and mixed formats
               </p>
             </div>
           </div>
-          {nextBonusExam && (
-            <div className="flex items-center gap-2">
-              <span
-                className="pill border"
-                style={{
-                  background: 'rgba(139,92,246,0.25)',
-                  color: '#c4b5fd',
-                  borderColor: 'rgba(139,92,246,0.45)'
-                }}
-              >
-                Next: "{nextBonusExam.title}" in {daysUntilNext}d
-              </span>
-            </div>
-          )}
         </div>
       </div>
 
+      <p className="exam-format-note text-xs leading-relaxed">
+        Full simulations follow the current AP CSA timing and structure: 42 MCQs in 90 minutes, then 4 FRQs in 90 minutes. These are original practice materials, not official College Board questions.
+      </p>
+
+      <nav className="flex flex-wrap gap-2" aria-label="Filter mock exams by format">
+        {EXAM_FILTERS.map(([id, label]) =>
+        {
+          const count = id === 'all' ? allExams.length : allExams.filter((exam) => exam.format === id).length;
+          return (
+            <button
+              key={id}
+              type="button"
+              aria-pressed={formatFilter === id}
+              onClick={() => setFormatFilter(id)}
+              className={`exam-filter ${formatFilter === id ? 'exam-filter-active' : ''}`}
+            >
+              {label}<span>{count}</span>
+            </button>
+          );
+        })}
+      </nav>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-        {allExams.map((exam) =>
+        {visibleExams.map((exam) =>
         {
           const { mcq, frq } = countTypes(exam);
           const rec = results[exam.id];
@@ -202,7 +141,7 @@ function ExamList({ results, onStart, allExams, daysUntilNext, nextBonusExam })
           return (
             <div
               key={exam.id}
-              className={`glass card-hover gradient-border rounded-2xl px-4 py-3.5 flex flex-col gap-2.5 bg-gradient-to-br ${exam.accent}`}
+              className={`exam-card glass card-hover gradient-border rounded-2xl px-4 py-3.5 flex flex-col gap-2.5 bg-gradient-to-br ${exam.accent}`}
             >
               <div className="flex items-start justify-between gap-2 flex-wrap">
                 <div className="min-w-0">
@@ -231,7 +170,7 @@ function ExamList({ results, onStart, allExams, daysUntilNext, nextBonusExam })
                 ) : (
                   <span className="text-[11px] text-slate-500">Not attempted</span>
                 )}
-                <button onClick={() => onStart(exam.id)} className="btn-primary">
+                <button type="button" onClick={() => onStart(exam.id)} className="btn-primary">
                   {rec?.completed ? <RotateCcw size={12} /> : <ClipboardList size={12} />}
                   <span>{rec?.completed ? 'Retake' : 'Start exam'}</span>
                 </button>
@@ -245,6 +184,44 @@ function ExamList({ results, onStart, allExams, daysUntilNext, nextBonusExam })
 }
 
 /* ─────────────────────── Bluebook exam runner ───────────────────────────── */
+function useTimer(minutes, running, onExpire)
+{
+  const [secondsLeft, setSecondsLeft] = useState(minutes * 60);
+  const [timerHidden, setTimerHidden] = useState(false);
+  const remaining = useRef(minutes * 60);
+  const expireRef = useRef(onExpire);
+
+  useEffect(() =>
+  {
+    expireRef.current = onExpire;
+  }, [onExpire]);
+
+  useEffect(() =>
+  {
+    if (!running)
+    {
+      return undefined;
+    }
+    const id = window.setInterval(() =>
+    {
+      remaining.current = Math.max(0, remaining.current - 1);
+      setSecondsLeft(remaining.current);
+      if (remaining.current === 0)
+      {
+        window.clearInterval(id);
+        expireRef.current?.();
+      }
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, [running]);
+
+  const m = Math.floor(secondsLeft / 60);
+  const s = secondsLeft % 60;
+  const display = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  const pct = (secondsLeft / (minutes * 60)) * 100;
+  return { display, timerHidden, setTimerHidden, pct };
+}
+
 function BluebookRunner({ exam, onExit, onComplete })
 {
   const questions = exam.questions;
@@ -252,6 +229,7 @@ function BluebookRunner({ exam, onExit, onComplete })
 
   const [answers, setAnswers] = useState({});
   const [frqCode, setFrqCode] = useState({});
+  const [frqSelfChecks, setFrqSelfChecks] = useState({});
   const [current, setCurrent] = useState(0);
   const [markedForReview, setMarkedForReview] = useState({});
   const [eliminated, setEliminated] = useState({});
@@ -261,10 +239,11 @@ function BluebookRunner({ exam, onExit, onComplete })
   const [showRef, setShowRef] = useState(false);
   const [showNav, setShowNav] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const submittedRef = useRef(false);
   const rightPanelRef = useRef(null);
   const explanationRef = useRef(null);
 
-  const { display: timerDisplay, timerHidden, setTimerHidden, pct: timerPct } = useTimer(exam.minutes, !submitted);
+  const { display: timerDisplay, timerHidden, setTimerHidden, pct: timerPct } = useTimer(exam.minutes, !submitted, handleSubmit);
 
   const q = questions[current];
   const totalQ = questions.length;
@@ -322,9 +301,21 @@ function BluebookRunner({ exam, onExit, onComplete })
 
   function handleSubmit()
   {
+    if (submittedRef.current)
+    {
+      return;
+    }
+    submittedRef.current = true;
     const correct = mcqs.filter((mq) => answers[mq.id] === mq.answer).length;
     setSubmitted(true);
     onComplete(exam.id, correct, mcqs.length);
+  }
+
+  function requestExit()
+  {
+    const hasWork = Object.keys(answers).length > 0 || Object.values(frqCode).some((code) => code.trim());
+    if (!submitted && hasWork && !window.confirm('Exit this exam? Your answers in progress will be lost.')) return;
+    onExit();
   }
 
   const correctCount = submitted ? mcqs.filter((mq) => answers[mq.id] === mq.answer).length : null;
@@ -335,7 +326,7 @@ function BluebookRunner({ exam, onExit, onComplete })
       {/* ── Top bar ─────────────────────────────────── */}
       <header className="flex items-center justify-between px-4 py-2 border-b border-white/10 glass shrink-0 relative">
         <div className="flex items-center gap-3 min-w-0">
-          <button onClick={onExit} className="btn-ghost text-[11px] shrink-0">
+          <button type="button" onClick={requestExit} className="btn-ghost text-[11px] shrink-0">
             <XCircle size={13} /><span className="hidden sm:inline">Exit exam</span>
           </button>
           <div className="text-xs font-semibold text-white hidden sm:block truncate">{exam.title}</div>
@@ -383,11 +374,11 @@ function BluebookRunner({ exam, onExit, onComplete })
             <Book size={13} /><span className="hidden sm:inline">Reference</span>
           </button>
           {!submitted ? (
-            <button onClick={handleSubmit} className="btn-primary text-[11px]">
+            <button type="button" onClick={handleSubmit} className="btn-primary text-[11px]">
               <CheckCircle2 size={13} /><span>Submit</span>
             </button>
           ) : (
-            <button onClick={onExit} className="btn-ghost text-[11px]">
+            <button type="button" onClick={requestExit} className="btn-ghost text-[11px]">
               <ArrowLeft size={13} /><span>All exams</span>
             </button>
           )}
@@ -399,7 +390,7 @@ function BluebookRunner({ exam, onExit, onComplete })
         <div className={`shrink-0 px-4 py-2 text-xs font-medium flex items-center gap-3 ${pct >= 70 ? 'bg-emerald-500/20 text-emerald-200' : pct >= 50 ? 'bg-amber-500/20 text-amber-200' : 'bg-rose-500/20 text-rose-200'}`}>
           <Trophy size={13} />
           Score: {correctCount}/{mcqs.length} MCQ correct ({pct}%)
-          <span className="text-slate-300 ml-2">— Review all answers below. Click a wrong answer for AI explanation.</span>
+          <span className="text-slate-300 ml-2">Review each answer below; missed questions include an explanation.</span>
         </div>
       )}
 
@@ -554,6 +545,29 @@ function BluebookRunner({ exam, onExit, onComplete })
                   language="java"
                 />
               </div>
+              {submitted && (
+                <fieldset className="frq-self-check glass rounded-xl p-3 flex flex-col gap-2">
+                  <legend className="px-1 text-xs font-semibold">FRQ self-check</legend>
+                  <p className="text-[11px] text-slate-400">Compare your code with the model answer and check each criterion you met. This is a self-assessment, not an automatic score.</p>
+                  {(q.rubric || ['Correct method or class signature.', 'Correct algorithm and control flow.', 'Correct result and specified edge cases.']).map((item, index) =>
+                  {
+                    const criterion = typeof item === 'string' ? item : item.criterion;
+                    return (
+                      <label key={criterion} className="flex items-start gap-2 text-xs text-slate-300">
+                        <input
+                          type="checkbox"
+                          checked={Boolean(frqSelfChecks[q.id]?.[index])}
+                          onChange={(event) => setFrqSelfChecks((currentChecks) => ({
+                            ...currentChecks,
+                            [q.id]: { ...(currentChecks[q.id] || {}), [index]: event.target.checked }
+                          }))}
+                        />
+                        <span>{criterion}{typeof item === 'object' ? ` (${item.points} pts)` : ''}</span>
+                      </label>
+                    );
+                  })}
+                </fieldset>
+              )}
               {submitted && q.modelAnswer && (
                 <details className="glass rounded-xl">
                   <summary className="cursor-pointer px-3 py-2 text-xs text-amber-300 font-medium list-none flex items-center gap-1">

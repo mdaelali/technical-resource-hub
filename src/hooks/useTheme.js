@@ -6,14 +6,14 @@ export default function useTheme()
   {
     try
     {
-      const saved = window.localStorage.getItem('trh.theme');
+      const saved = window.localStorage.getItem('trh.theme.v2');
       if (saved === 'light' || saved === 'dark') return saved;
     }
     catch
     {
       // Private browsing can block local storage; fall back to the device theme.
     }
-    return window.matchMedia?.('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    return 'light';
   });
 
   useEffect(() =>
@@ -31,7 +31,7 @@ export default function useTheme()
     }
     try
     {
-      window.localStorage.setItem('trh.theme', theme);
+      window.localStorage.setItem('trh.theme.v2', theme);
     }
     catch
     {
