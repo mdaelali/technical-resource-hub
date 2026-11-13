@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { FileCode2, Play, Copy, Check, Terminal, X } from 'lucide-react';
 import { snippets } from '../data/snippets.js';
@@ -17,15 +17,6 @@ export default function CodePlayground({ initialSnippetId })
   const [copied, setCopied] = useState(false);
   const [running, setRunning] = useState(false);
   const [runOutput, setRunOutput] = useState(null);
-
-  useEffect(() =>
-  {
-    if (initialSnippetId && snippets.some((s) => s.id === initialSnippetId))
-    {
-      setActiveId(initialSnippetId);
-      setRunOutput(null);
-    }
-  }, [initialSnippetId]);
 
   const active = snippets.find((s) => s.id === activeId);
   const tokens = useMemo(() => tokenize(active.code), [active.code]);

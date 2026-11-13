@@ -88,7 +88,7 @@ function SidebarBody({ active, onSelect, layoutKey, onClose })
     <>
       {/* Brand header */}
       <div className="px-4 py-4 flex items-center gap-2.5 border-b border-white/5">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 via-violet-400 to-cyan-400 grid place-items-center shadow-glow shrink-0 relative">
+        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-600 via-emerald-500 to-sky-500 grid place-items-center shadow-glow shrink-0 relative">
           <GraduationCap size={17} className="text-white" />
           <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[var(--bg-base)]" />
         </div>
@@ -161,7 +161,7 @@ function SidebarBody({ active, onSelect, layoutKey, onClose })
           onClick={() => onSelect('profile')}
           className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-white/[0.05] transition group w-full text-left"
         >
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-cyan-400 grid place-items-center text-[11px] font-semibold text-white overflow-hidden border border-white/10 shrink-0">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-600 to-sky-500 grid place-items-center text-[11px] font-semibold text-white overflow-hidden border border-white/10 shrink-0">
             {profile?.avatarUrl ? (
               <img
                 src={profile.avatarUrl}

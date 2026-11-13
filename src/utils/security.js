@@ -66,7 +66,7 @@ export function passwordStrength(password)
     return { score: 0, label: 'Empty', requirements: [] };
   }
   const checks = [
-    { id: 'length', label: 'At least 8 characters', pass: password.length >= 8 },
+    { id: 'length', label: 'At least 12 characters', pass: password.length >= 12 },
     { id: 'number', label: 'Contains a number', pass: /\d/.test(password) },
     { id: 'special', label: 'Contains a special character', pass: /[^A-Za-z0-9]/.test(password) },
     { id: 'upper', label: 'Contains an uppercase letter', pass: /[A-Z]/.test(password) },
@@ -79,9 +79,13 @@ export function passwordStrength(password)
 
 export function validatePassword(password)
 {
-  if (!password || password.length < 8)
+  if (typeof password !== 'string' || password.length < 12)
   {
-    return { valid: false, reason: 'Password must be at least 8 characters.' };
+    return { valid: false, reason: 'Password must be at least 12 characters.' };
+  }
+  if (password.length > 128)
+  {
+    return { valid: false, reason: 'Password must be 128 characters or fewer.' };
   }
   if (!/\d/.test(password))
   {
@@ -94,8 +98,6 @@ export function validatePassword(password)
   return { valid: true };
 }
 
-const CONTROL_CHAR_REGEX = new RegExp('[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]', 'g');
-
 /*
  * Sanitize free-text user input. React already escapes interpolated strings,
  * so this strips control characters and enforces a max length to prevent
@@ -107,7 +109,14 @@ export function sanitizeText(input, { maxLength = 240 } = {})
   {
     return '';
   }
-  const cleaned = input.replace(CONTROL_CHAR_REGEX, '').trim();
+  const cleaned = Array.from(input)
+    .filter((character) =>
+    {
+      const code = character.charCodeAt(0);
+      return !(code <= 0x08 || code === 0x0b || code === 0x0c || (code >= 0x0e && code <= 0x1f) || code === 0x7f);
+    })
+    .join('')
+    .trim();
   if (cleaned.length > maxLength)
   {
     return cleaned.slice(0, maxLength);

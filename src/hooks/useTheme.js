@@ -4,12 +4,16 @@ export default function useTheme()
 {
   const [theme, setTheme] = useState(() =>
   {
-    const saved = localStorage.getItem('trh.theme');
-    if (saved)
+    try
     {
-      return saved;
+      const saved = window.localStorage.getItem('trh.theme');
+      if (saved === 'light' || saved === 'dark') return saved;
     }
-    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    catch
+    {
+      // Private browsing can block local storage; fall back to the device theme.
+    }
+    return window.matchMedia?.('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
   });
 
   useEffect(() =>
@@ -25,7 +29,14 @@ export default function useTheme()
       root.classList.remove('light');
       root.classList.add('dark');
     }
-    localStorage.setItem('trh.theme', theme);
+    try
+    {
+      window.localStorage.setItem('trh.theme', theme);
+    }
+    catch
+    {
+      // The selected theme still applies for this page session.
+    }
   }, [theme]);
 
   const toggle = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'));

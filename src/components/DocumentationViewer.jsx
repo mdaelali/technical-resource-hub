@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import
 {
@@ -69,14 +69,6 @@ export default function DocumentationViewer({
   const [expanded, setExpanded] = useState(() => new Set());
   const [mastered, setMastered] = useUserStorage('mastered', []);
   const [, recordRecent] = useRecentlyViewed();
-
-  useEffect(() =>
-  {
-    if (initialCategoryId && docCategories.some((c) => c.id === initialCategoryId))
-    {
-      setActiveCategory(initialCategoryId);
-    }
-  }, [initialCategoryId]);
 
   const counts = useMemo(() =>
   {

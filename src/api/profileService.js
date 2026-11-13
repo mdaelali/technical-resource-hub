@@ -161,20 +161,21 @@ export async function deleteAllAvatars(userId)
   {
     return;
   }
-  try
+  const { data: files, error: listError } = await supabase.storage
+    .from('avatars')
+    .list(userId, { limit: 100 });
+  if (listError)
   {
-    const { data: files } = await supabase.storage
-      .from('avatars')
-      .list(userId, { limit: 100 });
-    if (!files || files.length === 0)
-    {
-      return;
-    }
-    const paths = files.map((f) => `${userId}/${f.name}`);
-    await supabase.storage.from('avatars').remove(paths);
+    throw listError;
   }
-  catch
+  if (!files || files.length === 0)
   {
-    /* swallow — the SQL function handles the canonical cleanup */
+    return;
+  }
+  const paths = files.map((f) => `${userId}/${f.name}`);
+  const { error: removeError } = await supabase.storage.from('avatars').remove(paths);
+  if (removeError)
+  {
+    throw removeError;
   }
 }

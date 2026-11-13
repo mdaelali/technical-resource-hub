@@ -15,6 +15,7 @@ function rowToState(row)
       sources: row.compiler_sources || {},
       stdin: row.compiler_stdin || ''
     },
+    learningPlan: row.learning_plan || { date: null, completed: [] },
     updatedAt: row.updated_at
   };
 }
@@ -52,6 +53,7 @@ export async function upsertState(userId, snapshot)
     compiler_lang: snapshot.compiler?.lang ?? 'java',
     compiler_sources: snapshot.compiler?.sources ?? {},
     compiler_stdin: snapshot.compiler?.stdin ?? '',
+    learning_plan: snapshot.learningPlan ?? { date: null, completed: [] },
     updated_at: new Date().toISOString()
   };
   const { error } = await supabase

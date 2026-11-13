@@ -5,17 +5,18 @@ import LoginPage from './components/auth/LoginPage.jsx';
 import SignupPage from './components/auth/SignupPage.jsx';
 import ForgotPasswordPage from './components/auth/ForgotPasswordPage.jsx';
 import ResetPasswordPage from './components/auth/ResetPasswordPage.jsx';
+import LandingPage from './components/LandingPage.jsx';
 import App from './App.jsx';
 import RemoteSync from './state/RemoteSync.jsx';
 
 export default function AppRoot()
 {
   const { user, loading, isRecovering, isSupabaseConfigured } = useAuth();
-  const [authView, setAuthView] = useState('login');
+  const [authView, setAuthView] = useState('home');
 
-  if (!isSupabaseConfigured)
+  if (!isSupabaseConfigured && authView !== 'home')
   {
-    return <SetupNotice />;
+    return <SetupNotice onBack={() => setAuthView('home')} />;
   }
 
   if (loading)
@@ -33,9 +34,13 @@ export default function AppRoot()
 
   if (!user)
   {
+    if (authView === 'home')
+    {
+      return <LandingPage onLogin={() => setAuthView('login')} onSignup={() => setAuthView('signup')} />;
+    }
     if (authView === 'signup')
     {
-      return <SignupPage onSwitchToLogin={() => setAuthView('login')} />;
+      return <SignupPage onSwitchToLogin={() => setAuthView('login')} onBack={() => setAuthView('home')} />;
     }
     if (authView === 'forgot')
     {
@@ -45,6 +50,7 @@ export default function AppRoot()
       <LoginPage
         onSwitchToSignup={() => setAuthView('signup')}
         onForgotPassword={() => setAuthView('forgot')}
+        onBack={() => setAuthView('home')}
       />
     );
   }
@@ -69,7 +75,7 @@ function FullScreenLoader()
   );
 }
 
-function SetupNotice()
+function SetupNotice({ onBack })
 {
   return (
     <div className="min-h-[100dvh] w-screen flex items-center justify-center p-4">
@@ -84,15 +90,16 @@ function SetupNotice()
         </p>
         <pre className="font-mono text-[11px] text-slate-200 bg-black/40 border border-white/10 rounded-lg p-3 overflow-auto">
 {`VITE_SUPABASE_URL=https://<project>.supabase.co
-VITE_SUPABASE_ANON_KEY=<your anon key>`}
+VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...`}
         </pre>
         <ol className="text-xs text-slate-300 list-decimal pl-4 flex flex-col gap-1">
           <li>Create a free project at supabase.com.</li>
-          <li>Project Settings → API → copy URL and anon key.</li>
+          <li>Project Settings → API → copy the project URL and publishable key.</li>
           <li>SQL Editor → run the script in <code className="font-mono text-cyan-200">supabase/schema.sql</code>.</li>
           <li>Storage → confirm the <code className="font-mono text-cyan-200">avatars</code> bucket is public.</li>
           <li>Restart <code className="font-mono text-cyan-200">npm run dev</code>.</li>
         </ol>
+        {onBack && <button type="button" onClick={onBack} className="btn-ghost self-start">Back to home</button>}
       </div>
     </div>
   );

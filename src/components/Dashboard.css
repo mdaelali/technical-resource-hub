@@ -1,0 +1,31 @@
+.dashboard-page { --dash-ink: var(--text-primary); --dash-muted: var(--text-secondary); color: var(--dash-ink); }
+.dashboard-hero { min-height: 300px; color: #f7faf9; background: linear-gradient(112deg,#142334 2%,#1b3442 53%,#235348 100%); box-shadow: 0 18px 44px #07121d40; }
+.dashboard-hero::after { position:absolute; inset:0; content:''; pointer-events:none; opacity:.55; background:radial-gradient(ellipse at 90% 4%,#6ac09a24,transparent 38%),radial-gradient(ellipse at 5% 110%,#4f83bc20,transparent 42%); }
+.dashboard-orbit { position:absolute; z-index:0; pointer-events:none; border:1px solid #b9e4d119; border-radius:50%; }
+.dashboard-orbit-one { width:400px;height:400px;right:-120px;top:-230px; }
+.dashboard-orbit-two { width:300px;height:300px;right:-70px;top:-180px; }
+.dashboard-cta { position:relative; z-index:1; color:#162a2a; background:#9be4bd; box-shadow:0 8px 22px #06151d38; transition:transform .18s,background .18s; }
+.dashboard-cta:hover { transform:translateY(-1px);background:#b2f0ce; }
+.dashboard-code-card { background:#101c27e8; backdrop-filter:blur(12px); }
+.dashboard-panel { background:var(--bg-surface); border:1px solid var(--border-color); box-shadow:var(--shadow-glass); }
+.dashboard-muted { color:var(--dash-muted); }
+.dashboard-eyebrow { color:#5ea58b; font-size:10px; font-weight:700; letter-spacing:.15em; }
+.stat-peach { color:#d0915f; background:#d0915f18; }
+.stat-mint { color:#42a587; background:#42a58718; }
+.stat-blue { color:#5794c2; background:#5794c218; }
+.stat-lilac { color:#937dcc; background:#937dcc18; }
+.dashboard-page .text-slate-300 { color:var(--text-secondary); }
+.dashboard-page .text-slate-400 { color:var(--text-muted); }
+html.light .dashboard-page .dashboard-panel { background:#ffffffd9; border-color:#dfe7e2; box-shadow:0 6px 24px #1f3e3210; }
+html.light .dashboard-page .dashboard-muted { color:#657486; }
+html.light .dashboard-page .dashboard-eyebrow { color:#31765f; }
+html.light .dashboard-page .dashboard-hero .text-white,
+html.light .dashboard-page .dashboard-code-card .text-white { color:#f4f8f6 !important; }
+html.light .dashboard-page .dashboard-hero .text-slate-300,
+html.light .dashboard-page .dashboard-code-card .text-slate-300 { color:#d0dcdf !important; }
+html.light .dashboard-page .dashboard-hero .text-slate-400,
+html.light .dashboard-page .dashboard-code-card .text-slate-400 { color:#a8bbc2 !important; }
+html.light .dashboard-page .text-sky-300 { color:#0369a1 !important; }
+html.light .dashboard-page .text-amber-100 { color:#8b4b12 !important; }
+html.light .dashboard-page .text-amber-200 { color:#a35c15 !important; }
+@media (max-width:640px) { .dashboard-hero { min-height:0; } }

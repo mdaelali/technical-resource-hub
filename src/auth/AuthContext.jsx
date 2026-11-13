@@ -3,6 +3,9 @@ import { supabase, isSupabaseConfigured } from '../api/supabaseClient.js';
 import { fetchProfile, upsertProfile, deleteAllAvatars } from '../api/profileService.js';
 import { sanitizeText, validateEmail, validatePassword } from '../utils/security.js';
 
+/* This module intentionally exports both the context provider and its hook. */
+/* eslint-disable react-refresh/only-export-components */
+
 const AuthContext = createContext(null);
 
 const DEFAULT_BIO = 'Computer science student exploring algorithms, logic, and system design.';
@@ -54,7 +57,7 @@ function friendlyError(error)
   }
   if (msg.includes('password should be at least'))
   {
-    return 'Password must be at least 8 characters with a number and special character.';
+    return 'Password must be at least 12 characters with a number and special character.';
   }
   return error.message || 'Something went wrong.';
 }
@@ -64,7 +67,7 @@ export function AuthProvider({ children })
   const [session, setSession] = useState(null);
   const [supaUser, setSupaUser] = useState(null);
   const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(isSupabaseConfigured);
   // True while the user is mid-password-recovery (clicked a reset link).
   // We use it to force the ResetPasswordPage instead of the normal app
   // even though Supabase has technically signed the user in.
@@ -74,7 +77,6 @@ export function AuthProvider({ children })
   {
     if (!isSupabaseConfigured)
     {
-      setLoading(false);
       return undefined;
     }
     // When the user clicks an email-confirmation link, the URL contains
@@ -109,8 +111,10 @@ export function AuthProvider({ children })
     }, 5000);
     const { data: sub } = supabase.auth.onAuthStateChange((event, newSession) =>
     {
+      const nextUser = newSession?.user || null;
       setSession(newSession || null);
-      setSupaUser(newSession?.user || null);
+      setSupaUser(nextUser);
+      setProfile((current) => current?.id === nextUser?.id ? current : null);
       setLoading(false);
       if (event === 'PASSWORD_RECOVERY')
       {
@@ -130,7 +134,6 @@ export function AuthProvider({ children })
   {
     if (!supaUser || !isSupabaseConfigured)
     {
-      setProfile(null);
       return undefined;
     }
     let cancelled = false;
@@ -178,7 +181,7 @@ export function AuthProvider({ children })
   {
     if (!isSupabaseConfigured)
     {
-      return { ok: false, error: 'Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env.local.' };
+      return { ok: false, error: 'Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY to .env.local.' };
     }
     const cleanName = sanitizeText(name, { maxLength: 60 });
     if (!cleanName || cleanName.length < 2)
@@ -243,7 +246,7 @@ export function AuthProvider({ children })
   {
     if (!isSupabaseConfigured)
     {
-      return { ok: false, error: 'Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env.local.' };
+      return { ok: false, error: 'Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY to .env.local.' };
     }
     const emailCheck = validateEmail(email);
     if (!emailCheck.valid)
@@ -358,9 +361,8 @@ export function AuthProvider({ children })
     }
     try
     {
-      // Client-side avatar cleanup as a courtesy — the SQL function below
-      // also wipes storage.objects rows in the same transaction in case this
-      // call is blocked by a network failure mid-flight.
+      // Storage files must be removed through the Storage API; deleting their
+      // metadata through SQL can leave orphaned file blobs behind.
       await deleteAllAvatars(supaUser.id);
       const { error } = await supabase.rpc('delete_my_account');
       if (error)

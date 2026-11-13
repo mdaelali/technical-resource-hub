@@ -88,7 +88,6 @@ export default function App()
     if (!window.location.hash || window.location.hash === '#')
     {
       window.history.replaceState(null, '', '#/dashboard');
-      setRoute({ section: 'dashboard' });
     }
     function onHashChange()
     {

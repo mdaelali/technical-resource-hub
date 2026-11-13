@@ -93,8 +93,8 @@ export default function Profile({ onNavigate })
   const [streak] = useUserStorage('streak', { count: 0, last: null });
   const [recent, , clearRecent] = useRecentlyViewed();
 
-  const safeMastered = mastered || [];
-  const safeStreak = streak || { count: 0, last: null };
+  const safeMastered = useMemo(() => mastered || [], [mastered]);
+  const safeStreak = useMemo(() => streak || { count: 0, last: null }, [streak]);
 
   const [editing, setEditing] = useState(false);
   const [draftName, setDraftName] = useState('');
@@ -187,16 +187,6 @@ export default function Profile({ onNavigate })
     }
     // AuthContext has already cleared state — AppRoot will rerender to LoginPage.
   }
-
-  // Keep the edit drafts in sync when the profile data arrives or changes.
-  useEffect(() =>
-  {
-    if (!editing)
-    {
-      setDraftName(user?.name || '');
-      setDraftBio(profile?.bio || '');
-    }
-  }, [user?.name, profile?.bio, editing]);
 
   const earnedBadges = useMemo(
     () => BADGES.filter((b) => b.earn({ mastered: safeMastered, streak: safeStreak, recent })),

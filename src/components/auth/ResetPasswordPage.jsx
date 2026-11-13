@@ -95,7 +95,7 @@ export default function ResetPasswordPage()
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="input-field pr-10"
-              placeholder="At least 8 characters"
+              placeholder="At least 12 characters"
               required
               autoFocus
             />

@@ -6,7 +6,7 @@ export default function AuthShell({ title, subtitle, children, footer })
     <div className="min-h-[100dvh] w-screen flex items-center justify-center p-4 sm:p-6">
       <div className="w-full max-w-md flex flex-col gap-4">
         <div className="flex items-center gap-2 justify-center">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-cyan-400 grid place-items-center shadow-glow">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 to-sky-500 grid place-items-center shadow-glow">
             <GraduationCap size={20} className="text-white" />
           </div>
           <div className="leading-tight">

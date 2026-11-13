@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 const SYNC_EVENT = 'trh:localStorage:set';
 
@@ -45,11 +45,17 @@ function writeCached(key, value)
 
 export default function useLocalStorage(key, initial)
 {
+  const initialRef = useRef(initial);
   const [value, setValue] = useState(() =>
   {
     const cached = readCached(key);
     return cached === SENTINEL ? initial : cached;
   });
+
+  useEffect(() =>
+  {
+    initialRef.current = initial;
+  }, [initial]);
 
   useEffect(() =>
   {
@@ -69,7 +75,7 @@ export default function useLocalStorage(key, initial)
       }
       try
       {
-        const parsed = event.newValue !== null ? JSON.parse(event.newValue) : initial;
+        const parsed = event.newValue !== null ? JSON.parse(event.newValue) : initialRef.current;
         cache.set(key, parsed);
         setValue(parsed);
       }

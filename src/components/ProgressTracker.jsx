@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { Flame, Trophy, Target, TrendingUp } from 'lucide-react';
 import useUserStorage from '../hooks/useUserStorage.js';
 import { docCategories } from '../data/docs.js';
+import { localDateKey } from '../utils/dates.js';
 
 const TOTAL_TOPICS = docCategories.reduce((sum, c) => sum + c.cards.length, 0);
 
@@ -10,7 +11,7 @@ export default function ProgressTracker({ compact = false })
   const [mastered] = useUserStorage('mastered', []);
   const [streak] = useUserStorage('streak', { count: 0, last: null });
 
-  const safeMastered = mastered || [];
+  const safeMastered = useMemo(() => mastered || [], [mastered]);
   const safeStreak = streak || { count: 0, last: null };
   const masteryPct = Math.round((safeMastered.length / TOTAL_TOPICS) * 100);
 
@@ -34,7 +35,7 @@ export default function ProgressTracker({ compact = false })
           value={`${safeStreak.count}`}
           unit={`day${safeStreak.count === 1 ? '' : 's'}`}
           accent="amber"
-          hint={safeStreak.last === todayISO() ? 'Active today' : 'Tap any card to log'}
+          hint={safeStreak.last === localDateKey() ? 'Active today' : 'Tap any card to log'}
         />
         <PremiumStat
           icon={Trophy}
@@ -160,9 +161,4 @@ function PremiumStat({ icon: Icon, label, value, unit, hint, accent = 'amber' })
       </div>
     </div>
   );
-}
-
-function todayISO()
-{
-  return new Date().toISOString().slice(0, 10);
 }

@@ -4,7 +4,7 @@ import AuthShell from './AuthShell.jsx';
 import PasswordStrength from './PasswordStrength.jsx';
 import { useAuth } from '../../auth/AuthContext.jsx';
 
-export default function SignupPage({ onSwitchToLogin })
+export default function SignupPage({ onSwitchToLogin, onBack })
 {
   const { signUp } = useAuth();
   const [name, setName] = useState('');
@@ -47,6 +47,7 @@ export default function SignupPage({ onSwitchToLogin })
       subtitle="Sign up to track your progress, mastery, and streak."
       footer={(
         <>
+          {onBack && <button onClick={onBack} className="text-slate-400 hover:text-white transition mr-3">← Home</button>}
           Already have an account?{' '}
           <button onClick={onSwitchToLogin} className="text-violet-300 hover:text-white transition font-medium">
             Sign in
@@ -91,7 +92,7 @@ export default function SignupPage({ onSwitchToLogin })
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="input-field pr-10"
-              placeholder="At least 8 characters"
+              placeholder="At least 12 characters"
               required
             />
             <button

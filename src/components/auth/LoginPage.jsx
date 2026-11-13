@@ -3,7 +3,7 @@ import { Eye, EyeOff, AlertCircle, Loader2, LogIn } from 'lucide-react';
 import AuthShell from './AuthShell.jsx';
 import { useAuth } from '../../auth/AuthContext.jsx';
 
-export default function LoginPage({ onSwitchToSignup, onForgotPassword })
+export default function LoginPage({ onSwitchToSignup, onForgotPassword, onBack })
 {
   const { signIn } = useAuth();
   const [email, setEmail] = useState('');
@@ -35,6 +35,7 @@ export default function LoginPage({ onSwitchToSignup, onForgotPassword })
       subtitle="Sign in to continue your learning streak."
       footer={(
         <>
+          {onBack && <button onClick={onBack} className="text-slate-400 hover:text-white transition mr-3">← Home</button>}
           New here?{' '}
           <button onClick={onSwitchToSignup} className="text-violet-300 hover:text-white transition font-medium">
             Create an account

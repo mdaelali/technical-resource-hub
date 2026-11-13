@@ -1,15 +1,6 @@
 import { useCallback } from 'react';
 import useUserStorage from './useUserStorage.js';
-
-function todayISO()
-{
-  return new Date().toISOString().slice(0, 10);
-}
-
-function daysBetween(a, b)
-{
-  return Math.round((new Date(b).getTime() - new Date(a).getTime()) / 86400000);
-}
+import { calendarDaysBetween, localDateKey } from '../utils/dates.js';
 
 /*
  * Auto-streak: any time logActivity() is called, the streak advances if today
@@ -22,7 +13,7 @@ export default function useStreak()
 
   const logActivity = useCallback(() =>
   {
-    const today = todayISO();
+    const today = localDateKey();
     setStreak((prev) =>
     {
       if (prev?.last === today)
@@ -33,7 +24,7 @@ export default function useStreak()
       {
         return { count: 1, last: today };
       }
-      const diff = daysBetween(prev.last, today);
+      const diff = calendarDaysBetween(prev.last, today);
       if (diff === 1)
       {
         return { count: (prev.count || 0) + 1, last: today };

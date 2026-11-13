@@ -1,19 +1,12 @@
 /*
  * Judge0 API client.
  *
- * Defaults to the public CE endpoint at ce.judge0.com (free, rate-limited).
- * To use a RapidAPI proxy with a personal key, create .env.local with:
- *   VITE_JUDGE0_URL=https://judge0-ce.p.rapidapi.com
- *   VITE_JUDGE0_HOST=judge0-ce.p.rapidapi.com
- *   VITE_JUDGE0_KEY=<your RapidAPI key>
+ * Uses the public CE endpoint at ce.judge0.com (free, rate-limited).
+ * Provider credentials must never be shipped in VITE_ variables because
+ * those values are included in the public browser bundle.
  */
 
-const RAW_URL_BASE = (import.meta.env.VITE_JUDGE0_URL || 'https://ce.judge0.com').replace(/\/$/, '');
-const HOST = import.meta.env.VITE_JUDGE0_HOST || '';
-const KEY = import.meta.env.VITE_JUDGE0_KEY || '';
-
-// Security: only allow HTTPS endpoints. If a non-https URL is configured, refuse to use it.
-const URL_BASE = RAW_URL_BASE.startsWith('https://') ? RAW_URL_BASE : null;
+const URL_BASE = 'https://ce.judge0.com';
 
 export const LANGUAGES = [
   {
@@ -96,18 +89,7 @@ function decodeBase64(str)
 
 function buildHeaders()
 {
-  const headers = { 'Content-Type': 'application/json' };
-  if (KEY)
-  {
-    headers['X-RapidAPI-Key'] = KEY;
-    headers['x-rapidapi-key'] = KEY;
-  }
-  if (HOST)
-  {
-    headers['X-RapidAPI-Host'] = HOST;
-    headers['x-rapidapi-host'] = HOST;
-  }
-  return headers;
+  return { 'Content-Type': 'application/json' };
 }
 
 export const MAX_SOURCE_LENGTH = 10000;
@@ -115,13 +97,6 @@ export const MAX_STDIN_LENGTH = 4000;
 
 export async function runCode({ languageId, source, stdin = '' })
 {
-  if (!URL_BASE)
-  {
-    throw new CompilerError(
-      'INSECURE_URL',
-      'Judge0 endpoint must use HTTPS. Update VITE_JUDGE0_URL in .env.local.'
-    );
-  }
   if (typeof source !== 'string' || source.length === 0)
   {
     throw new CompilerError('EMPTY', 'Source code is empty.');
@@ -153,11 +128,11 @@ export async function runCode({ languageId, source, stdin = '' })
       }
     );
   }
-  catch (networkError)
+  catch
   {
     throw new CompilerError(
       'NETWORK',
-      'Could not reach the Judge0 service. Check your internet connection or configure VITE_JUDGE0_URL / VITE_JUDGE0_KEY in .env.local.'
+      'Could not reach the public Judge0 service. Check your internet connection and try again later.'
     );
   }
 
@@ -165,7 +140,7 @@ export async function runCode({ languageId, source, stdin = '' })
   {
     throw new CompilerError(
       'AUTH',
-      'Judge0 rejected the request (HTTP ' + response.status + '). Set VITE_JUDGE0_KEY and VITE_JUDGE0_HOST in .env.local with a free RapidAPI Judge0 CE key.'
+      'The public Judge0 service rejected the request (HTTP ' + response.status + '). Please try again later.'
     );
   }
 
@@ -173,7 +148,7 @@ export async function runCode({ languageId, source, stdin = '' })
   {
     throw new CompilerError(
       'RATE_LIMIT',
-      'Judge0 rate limit reached. Wait a moment and try again, or use your own RapidAPI key for a higher quota.'
+      'The public Judge0 service rate limit was reached. Wait a moment and try again.'
     );
   }
 

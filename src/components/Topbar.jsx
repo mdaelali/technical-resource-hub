@@ -18,6 +18,7 @@ import useLocalStorage from '../hooks/useLocalStorage.js';
 import useUserStorage from '../hooks/useUserStorage.js';
 import { useAuth } from '../auth/AuthContext.jsx';
 import { docCategories } from '../data/docs.js';
+import { localDateKey } from '../utils/dates.js';
 
 const TITLES = {
   dashboard: { title: 'Dashboard', subtitle: 'Overview of your learning progress' },
@@ -31,14 +32,9 @@ const TITLES = {
 
 const TOTAL_TOPICS = docCategories.reduce((sum, c) => sum + c.cards.length, 0);
 
-function todayISO()
-{
-  return new Date().toISOString().slice(0, 10);
-}
-
 function buildReminders({ streak, mastered })
 {
-  const today = todayISO();
+  const today = localDateKey();
   const reminders = [];
 
   if (streak.last !== today)
@@ -123,6 +119,7 @@ export default function Topbar({ section, searchQuery, onSearchChange, onNavigat
 
   const [bellOpen, setBellOpen] = useState(false);
   const bellRef = useRef(null);
+  const searchRef = useRef(null);
 
   const reminders = useMemo(() => buildReminders({ streak, mastered }), [streak, mastered]);
   const unreadCount = reminders.filter((r) => !readReminders.includes(r.id)).length;
@@ -143,6 +140,24 @@ export default function Topbar({ section, searchQuery, onSearchChange, onNavigat
     document.addEventListener('mousedown', onDocClick);
     return () => document.removeEventListener('mousedown', onDocClick);
   }, [bellOpen]);
+
+  useEffect(() =>
+  {
+    function onShortcut(event)
+    {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k')
+      {
+        event.preventDefault();
+        searchRef.current?.focus();
+      }
+      if (event.key === 'Escape' && document.activeElement === searchRef.current)
+      {
+        searchRef.current?.blur();
+      }
+    }
+    window.addEventListener('keydown', onShortcut);
+    return () => window.removeEventListener('keydown', onShortcut);
+  }, []);
 
   function toggleBell()
   {
@@ -183,12 +198,15 @@ export default function Topbar({ section, searchQuery, onSearchChange, onNavigat
         <div className="relative">
           <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
           <input
+            ref={searchRef}
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Search..."
+            placeholder="Search topics..."
+            aria-label="Search learning topics"
             className="bg-white/[0.04] border border-white/10 rounded-lg pl-7 pr-7 py-1.5 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-violet-400/50 w-32 sm:w-44 md:w-56"
           />
+          {!searchQuery && <kbd className="pointer-events-none absolute right-2 top-1/2 hidden -translate-y-1/2 rounded border border-white/10 px-1 py-0.5 text-[9px] text-slate-500 md:block">Ctrl / ⌘ K</kbd>}
           {searchQuery && (
             <button
               onClick={() => onSearchChange('')}
@@ -264,7 +282,7 @@ export default function Topbar({ section, searchQuery, onSearchChange, onNavigat
         </button>
         <button
           onClick={() => onNavigate?.('profile')}
-          className="w-7 h-7 grid place-items-center rounded-lg bg-gradient-to-br from-violet-500 to-cyan-400 text-white overflow-hidden border border-white/10 hover:opacity-90 transition"
+          className="w-7 h-7 grid place-items-center rounded-lg bg-gradient-to-br from-emerald-600 to-sky-500 text-white overflow-hidden border border-white/10 hover:opacity-90 transition"
           aria-label="Open profile"
         >
           {profile?.avatarUrl ? (

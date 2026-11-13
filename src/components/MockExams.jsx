@@ -4,14 +4,12 @@ import
 {
   ClipboardList, CheckCircle2, XCircle, Clock, ArrowLeft, ArrowRight,
   Trophy, Code2, ListChecks, RotateCcw, Bookmark, BookmarkCheck,
-  Highlighter, Book, X, ChevronDown, ChevronUp, Bot, Send,
-  Loader2, AlertCircle, Zap, ExternalLink
+  Highlighter, Book, X, ChevronDown, ChevronUp
 } from 'lucide-react';
 import useUserStorage from '../hooks/useUserStorage.js';
 import { exams } from '../data/exams.js';
 import { referenceSheet } from '../data/referenceSheet.js';
 import CodeEditor from './CodeEditor.jsx';
-import { isAIEnabled, explainMistake, askFollowUp } from '../api/anthropicClient.js';
 
 const LETTERS = ['A', 'B', 'C', 'D', 'E'];
 
@@ -35,7 +33,7 @@ const HIGHLIGHT_COLORS = [
 
 const SCHEDULE_START = '2026-06-01';
 
-export const WEEKLY_BONUS_QUEUE = [
+const WEEKLY_BONUS_QUEUE = [
   {
     id: 'bonus-week1-loops',
     title: 'Bonus Week 1 · Loops Deep Dive',
@@ -175,7 +173,6 @@ function ExamList({ results, onStart, allExams, daysUntilNext, nextBonusExam })
               <h2 className="text-lg font-semibold text-white tracking-tight">Mock Exams</h2>
               <p className="text-xs text-slate-400">
                 {allExams.length} exams available · new exam added every week
-                {isAIEnabled && ' · AI explanations active'}
               </p>
             </div>
           </div>
@@ -224,7 +221,6 @@ function ExamList({ results, onStart, allExams, daysUntilNext, nextBonusExam })
                 <span className="flex items-center gap-1"><Clock size={12} className="text-cyan-300" />~{exam.minutes} min</span>
                 {mcq > 0 && <span className="flex items-center gap-1"><ListChecks size={12} className="text-violet-300" />{mcq} MCQ</span>}
                 {frq > 0 && <span className="flex items-center gap-1"><Code2 size={12} className="text-amber-300" />{frq} FRQ</span>}
-                {isAIEnabled && <span className="flex items-center gap-1"><Bot size={12} className="text-emerald-300" />AI tutor</span>}
               </div>
 
               <div className="flex items-center justify-between pt-1 mt-auto flex-wrap gap-2">
@@ -265,8 +261,6 @@ function BluebookRunner({ exam, onExit, onComplete })
   const [showRef, setShowRef] = useState(false);
   const [showNav, setShowNav] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [reviewMode, setReviewMode] = useState(false);
-  const [chatOpen, setChatOpen] = useState(null);
   const rightPanelRef = useRef(null);
   const explanationRef = useRef(null);
 
@@ -330,11 +324,9 @@ function BluebookRunner({ exam, onExit, onComplete })
   {
     const correct = mcqs.filter((mq) => answers[mq.id] === mq.answer).length;
     setSubmitted(true);
-    setReviewMode(true);
     onComplete(exam.id, correct, mcqs.length);
   }
 
-  const answeredCount = questions.filter((q) => answers[q.id] !== undefined || frqCode[q.id]).length;
   const correctCount = submitted ? mcqs.filter((mq) => answers[mq.id] === mq.answer).length : null;
   const pct = submitted && mcqs.length > 0 ? Math.round((correctCount / mcqs.length) * 100) : null;
 
@@ -475,8 +467,8 @@ function BluebookRunner({ exam, onExit, onComplete })
           {submitted && q.type === 'mcq' && (
             <p className="text-[11px] text-slate-400 -mt-2">
               {answers[q.id] === q.answer
-                ? '✓ Correct — click any choice to review, then click "Ask AI" below for deeper insight.'
-                : '✗ Incorrect — click the highlighted answer or "Ask AI" below for an explanation.'}
+                ? '✓ Correct — review the explanation below or move on to the next question.'
+                : '✗ Incorrect — review the explanation below, then try the question again.'}
             </p>
           )}
 
@@ -498,7 +490,6 @@ function BluebookRunner({ exam, onExit, onComplete })
                   }
                   else if (submitted && answers[q.id] !== q.answer)
                   {
-                    setChatOpen((prev) => (prev === q.id ? null : q.id));
                     // Give React one frame to render the explanation, then scroll to it
                     requestAnimationFrame(() =>
                     {
@@ -582,15 +573,6 @@ function BluebookRunner({ exam, onExit, onComplete })
               <ExplanationCard
                 question={q}
                 userAnswer={answers[q.id]}
-                chatOpen={chatOpen === q.id}
-                onToggleChat={() =>
-                {
-                  setChatOpen((prev) => (prev === q.id ? null : q.id));
-                  requestAnimationFrame(() =>
-                    setTimeout(() =>
-                      explanationRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
-                  );
-                }}
               />
             </div>
           )}
@@ -712,79 +694,9 @@ function BluebookRunner({ exam, onExit, onComplete })
 }
 
 /* ─────────────────────── Explanation + AI chat ──────────────────────────── */
-function ExplanationCard({ question, userAnswer, chatOpen, onToggleChat })
+function ExplanationCard({ question, userAnswer })
 {
   const isCorrect = userAnswer === question.answer;
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [aiExplanation, setAiExplanation] = useState(null);
-  const [aiLoading, setAiLoading] = useState(false);
-  const bottomRef = useRef(null);
-
-  useEffect(() =>
-  {
-    if (bottomRef.current)
-    {
-      bottomRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [messages]);
-
-  async function loadAiExplanation()
-  {
-    if (isCorrect || aiExplanation || !isAIEnabled)
-    {
-      return;
-    }
-    setAiLoading(true);
-    try
-    {
-      const text = await explainMistake(question, userAnswer);
-      setAiExplanation(text);
-    }
-    catch
-    {
-      setAiExplanation(null);
-    }
-    finally
-    {
-      setAiLoading(false);
-    }
-  }
-
-  useEffect(() =>
-  {
-    if (chatOpen && !isCorrect)
-    {
-      loadAiExplanation();
-    }
-  }, [chatOpen]);
-
-  async function sendMessage()
-  {
-    if (!input.trim() || loading)
-    {
-      return;
-    }
-    const text = input.trim();
-    setInput('');
-    setMessages((p) => [...p, { role: 'user', text }]);
-    setLoading(true);
-    try
-    {
-      const context = { question, userAnswer, explanation: aiExplanation || question.explanation };
-      const reply = await askFollowUp(context, text, messages);
-      setMessages((p) => [...p, { role: 'ai', text: reply }]);
-    }
-    catch
-    {
-      setMessages((p) => [...p, { role: 'ai', text: 'Sorry, I could not respond right now.' }]);
-    }
-    finally
-    {
-      setLoading(false);
-    }
-  }
 
   const explanationBg = isCorrect
     ? 'border-emerald-500/40 bg-emerald-500/10'
@@ -792,7 +704,7 @@ function ExplanationCard({ question, userAnswer, chatOpen, onToggleChat })
 
   return (
     <div className={`rounded-xl border text-xs overflow-hidden ${explanationBg}`}>
-      {/* Explanation header — always visible */}
+      {/* Every question includes its explanation without a network call. */}
       <div className="px-3 py-3 flex items-start justify-between gap-3">
         <div className="flex items-start gap-2.5 min-w-0 flex-1">
           {isCorrect
@@ -808,100 +720,7 @@ function ExplanationCard({ question, userAnswer, chatOpen, onToggleChat })
             <p className="text-slate-200 leading-relaxed">{question.explanation}</p>
           </div>
         </div>
-        {!isCorrect && (
-          <button
-            onClick={onToggleChat}
-            className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[11px] font-semibold transition whitespace-nowrap ${
-              chatOpen
-                ? 'bg-violet-500 border-violet-400 text-white'
-                : 'border-violet-400/40 text-violet-300 hover:bg-violet-500/20 hover:border-violet-400/60'
-            }`}
-          >
-            <Bot size={12} />
-            <span>Ask AI</span>
-          </button>
-        )}
       </div>
-
-      {/* Expandable section */}
-      {chatOpen && !isCorrect && (
-        <div className="border-t border-white/10">
-          {/* AI deeper explanation */}
-          {isAIEnabled && (aiLoading || aiExplanation) && (
-            <div className="px-3 py-2.5 bg-violet-500/10 border-b border-white/10">
-              <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-violet-300 mb-1.5">
-                <Zap size={10} />AI Deeper Explanation
-              </div>
-              {aiLoading ? (
-                <div className="flex items-center gap-1.5 text-slate-300">
-                  <Loader2 size={12} className="animate-spin" />Generating explanation…
-                </div>
-              ) : (
-                <p className="text-slate-200 leading-relaxed">{aiExplanation}</p>
-              )}
-            </div>
-          )}
-
-          {/* No AI key — clean setup instructions */}
-          {!isAIEnabled && (
-            <div className="px-3 py-3 bg-slate-800/40 flex items-start gap-2.5">
-              <AlertCircle size={14} className="text-amber-400 mt-0.5 shrink-0" />
-              <div className="text-[11px] text-slate-200 leading-relaxed">
-                <span className="font-semibold text-white">AI Tutor not yet configured.</span> The explanation above is included in the question data.
-                {' '}To enable the live AI chatbot:{' '}
-                <ol className="list-decimal pl-4 mt-1 space-y-0.5 text-slate-300">
-                  <li>Get a free key at <a href="https://console.anthropic.com" target="_blank" rel="noopener noreferrer" className="text-violet-300 underline hover:text-white">console.anthropic.com</a></li>
-                  <li>In Vercel → Project Settings → Environment Variables, add: <code className="font-mono bg-white/10 px-1 py-0.5 rounded text-cyan-200">VITE_ANTHROPIC_API_KEY</code></li>
-                  <li>Trigger a new deploy</li>
-                </ol>
-              </div>
-            </div>
-          )}
-
-          {/* Chat messages — only shown when AI enabled */}
-          {isAIEnabled && (
-            <>
-              <div className="max-h-48 overflow-auto px-3 py-2 flex flex-col gap-2">
-                {messages.length === 0 && !aiLoading && (
-                  <p className="text-[11px] text-slate-500 text-center py-2">Ask any follow-up question about this concept.</p>
-                )}
-                {messages.map((msg, i) => (
-                  <div key={i} className={`flex gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[88%] rounded-xl px-3 py-1.5 leading-relaxed ${msg.role === 'user' ? 'bg-violet-500/30 text-white' : 'bg-white/[0.07] text-slate-200'}`}>
-                      {msg.text}
-                    </div>
-                  </div>
-                ))}
-                {loading && (
-                  <div className="flex gap-2">
-                    <div className="bg-white/[0.06] rounded-xl px-3 py-1.5 text-slate-400 flex items-center gap-1.5">
-                      <Loader2 size={11} className="animate-spin" />Thinking…
-                    </div>
-                  </div>
-                )}
-                <div ref={bottomRef} />
-              </div>
-              <div className="px-3 py-2 border-t border-white/10 flex items-center gap-2">
-                <input
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
-                  placeholder="Ask a follow-up question about this concept…"
-                  disabled={loading}
-                  className="input-field py-1.5 text-[11px] flex-1"
-                />
-                <button
-                  onClick={sendMessage}
-                  disabled={!input.trim() || loading}
-                  className="btn-primary py-1.5 px-2.5 disabled:opacity-50"
-                >
-                  <Send size={12} />
-                </button>
-              </div>
-            </>
-          )}
-        </div>
-      )}
     </div>
   );
 }

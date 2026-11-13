@@ -2,7 +2,7 @@
 
 # Technical Resource Hub
 
-**A focused study workspace for computer science students — documentation, a real online compiler, automatic streak tracking, and per-user progress that syncs across devices.**
+**Learn computer science by doing: explore clear explanations, practise Java, Python, and C++, and keep your study progress in one focused workspace.**
 
 🔗 **Live demo:** [alihasanli.com](https://alihasanli.com)
 
@@ -36,13 +36,14 @@
 
 ## What it does
 
-Resource Hub is a single-page study workspace built around four things students actually use:
+Resource Hub is a public learning website and study workspace built around:
 
 - **Documentation Viewer** — 18 hand-written cards across *Algorithms*, *Logic Problems*, and *Exam Prep* with complexity analysis, common mistakes, step-by-step solutions, and practice tips.
 - **Code Playground** — 11 reference Java snippets (Binary Search, Merge Sort, Two Sum, Stack, Tree Traversal, …) with a faux IDE chrome, custom syntax highlighting, and one-click expected-output preview.
 - **Online Compiler** — a real editable code editor with **autocomplete** (keyword / type / function / snippet suggestions plus locals harvested from your own code), bracket auto-pair, Enter auto-indent, and Tab indentation. Runs **Java, Python, and C++** in the browser via the [Judge0 CE](https://judge0.com/) public endpoint. Output, stderr, and compile errors are surfaced separately. Code length is capped at 10 000 chars.
 - **Mock Exams** — timed-style practice tests mixing auto-graded multiple choice (A–D, with explanations) and AP-CSA-style coding free-response questions (full Java class declarations, self-checked against a model answer). Best score is saved per test.
 - **Progress Tracker** — a dashboard with a study-streak counter that increments **automatically** when the student reads a topic, marks something as mastered, runs code, takes a test, or dwells for 2 minutes on a page. No manual "log session" button.
+- **Daily learning plan** — a small, checkable sequence of steps to help students move from understanding a concept to practising it.
 
 Every user gets their own account (Supabase Auth), their own profile (name, bio, avatar uploaded to Supabase Storage), and their own progress — synced across devices.
 
@@ -50,7 +51,7 @@ Every user gets their own account (Supabase Auth), their own profile (name, bio,
 
 The fastest way to feel the app is the [live demo](https://alihasanli.com). What you'll see:
 
-- **Dashboard** — time-of-day greeting, premium stat widgets for streak and mastery, six quick-access tiles, daily recommendation, tip of the day.
+- **Public homepage and dashboard** — visitors can explore the product before choosing sign in or sign up; signed-in students see progress, a daily plan, and clear next steps.
 - **Documentation** — gradient-bordered topic cards with an expandable "Read more" surface that reveals step-by-step solutions, common mistakes, and practice tips.
 - **Online Compiler** — multi-language editor with autocomplete, bracket auto-pair, Enter auto-indent, tab indentation; runs via Judge0, separate panels for `stdout`, `stderr`, and compile output, plus stdin support.
 - **Mock Exams** — pick a test, answer A–D multiple choice and Java coding free-response, submit for an auto-graded score with per-question explanations and model solutions.
@@ -66,7 +67,7 @@ What surprised me most was how many small details matter: error messages, mobile
 
 ## Highlights an interviewer might ask about
 
-- **Real backend auth, not localStorage.** Supabase email-and-password with verified emails delivered through [Resend](https://resend.com) on a custom-authenticated `noreply@alihasanli.com` sender (DKIM + SPF + DMARC), full password reset flow via one-time emailed link, account deletion via a `SECURITY DEFINER` Postgres function that an authenticated user can only invoke on their own row.
+- **Real backend auth, not localStorage.** Supabase email-and-password, password reset, and self-service account deletion. Supabase can use Resend as its custom SMTP provider; configure and verify the sender in the Resend and Supabase dashboards.
 - **Row-Level Security everywhere.** Two tables (`profiles`, `user_state`) plus the `avatars` storage bucket, all locked down so users can physically only read or write their own rows / their own folder.
 - **Defense-in-depth file upload.** Avatar uploads are sniffed for actual magic bytes (`FF D8 FF` for JPEG, `89 50 4E 47` for PNG, the `RIFF…WEBP` window for WebP, …) — the browser-reported MIME is treated as untrusted because file extensions are spoofable.
 - **Auto-streak via activity inference.** Streak doesn't need a "log session" button. The hook reads `last_activity_date` from Supabase, compares to today, and either increments, resets, or no-ops idempotently. Any user-driven action calls `logActivity()`.
@@ -156,16 +157,18 @@ The app needs a Supabase project for sign-up, sign-in, profile data, progress sy
 1. Create a free project at [supabase.com](https://supabase.com).
 2. Copy your credentials from *Project Settings → API*:
    - `Project URL` → `VITE_SUPABASE_URL`
-   - `anon public` key → `VITE_SUPABASE_ANON_KEY`
+   - `publishable` key → `VITE_SUPABASE_PUBLISHABLE_KEY` (legacy anon keys remain supported)
 3. SQL Editor → paste and run [`supabase/schema.sql`](./supabase/schema.sql). It creates:
    - `public.profiles` (name, bio, avatar URL) with RLS so each user sees only their own row
-   - `public.user_state` (streak, mastered topics, recently viewed, compiler drafts) with the same RLS
-   - The public `avatars` storage bucket with owner-only write policies
+   - `public.user_state` (streak, mastered topics, recently viewed, compiler drafts, and daily learning plan) with the same RLS
+   - The public `avatars` storage bucket with owner-only write policies, MIME allow-list, and a 2 MB cap
    - The `delete_my_account()` RPC for self-service account deletion
 4. Configure redirect URLs and (optionally) custom email sender — see [Email verification](#email-verification) below.
 5. Add your env vars to `.env.local` and restart `npm run dev`.
 
-If `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are missing or invalid, the app shows a setup notice on launch.
+If `VITE_SUPABASE_URL` and a publishable key are missing or invalid, the public homepage remains available and sign-in explains what setup is needed.
+
+Do not put Anthropic, Supabase secret, service-role, Resend, or other private keys in any `VITE_` variable. Vite embeds `VITE_` values in the public browser bundle.
 
 ## Email verification
 
@@ -182,7 +185,7 @@ The client passes `emailRedirectTo: ${window.location.origin}/` to `supabase.aut
 
 ## Custom email sender (Resend)
 
-By default Supabase emails come from a generic `noreply@mail.app.supabase.io` address, rate-limited to a handful of emails per hour. This project sends authenticated transactional email through [Resend](https://resend.com) on the free tier (100 emails / day) so all auth emails arrive from `noreply@alihasanli.com` with proper DKIM, SPF, and DMARC.
+To send Supabase Auth emails through [Resend](https://resend.com), configure Resend as the custom SMTP provider in your Supabase dashboard. This repository does not contain Resend credentials and cannot confirm the live provider or domain verification status.
 
 ### One-time setup
 
@@ -205,21 +208,13 @@ By default Supabase emails come from a generic `noreply@mail.app.supabase.io` ad
 
 ### Why Resend instead of Gmail SMTP
 
-This project originally used Gmail SMTP. Gmail-as-sender works but Gmail flags the resulting auth emails as "this message might be dangerous" because the sender domain (`gmail.com`) doesn't match the link domain (`alihasanli.com`) and there's no SPF/DKIM/DMARC chain authorizing the cross-domain claim. Resend solves all three: emails come from `alihasanli.com`, the records are at `alihasanli.com`, the cryptographic chain checks out.
+Use a verified sending domain and follow Resend's current DNS and SMTP setup instructions. Keep the Resend API key in Supabase SMTP settings; never place it in the frontend environment or browser code.
 
 ## Online Compiler (Judge0)
 
 The compiler hits the public Judge0 CE endpoint at `https://ce.judge0.com`. No API key required for basic use. Supports Java (language id 62), Python 3 (71), and C++ (54) out of the box.
 
-The free public endpoint is rate-limited and occasionally slow. For higher throughput and reliability, sign up at [rapidapi.com](https://rapidapi.com) for the Judge0 CE proxy and set the following env vars in your hosting platform (Vercel → Environment Variables):
-
-```env
-VITE_JUDGE0_URL=https://judge0-ce.p.rapidapi.com
-VITE_JUDGE0_HOST=judge0-ce.p.rapidapi.com
-VITE_JUDGE0_KEY=<your-rapidapi-key>
-```
-
-The client refuses to call any non-HTTPS Judge0 endpoint.
+The public endpoint is rate-limited and may occasionally be slow. The browser client does not include a personal provider key; if you need a paid or higher-volume endpoint, route requests through a server-side proxy and keep its credential on the server.
 
 > Earlier this project briefly used [Piston](https://github.com/engineer-man/piston). On 2026-02-15 Piston's public emkc.org endpoint went whitelist-only, returning HTTP 401 to unauthenticated callers. The Piston client (`src/api/piston.js`) is kept in the repo for use against a self-hosted Piston instance — swap one import in `CodeCompiler.jsx` to re-enable it.
 
@@ -228,12 +223,15 @@ The client refuses to call any non-HTTPS Judge0 endpoint.
 Briefly:
 
 - **Passwords** are never stored in this codebase. Supabase hashes server-side and never returns plaintext.
-- **Sessions** are JWTs in localStorage, auto-refreshed by `supabase-js`, and revoked on logout.
-- **RLS** policies on `profiles`, `user_state`, and `storage.objects` mean users can physically only read or modify their own data. The anon key shipping in the client bundle is harmless because RLS is the gate.
-- **Account deletion** uses a `SECURITY DEFINER` Postgres function that checks `auth.uid()` so it can only ever delete the calling user.
-- **Avatar uploads** are size-limited (2 MB), extension-limited (jpg / png / gif / webp), and magic-byte verified — the file's actual first bytes must match the claimed MIME, otherwise the upload is rejected before reaching Storage.
-- **Code submitted to Judge0** is length-capped (10 000 chars), the endpoint is HTTPS-only enforced in code, and stdin is capped at 4 000 chars.
-- **No `dangerouslySetInnerHTML`** anywhere. React's default escaping prevents XSS via state. A `sanitizeText` helper additionally strips ASCII control characters before persisting user-typed text.
+- **Public client keys** are intended to ship in browser code. Database access still depends on narrowly scoped RLS policies; never ship a Supabase secret or service-role key.
+- **RLS** is enabled for profiles and learning state. Users may only access their own rows.
+- **Account deletion** uses a `SECURITY DEFINER` function with an empty search path and checks `auth.uid()`. Avatar files are removed through the Storage API before the user row is deleted.
+- **Avatar uploads** are limited to 2 MB and JPEG, PNG, GIF, or WebP at the storage bucket; the app also checks file signatures before upload and restricts writes to a user's own single-level folder.
+- **Deployment headers** in `public/_headers` include a Content Security Policy, clickjacking protection, MIME sniffing protection, a strict referrer policy, and a restricted permissions policy for supported static hosts.
+- **Code submitted to Judge0** is length-capped (10 000 chars), uses HTTPS, and stdin is capped at 4 000 chars.
+- **No `dangerouslySetInnerHTML`** anywhere. React escapes displayed strings, while profile text is length-limited and stripped of control characters.
+
+Before accepting real users, enable email confirmation, configure Supabase Auth's server-side password policy and rate limits, check the exact redirect URL allow-list, and review the same CSP on whichever host serves the site. An application cannot guarantee that it is immune to attacks; security still depends on the live Supabase and hosting configuration.
 
 ## Roadmap
 
