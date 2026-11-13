@@ -288,10 +288,10 @@ export default function Profile({ onNavigate })
   const studentId = useMemo(() => formatUserId(user?.id), [user?.id]);
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="learning-page dashboard-page">
       <div className="relative">
-        <div className="glass gradient-border rounded-2xl overflow-hidden">
-          <div className="relative h-20 sm:h-24 bg-gradient-to-r from-violet-600 via-cyan-500 to-amber-300 overflow-hidden">
+        <div className="glass dashboard-panel rounded-2xl overflow-hidden">
+          <div className="learning-page-header relative h-20 sm:h-24 overflow-hidden">
             <div
               className="absolute inset-0 opacity-30"
               style={{
@@ -316,7 +316,7 @@ export default function Profile({ onNavigate })
               <button
                 type="button"
                 onClick={() => setLightboxOpen(true)}
-                className="group w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-violet-500 to-cyan-400 grid place-items-center overflow-hidden border-2 border-white/20 shadow-glass hover:ring-2 hover:ring-violet-400/40 transition cursor-zoom-in relative"
+                className="group w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-emerald-700 to-cyan-800 grid place-items-center overflow-hidden border-2 border-white/20 shadow-glass hover:ring-2 hover:ring-emerald-400/40 transition cursor-zoom-in relative"
                 aria-label="View profile picture"
               >
                 {avatarUrl ? (
@@ -470,7 +470,7 @@ export default function Profile({ onNavigate })
         />
       </div>
 
-      <div className="glass gradient-border rounded-2xl px-4 py-3">
+      <div className="glass dashboard-panel rounded-2xl px-4 py-4">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <Sparkles size={14} className="text-violet-300" />

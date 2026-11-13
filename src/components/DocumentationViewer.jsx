@@ -124,7 +124,7 @@ export default function DocumentationViewer({
   }
 
   return (
-    <div className="flex flex-col gap-3 h-full">
+    <div className="learning-page dashboard-page h-full">
       <div className="flex flex-wrap gap-2">
         {docCategories.map((cat) =>
         {
@@ -141,7 +141,7 @@ export default function DocumentationViewer({
                 onNavigate?.('docs', { categoryId: cat.id });
               }}
               className={`glass card-hover flex items-center gap-2 px-3 py-2 rounded-xl text-xs transition ${
-                isActive ? 'border-violet-400/40 text-white' : 'text-slate-400 hover:text-slate-100'
+                isActive ? 'border-emerald-400/40 text-white bg-emerald-500/10' : 'text-slate-400 hover:text-slate-100'
               }`}
             >
               <Icon size={13} className={isActive ? 'text-white' : accent} />
@@ -169,7 +169,7 @@ export default function DocumentationViewer({
           transition={{ duration: 0.18 }}
           className="flex flex-col gap-3"
         >
-          <div className={`glass gradient-border rounded-2xl px-4 py-3 bg-gradient-to-r ${category.accent} relative overflow-hidden`}>
+          <div className="learning-page-header px-5 py-4">
             <div className="text-[10px] uppercase tracking-widest text-slate-300">Section</div>
             <div className="flex flex-wrap items-center justify-between gap-1">
               <div className="text-base font-semibold text-white tracking-tight">{category.title}</div>
@@ -200,7 +200,7 @@ export default function DocumentationViewer({
                 return (
                   <article
                     key={card.title}
-                    className="glass card-hover gradient-border rounded-xl px-3.5 py-3 flex flex-col gap-2"
+                    className="glass dashboard-panel card-hover rounded-2xl px-4 py-4 flex flex-col gap-2.5"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2">

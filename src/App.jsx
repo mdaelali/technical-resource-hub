@@ -8,6 +8,7 @@ import { useAuth } from './auth/AuthContext.jsx';
 import useStreak from './hooks/useStreak.js';
 import useTheme from './hooks/useTheme.js';
 import './App.css';
+import './components/learning-pages.css';
 
 const DocumentationViewer = lazy(() => import('./components/DocumentationViewer.jsx'));
 const CodePlayground = lazy(() => import('./components/CodePlayground.jsx'));

@@ -58,8 +58,8 @@ export default function CodePlayground({ initialSnippetId })
   }
 
   return (
-    <div className="flex flex-col gap-3 min-h-full lg:h-full">
-      <div className="glass rounded-2xl overflow-hidden flex flex-col flex-1 min-h-[20rem] lg:min-h-0">
+    <div className="learning-page dashboard-page min-h-full lg:h-full">
+      <div className="glass dashboard-panel rounded-2xl overflow-hidden flex flex-col flex-1 min-h-[20rem] lg:min-h-0">
         <div className="flex items-center justify-between px-3 py-1.5 border-b border-white/10 bg-black/20 gap-2">
           <div className="flex items-center gap-1.5 min-w-0">
             <span className="w-2.5 h-2.5 rounded-full bg-rose-400/80 shrink-0 hidden sm:block" />
@@ -163,8 +163,8 @@ export default function CodePlayground({ initialSnippetId })
             <button
               key={s.id}
               onClick={() => handleSelect(s.id)}
-              className={`glass card-hover rounded-xl px-3 py-2 text-left transition ${
-                isActive ? 'border-cyan-400/40' : ''
+              className={`glass dashboard-panel card-hover rounded-xl px-3 py-2.5 text-left transition ${
+                isActive ? 'border-emerald-400/40 bg-emerald-500/10' : ''
               }`}
             >
               <div className="flex items-center gap-1.5 text-xs font-mono text-cyan-200">

@@ -136,8 +136,8 @@ export default function CodeCompiler({ onLogActivity })
   }
 
   return (
-    <div className="flex flex-col gap-2 min-h-full">
-      <div className="glass rounded-2xl flex flex-wrap items-center justify-between px-3 py-2 gap-2">
+    <div className="learning-page dashboard-page min-h-full">
+      <div className="glass dashboard-panel rounded-2xl flex flex-wrap items-center justify-between px-4 py-3 gap-3">
         <div className="flex items-center gap-2 min-w-0 flex-wrap">
           <div className="text-[10px] uppercase tracking-wider text-slate-400 hidden sm:block">Language</div>
           <div className="flex items-center gap-1 flex-wrap">
@@ -147,7 +147,7 @@ export default function CodeCompiler({ onLogActivity })
                 onClick={() => changeLanguage(l.key)}
                 className={`text-xs px-2.5 py-1 rounded-lg transition ${
                   l.key === language.key
-                    ? 'bg-gradient-to-r from-violet-500/40 to-cyan-400/30 text-white border border-white/10'
+                    ? 'bg-emerald-500/15 text-emerald-100 border border-emerald-300/20'
                     : 'text-slate-400 hover:text-slate-100 hover:bg-white/[0.04] border border-transparent'
                 }`}
               >
@@ -175,7 +175,7 @@ export default function CodeCompiler({ onLogActivity })
           <button
             onClick={handleRun}
             disabled={running}
-            className="flex items-center gap-1 text-xs text-white px-3 py-1.5 rounded-lg bg-gradient-to-r from-violet-500 to-cyan-400 hover:opacity-90 disabled:opacity-60 transition"
+            className="flex items-center gap-1 text-xs text-white px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-600 to-cyan-700 hover:opacity-90 disabled:opacity-60 transition"
           >
             {running ? <Loader2 size={13} className="animate-spin" /> : <Play size={13} />}
             <span>{running ? 'Running' : 'Run'}</span>

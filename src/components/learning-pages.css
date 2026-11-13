@@ -1,0 +1,57 @@
+/* Shared authenticated-page design language, aligned with the dashboard. */
+.learning-page {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+  gap: 1rem;
+  padding-bottom: 1.5rem;
+  color: var(--text-primary);
+}
+.learning-page .glass.gradient-border,
+.learning-page .glass.card-hover,
+.learning-page .glass {
+  border-color: var(--border-color);
+  box-shadow: var(--shadow-glass);
+}
+.learning-page .glass.gradient-border { background-image: none !important; }
+.learning-page .dashboard-panel { border-radius: 1.25rem; }
+.learning-page .text-violet-300,
+.learning-page .text-cyan-200,
+.learning-page .text-cyan-300 { color: #83cbb2; }
+.learning-page .text-violet-200,
+.learning-page .text-cyan-100 { color: #b4e7d2; }
+.learning-page .exam-card { background-image: none !important; }
+.learning-page button.bg-gradient-to-r,
+.learning-page .btn-primary {
+  background: linear-gradient(110deg, #348e78, #347f99);
+  border-color: #4b9b8e;
+  color: #f5fbf9;
+}
+.learning-page button.bg-gradient-to-r:hover,
+.learning-page .btn-primary:hover { filter: brightness(1.12); }
+.learning-page .learning-page-header {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #497d70;
+  border-radius: 1.5rem;
+  background: linear-gradient(112deg, #142334 2%, #1b3442 53%, #235348 100%);
+  color: #f7faf9;
+  box-shadow: 0 18px 44px #07121d40;
+}
+.learning-page .learning-page-header::after {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  content: '';
+  background: radial-gradient(ellipse at 95% 0%, #6ac09a20, transparent 42%);
+}
+.learning-page .learning-page-header > * { position: relative; z-index: 1; }
+.learning-page .learning-page-header .text-white { color: #f7faf9; }
+.learning-page .learning-page-header .text-slate-300 { color: #c2d1d7; }
+.learning-page .learning-page-header .text-slate-400 { color: #a6bbc3; }
+html.light .learning-page .learning-page-header { color:#f7faf9; }
+html.light .learning-page .dashboard-panel { background:#ffffffd9; border-color:#dfe7e2; box-shadow:0 6px 24px #1f3e3210; }
+html.light .learning-page .text-slate-300 { color:var(--text-secondary); }
+html.light .learning-page .text-slate-400 { color:var(--text-muted); }
+html.light .learning-page .learning-page-header .text-slate-300 { color:#c2d1d7; }
+html.light .learning-page .learning-page-header .text-slate-400 { color:#a6bbc3; }

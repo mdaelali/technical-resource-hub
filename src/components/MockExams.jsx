@@ -94,12 +94,11 @@ function ExamList({ results, onStart, allExams })
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="glass gradient-border rounded-2xl px-4 py-4 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-500/10 via-transparent to-cyan-400/10 pointer-events-none" />
+    <div className="learning-page dashboard-page">
+      <div className="learning-page-header px-5 py-4">
         <div className="relative flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
-            <ClipboardList size={18} className="text-violet-300" />
+            <ClipboardList size={18} className="text-emerald-200" />
             <div className="min-w-0">
               <h2 className="text-lg font-semibold text-white tracking-tight">Mock Exams</h2>
               <p className="text-xs text-slate-400">
@@ -141,7 +140,7 @@ function ExamList({ results, onStart, allExams })
           return (
             <div
               key={exam.id}
-              className={`exam-card glass card-hover gradient-border rounded-2xl px-4 py-3.5 flex flex-col gap-2.5 bg-gradient-to-br ${exam.accent}`}
+              className="exam-card glass dashboard-panel card-hover rounded-2xl px-5 py-4 flex flex-col gap-3"
             >
               <div className="flex items-start justify-between gap-2 flex-wrap">
                 <div className="min-w-0">
