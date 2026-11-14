@@ -15,6 +15,7 @@ export default function GameArena({ onNavigate })
   const [message, setMessage] = useState('');
   const [standings, setStandings] = useState([]);
   const [awards, setAwards] = useState([]);
+  const [practiceAvailable, setPracticeAvailable] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const submitLock = useRef(false);
   const configured = Boolean(supabase && user);
@@ -24,12 +25,13 @@ export default function GameArena({ onNavigate })
     if (!configured) return () => { active = false; };
     const loadBoard = async () => {
       try {
-        const [boardResult, awardResult] = await Promise.all([
+        const [boardResult, awardResult, statusResult] = await Promise.all([
           supabase.rpc('get_weekly_game_standings'),
-          supabase.rpc('get_public_game_awards')
+          supabase.rpc('get_public_game_awards'),
+          supabase.rpc('get_cs_sprint_status')
         ]);
         if (!active) return;
-        const error = boardResult.error || awardResult.error;
+        const error = boardResult.error || awardResult.error || statusResult.error;
         if (error)
         {
           setMessage(`Standings request failed (${error.code || 'Supabase error'}): ${error.message}.`);
@@ -37,6 +39,7 @@ export default function GameArena({ onNavigate })
         }
         setStandings(boardResult.data || []);
         setAwards(awardResult.data || []);
+        setPracticeAvailable(statusResult.data?.[0]?.practice_available === true);
         setMessage('');
       } catch (error) {
         if (active) setMessage(`Standings request failed: ${error.message || 'network error'}.`);
@@ -54,11 +57,12 @@ export default function GameArena({ onNavigate })
     if (!configured) return;
     setRefreshing(true);
     try {
-      const [boardResult, awardResult] = await Promise.all([
+      const [boardResult, awardResult, statusResult] = await Promise.all([
         supabase.rpc('get_weekly_game_standings'),
-        supabase.rpc('get_public_game_awards')
+        supabase.rpc('get_public_game_awards'),
+        supabase.rpc('get_cs_sprint_status')
       ]);
-      const error = boardResult.error || awardResult.error;
+      const error = boardResult.error || awardResult.error || statusResult.error;
       if (error)
       {
         setMessage(`Could not refresh standings (${error.code || 'Supabase error'}): ${error.message}.`);
@@ -66,6 +70,7 @@ export default function GameArena({ onNavigate })
       }
       setStandings(boardResult.data || []);
       setAwards(awardResult.data || []);
+      setPracticeAvailable(statusResult.data?.[0]?.practice_available === true);
       setMessage('');
     } catch (error) {
       setMessage(`Could not refresh standings: ${error.message || 'network error'}.`);
@@ -74,12 +79,12 @@ export default function GameArena({ onNavigate })
     }
   }, [configured]);
 
-  async function startRound()
+  async function startRound(practice = false)
   {
     if (!configured || busy) return;
     setBusy(true);
     setMessage('');
-    const { data, error } = await supabase.rpc('start_cs_sprint');
+    const { data, error } = await supabase.rpc(practice ? 'start_cs_sprint_practice' : 'start_cs_sprint');
     setBusy(false);
     if (error)
     {
@@ -87,9 +92,12 @@ export default function GameArena({ onNavigate })
         ? 'You have reached the 12-round daily limit. Come back tomorrow to play again.'
         : error.message.includes('Join the opt-in')
         ? 'Join the optional Study League on the Progress page to enter the weekly game standings.'
+        : error.message.includes('optional practice round')
+        ? 'The one-time practice round is available only before your first ranked round.'
         : 'Could not start a round. Check that the Supabase competition migration is installed.');
       return;
     }
+    setPracticeAvailable(false);
     setRound(data);
     setSecondsLeft(data.seconds || 12);
     setDeadline(Date.now() + (data.seconds || 12) * 1000);
@@ -155,8 +163,11 @@ export default function GameArena({ onNavigate })
               <span className="stat-icon stat-mint grid h-12 w-12 place-items-center rounded-2xl"><Zap size={21} /></span>
               <p className="mt-5 dashboard-eyebrow">10 QUESTIONS · 12 SECONDS EACH</p>
               <h2 id="sprint-round-title" className="mt-2 text-2xl font-semibold">Ready for a quick round?</h2>
-              <p className="mt-2 max-w-lg text-sm leading-relaxed dashboard-muted">Points are calculated by Supabase from your answer and server time. Your first three rounds each week are ranked; after that, you can keep practicing. The daily limit is 12 rounds.</p>
-              <button type="button" onClick={startRound} disabled={busy} className="mt-6 inline-flex min-h-12 items-center gap-2 rounded-xl bg-emerald-300 px-5 py-3 font-semibold text-slate-950 hover:bg-emerald-200 disabled:opacity-50">{busy ? 'Starting…' : 'Start Code Sprint'} <Zap size={17} /></button>
+              <p className="mt-2 max-w-lg text-sm leading-relaxed dashboard-muted">{practiceAvailable ? 'Choose one practice round before your first ranked game, or start ranked immediately. Every later round is ranked.' : 'All new rounds are ranked. Your best completed score counts toward this week’s standings.'} The daily limit is 12 rounds.</p>
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+                <button type="button" onClick={() => startRound(false)} disabled={busy} className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-emerald-300 px-5 py-3 font-semibold text-slate-950 hover:bg-emerald-200 disabled:opacity-50">{busy ? 'Starting…' : 'Start ranked round'} <Zap size={17} /></button>
+                {practiceAvailable && <button type="button" onClick={() => startRound(true)} disabled={busy} className="min-h-12 rounded-xl border border-white/15 px-4 py-3 text-sm font-semibold hover:bg-white/5 disabled:opacity-50">Use one practice round</button>}
+              </div>
             </div> : round.finished ? <div className="flex min-h-[21rem] flex-col items-start justify-center">
               <span className="stat-icon stat-mint grid h-12 w-12 place-items-center rounded-2xl"><Trophy size={21} /></span>
               <p className="mt-5 dashboard-eyebrow">ROUND COMPLETE</p>

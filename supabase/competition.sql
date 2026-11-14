@@ -18,6 +18,15 @@ create policy "Users manage their competition profile"
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 
+-- Private, durable eligibility state: one optional practice before the first ranked round.
+create table if not exists public.competition_game_eligibility (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  practice_used_at timestamptz,
+  first_ranked_at timestamptz
+);
+alter table public.competition_game_eligibility enable row level security;
+revoke all on public.competition_game_eligibility from public, anon, authenticated;
+
 -- Timed rounds are server-scored: the client can see answer choices, never the key.
 create table if not exists public.competition_game_questions (
   question_id text primary key,
@@ -72,6 +81,24 @@ create index if not exists competition_game_sessions_week_idx
 create index if not exists competition_game_sessions_daily_limit_idx
   on public.competition_game_sessions (user_id, week_start, created_at);
 
+-- Preserve existing participants' status when moving from the old auto-practice rules.
+-- The old client silently labeled later rounds as practice. Promote completed rounds
+-- from this active week so students keep credit for points earned before this change.
+update public.competition_game_sessions
+set ranked = true
+where week_start = date_trunc('week', now() at time zone 'utc')::date
+  and ranked = false and completed_at is not null;
+
+insert into public.competition_game_eligibility as existing(user_id, practice_used_at, first_ranked_at)
+select s.user_id,
+  min(s.created_at) filter (where not s.ranked),
+  min(s.created_at) filter (where s.ranked)
+from public.competition_game_sessions s
+group by s.user_id
+on conflict (user_id) do update set
+  practice_used_at = coalesce(existing.practice_used_at, excluded.practice_used_at),
+  first_ranked_at = coalesce(existing.first_ranked_at, excluded.first_ranked_at);
+
 create table if not exists public.competition_game_awards (
   user_id uuid not null references auth.users(id) on delete cascade,
   week_start date not null,
@@ -92,7 +119,7 @@ alter table public.competition_game_awards enable row level security;
 alter table public.competition_game_closed_weeks enable row level security;
 revoke all on public.competition_game_questions, public.competition_game_sessions, public.competition_game_awards, public.competition_game_closed_weeks from public, anon, authenticated;
 
-create or replace function public.start_cs_sprint()
+create or replace function public._start_cs_sprint(p_ranked boolean)
 returns jsonb
 language plpgsql
 security definer
@@ -103,8 +130,7 @@ declare
   v_session uuid;
   v_ids text[];
   v_q record;
-  v_ranked boolean;
-  v_ranked_count integer;
+  v_eligibility public.competition_game_eligibility%rowtype;
   v_daily_count integer;
   v_week date := date_trunc('week', now() at time zone 'utc')::date;
 begin
@@ -112,22 +138,62 @@ begin
   if not exists (select 1 from public.competition_profiles where user_id = v_user and enabled = true) then
     raise exception 'Join the opt-in study league before starting a round';
   end if;
-  perform pg_advisory_xact_lock(hashtextextended(v_user::text || v_week::text, 0));
-  select count(*) filter (where ranked), count(*) into v_ranked_count, v_daily_count
-    from public.competition_game_sessions where user_id = v_user and week_start = v_week
+  insert into public.competition_game_eligibility(user_id) values (v_user) on conflict (user_id) do nothing;
+  select * into v_eligibility from public.competition_game_eligibility where user_id = v_user for update;
+  select count(*) into v_daily_count
+    from public.competition_game_sessions where user_id = v_user
+      and week_start = v_week
       and created_at >= date_trunc('day', now() at time zone 'utc') at time zone 'utc';
   if v_daily_count >= 12 then raise exception 'Daily game limit reached'; end if;
-  v_ranked := v_ranked_count < 3;
+  if not p_ranked and (v_eligibility.practice_used_at is not null or v_eligibility.first_ranked_at is not null) then
+    raise exception 'The optional practice round is only available once, before your first ranked round';
+  end if;
   select array_agg(question_id order by random()) into v_ids
     from (select question_id from public.competition_game_questions where active order by random() limit 10) q;
   if cardinality(v_ids) <> 10 then raise exception 'The question bank is not ready'; end if;
+  if p_ranked then
+    update public.competition_game_eligibility set first_ranked_at = coalesce(first_ranked_at, clock_timestamp()) where user_id = v_user;
+  else
+    update public.competition_game_eligibility set practice_used_at = clock_timestamp() where user_id = v_user;
+  end if;
   insert into public.competition_game_sessions(user_id, week_start, ranked, question_order)
-    values (v_user, v_week, v_ranked, v_ids) returning session_id into v_session;
+    values (v_user, v_week, p_ranked, v_ids) returning session_id into v_session;
   select question_id, topic, prompt, options into v_q
     from public.competition_game_questions where question_id = v_ids[1];
   return jsonb_build_object('sessionId', v_session, 'questionNumber', 1, 'totalQuestions', 10,
-    'seconds', 12, 'ranked', v_ranked, 'question', jsonb_build_object('id', v_q.question_id, 'topic', v_q.topic, 'prompt', v_q.prompt, 'options', v_q.options));
+    'seconds', 12, 'ranked', p_ranked, 'question', jsonb_build_object('id', v_q.question_id, 'topic', v_q.topic, 'prompt', v_q.prompt, 'options', v_q.options));
 end;
+$$;
+
+-- Ranked rounds are always ranked; practice is a separate, explicit one-time choice.
+create or replace function public.start_cs_sprint()
+returns jsonb
+language sql
+security definer
+set search_path = ''
+as $$ select public._start_cs_sprint(true); $$;
+
+create or replace function public.start_cs_sprint_practice()
+returns jsonb
+language sql
+security definer
+set search_path = ''
+as $$ select public._start_cs_sprint(false); $$;
+
+create or replace function public.get_cs_sprint_status()
+returns table(practice_available boolean)
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1
+    from public.competition_profiles p
+    left join public.competition_game_eligibility e on e.user_id = p.user_id
+    where p.user_id = auth.uid() and p.enabled = true
+      and e.practice_used_at is null and e.first_ranked_at is null
+  );
 $$;
 
 create or replace function public.answer_cs_sprint(p_session_id uuid, p_question_id text, p_answer integer)
@@ -304,13 +370,18 @@ as $$
   limit 30;
 $$;
 
+revoke all on function public._start_cs_sprint(boolean) from public, anon, authenticated;
 revoke all on function public.start_cs_sprint() from public, anon;
+revoke all on function public.start_cs_sprint_practice() from public, anon;
+revoke all on function public.get_cs_sprint_status() from public, anon;
 revoke all on function public.answer_cs_sprint(uuid, text, integer) from public, anon;
 revoke all on function public.finalize_weekly_game_awards() from public, anon, authenticated;
 revoke all on function public.get_weekly_game_standings() from public, anon;
 revoke all on function public.get_my_game_awards() from public, anon;
 revoke all on function public.get_public_game_awards() from public, anon;
 grant execute on function public.start_cs_sprint() to authenticated;
+grant execute on function public.start_cs_sprint_practice() to authenticated;
+grant execute on function public.get_cs_sprint_status() to authenticated;
 grant execute on function public.answer_cs_sprint(uuid, text, integer) to authenticated;
 grant execute on function public.get_weekly_game_standings() to authenticated;
 grant execute on function public.get_my_game_awards() to authenticated;

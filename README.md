@@ -44,6 +44,7 @@ Resource Hub is a public learning website and study workspace built around:
 - **Mock Exams** — 30 original AP-style practice forms: full simulations (42 MCQs + 4 FRQs), MCQ sections, FRQ sections, and shorter mixed practice. MCQs are auto-graded with explanations; coding responses include model answers for student self-review. These are practice materials, not official College Board questions.
 - **Progress Tracker** — a dashboard with a study-streak counter that increments **automatically** when the student reads a topic, marks something as mastered, runs code, takes a test, or dwells for 2 minutes on a page. No manual "log session" button.
 - **Daily learning plan** — a small, checkable sequence of steps to help students move from understanding a concept to practising it.
+- **Code Sprint** — an optional one-time practice round before a student's first ranked game; every later round is ranked. Ten timed Java questions use server-scored points, with weekly standings, a daily 12-round cap, and profile awards for the top three.
 
 Every user gets their own account (Supabase Auth), their own profile (name, bio, avatar uploaded to Supabase Storage), and their own progress — synced across devices.
 
