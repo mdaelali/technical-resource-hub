@@ -19,6 +19,8 @@ const CLOSED_AC = { open: false, items: [], index: 0, top: 0, left: 0, wordStart
 export default function CodeEditor({ value, onChange, language = 'java' })
 {
   const textareaRef = useRef(null);
+  const lineNumbersRef = useRef(null);
+  const highlightedCodeRef = useRef(null);
   const blurTimer = useRef(null);
   const tokens = useMemo(() => tokenize(value, language), [value, language]);
   const lineCount = Math.max(value.split('\n').length, 1);
@@ -324,6 +326,15 @@ export default function CodeEditor({ value, onChange, language = 'java' })
     requestAnimationFrame(refreshAutocomplete);
   }
 
+  function handleEditorScroll(event)
+  {
+    // Keep the syntax layer and line numbers in step with the textarea. The
+    // editor then needs only one vertical scrollbar instead of two nested ones.
+    const offset = `translateY(-${event.currentTarget.scrollTop}px)`;
+    if (lineNumbersRef.current) lineNumbersRef.current.style.transform = offset;
+    if (highlightedCodeRef.current) highlightedCodeRef.current.style.transform = offset;
+  }
+
   function handleBlur()
   {
     // Delay so a mousedown on a dropdown item is registered before we close.
@@ -331,16 +342,17 @@ export default function CodeEditor({ value, onChange, language = 'java' })
   }
 
   return (
-    <div className="flex bg-[#0a0c14] font-mono text-xs leading-[1.55] min-h-0 flex-1 overflow-auto">
-      <div className="select-none px-3 py-3 text-right text-slate-600 border-r border-white/5 shrink-0">
+    <div className="flex bg-[#0a0c14] font-mono text-xs leading-[1.55] min-h-0 flex-1 overflow-hidden">
+      <div ref={lineNumbersRef} className="select-none px-3 py-3 text-right text-slate-600 border-r border-white/5 shrink-0 will-change-transform">
         {Array.from({ length: lineCount }, (_, i) => (
           <div key={i}>{i + 1}</div>
         ))}
       </div>
       <div className="relative flex-1 min-w-0">
         <pre
+          ref={highlightedCodeRef}
           aria-hidden="true"
-          className="m-0 px-3 py-3 whitespace-pre-wrap break-words pointer-events-none min-h-full"
+          className="m-0 px-3 py-3 whitespace-pre-wrap break-words pointer-events-none min-h-full will-change-transform"
         >
           <code>
             {tokens.map((tok, i) =>
@@ -364,12 +376,14 @@ export default function CodeEditor({ value, onChange, language = 'java' })
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           onKeyUp={handleKeyUp}
+          onScroll={handleEditorScroll}
           onBlur={handleBlur}
+          wrap="soft"
           spellCheck={false}
           autoComplete="off"
           autoCorrect="off"
           autoCapitalize="off"
-          className="absolute inset-0 w-full h-full px-3 py-3 bg-transparent text-transparent caret-white resize-none focus:outline-none whitespace-pre-wrap break-words font-mono text-xs leading-[1.55] selection:bg-violet-500/40"
+          className="absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden px-3 py-3 bg-transparent text-transparent caret-white resize-none focus:outline-none whitespace-pre-wrap break-words font-mono text-xs leading-[1.55] selection:bg-violet-500/40"
         />
 
         {ac.open && createPortal(
