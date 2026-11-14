@@ -213,10 +213,10 @@ export default function CodeCompiler({ onLogActivity })
         <div
           onMouseDown={onDragStart}
           onTouchStart={onDragStart}
-          className="hidden lg:flex items-center justify-center w-2 cursor-col-resize shrink-0 group"
+          className="hidden lg:flex items-center justify-center w-3 cursor-col-resize shrink-0 group"
           title="Drag to resize"
         >
-          <div className="w-0.5 h-12 rounded-full bg-white/10 group-hover:bg-violet-400/60 transition" />
+          <div className="w-1 h-12 rounded-full bg-slate-400/50 group-hover:bg-violet-400/80 transition" />
         </div>
 
         <div className="flex flex-col gap-2 flex-1 min-h-0" style={{ minWidth: 0 }}>
@@ -321,7 +321,7 @@ export default function CodeCompiler({ onLogActivity })
               placeholder="Provide input lines for your program..."
               spellCheck={false}
               maxLength={4000}
-              className="bg-[#0a0c14] font-mono text-[11.5px] leading-[1.55] text-slate-200 px-3 py-2 h-24 resize-none overflow-y-auto overflow-x-auto overscroll-contain focus:outline-none placeholder:text-slate-600"
+              className="bg-[var(--code-bg)] font-mono text-[11.5px] leading-[1.55] text-[var(--text-primary)] px-3 py-2 h-24 resize-none overflow-y-auto overflow-x-auto overscroll-contain focus:outline-none placeholder:text-slate-600"
             />
           </div>
         </div>

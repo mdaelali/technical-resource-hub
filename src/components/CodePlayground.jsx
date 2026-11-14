@@ -130,7 +130,7 @@ export default function CodePlayground({ initialSnippetId })
                   <span>Output</span>
                   {runOutput && (
                     <span className="text-slate-500">
-                      · {runOutput.when.toLocaleTimeString()}
+                      · {runOutput.when.toLocaleTimeString('en-US')}
                     </span>
                   )}
                 </div>

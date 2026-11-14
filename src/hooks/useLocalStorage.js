@@ -93,22 +93,32 @@ export default function useLocalStorage(key, initial)
     };
   }, [key]);
 
+  // Keep the latest value in a ref so `update` can compute the next value
+  // synchronously, outside React's updater queue. Dispatching the sync event
+  // from inside a setState updater runs it during another component's render
+  // and triggers React's "cannot update a component while rendering" warning.
+  const valueRef = useRef(value);
+  useEffect(() =>
+  {
+    valueRef.current = value;
+  }, [value]);
+
   const update = useCallback((updater) =>
   {
-    setValue((prev) =>
+    const cached = cache.has(key) ? cache.get(key) : SENTINEL;
+    const prev = cached === SENTINEL ? valueRef.current : cached;
+    const next = typeof updater === 'function' ? updater(prev) : updater;
+    writeCached(key, next);
+    valueRef.current = next;
+    setValue(next);
+    try
     {
-      const next = typeof updater === 'function' ? updater(prev) : updater;
-      writeCached(key, next);
-      try
-      {
-        window.dispatchEvent(new CustomEvent(SYNC_EVENT, { detail: { key, value: next } }));
-      }
-      catch
-      {
-        /* swallow */
-      }
-      return next;
-    });
+      window.dispatchEvent(new CustomEvent(SYNC_EVENT, { detail: { key, value: next } }));
+    }
+    catch
+    {
+      /* swallow */
+    }
   }, [key]);
 
   return [value, update];

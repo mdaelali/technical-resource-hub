@@ -22,11 +22,19 @@
   font-size: .65rem;
   text-align: center;
 }
-.exam-filter-active {
-  border-color: #5c9d82;
-  background: #e8f3ec;
-  color: #245d4a;
+/* Active chip: fixed light-green surface with dark-green text in BOTH themes.
+   !important guards against theme-level hover/pressed/focus colour rules. */
+.exam-filter-active,
+.exam-filter-active:hover,
+.exam-filter-active:focus-visible,
+.exam-filter[aria-pressed="true"],
+.exam-filter[aria-pressed="true"]:hover {
+  border-color: #5c9d82 !important;
+  background: #e8f3ec !important;
+  color: #245d4a !important;
 }
+.exam-filter-active span,
+.exam-filter[aria-pressed="true"] span { background: rgba(36,93,74,.14) !important; color: #1f5240 !important; }
 .exam-format-note {
   padding: .7rem .9rem;
   border-left: 3px solid #418b74;
@@ -35,3 +43,17 @@
   color: var(--text-secondary);
 }
 html.light .exam-card { background-color: #fffefa; border-color: #e3e8e1; }
+
+/* Exam runner: resizable question / answer split (stacked on small screens). */
+.exam-runner-split { display: flex; flex-direction: column; }
+.exam-split-divider { display: none; }
+@media (min-width: 640px) {
+  .exam-runner-split {
+    display: grid;
+    grid-template-columns: var(--exam-left-pane, 50%) 12px minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .exam-split-divider { display: flex; }
+}
+.exam-split-divider > span { background: color-mix(in srgb, currentColor 35%, transparent); }
+html.light .exam-split-divider > span { background: rgba(15, 23, 42, .28); }

@@ -299,8 +299,25 @@ function BluebookRunner({ exam, onExit, onComplete })
   const [submitted, setSubmitted] = useState(false);
   const submittedRef = useRef(false);
   const rightPanelRef = useRef(null);
+  const splitRef = useRef(null);
   const explanationRef = useRef(null);
   const totalQ = questions.length;
+  const [leftPanePercent, setLeftPanePercent] = useState(50);
+
+  function resizeExamSplit(event)
+  {
+    if (!splitRef.current) return;
+    const bounds = splitRef.current.getBoundingClientRect();
+    const nextPercent = ((event.clientX - bounds.left) / bounds.width) * 100;
+    setLeftPanePercent(Math.min(72, Math.max(28, nextPercent)));
+  }
+
+  function startExamSplitResize(event)
+  {
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    resizeExamSplit(event);
+  }
 
   useEffect(() =>
   {
@@ -478,11 +495,15 @@ function BluebookRunner({ exam, onExit, onComplete })
       )}
 
       {/* ── Body: left (stem) + right (choices) ─── */}
-      <div className="flex flex-col sm:flex-row flex-1 min-h-0 relative">
+      <div
+        ref={splitRef}
+        className="exam-runner-split flex-1 min-h-0 relative"
+        style={{ '--exam-left-pane': `${leftPanePercent}%` }}
+      >
         {/* ── Left panel — always shows the question stem ───────────────────
             For MCQ: prompt (+ code block if any)
             For FRQ: prompt + code block                                     */}
-        <div className="sm:w-1/2 flex-1 overflow-auto p-5 border-r border-white/10">
+        <div className="min-h-0 min-w-0 overflow-auto p-5 border-r border-white/10">
           <div className="text-[10px] uppercase tracking-widest text-slate-400 mb-4">
             Question {current + 1} of {totalQ}
           </div>
@@ -518,7 +539,26 @@ function BluebookRunner({ exam, onExit, onComplete })
         </div>
 
         {/* ── Right panel — answer choices (MCQ) or code editor (FRQ) ───── */}
-        <div ref={rightPanelRef} className="sm:w-1/2 overflow-auto p-5 flex flex-col gap-4">
+        <div
+          role="separator"
+          aria-label="Resize question and answer panels"
+          aria-orientation="vertical"
+          aria-valuenow={Math.round(leftPanePercent)}
+          tabIndex={0}
+          onPointerDown={startExamSplitResize}
+          onPointerMove={(event) => { if (event.currentTarget.hasPointerCapture(event.pointerId)) resizeExamSplit(event); }}
+          onKeyDown={(event) =>
+          {
+            if (event.key === 'ArrowLeft') setLeftPanePercent((value) => Math.max(28, value - 3));
+            if (event.key === 'ArrowRight') setLeftPanePercent((value) => Math.min(72, value + 3));
+          }}
+          className="exam-split-divider group relative z-10 flex cursor-col-resize touch-none items-center justify-center outline-none"
+          title="Drag to resize panels"
+        >
+          <span className="h-full w-px transition group-hover:w-1 group-hover:!bg-emerald-400 group-focus-visible:w-1 group-focus-visible:!bg-emerald-400" />
+        </div>
+
+        <div ref={rightPanelRef} className="min-h-0 min-w-0 overflow-auto p-5 flex flex-col gap-4">
           {/* Question header row */}
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2">

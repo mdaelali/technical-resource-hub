@@ -97,6 +97,13 @@ export default function GameArena({ onNavigate })
         : 'Could not start a round. Check that the Supabase competition migration is installed.');
       return;
     }
+    // Guard against an unexpected payload (missing migration, older function
+    // version, or an empty result) so a bad response never crashes the page.
+    if (!data || typeof data !== 'object' || Array.isArray(data) || !data.question || !data.sessionId)
+    {
+      setMessage('Could not start a round: the server returned an unexpected response. Check that the Supabase competition migration is installed.');
+      return;
+    }
     setPracticeAvailable(false);
     setRound(data);
     setSecondsLeft(data.seconds || 12);
@@ -127,6 +134,13 @@ export default function GameArena({ onNavigate })
       setBusy(false);
       if (data.expired) setMessage('That round expired when the weekly league rolled over, so it was not added to the standings.');
       else void refreshBoard();
+      return;
+    }
+    if (!data || !data.question)
+    {
+      submitLock.current = false;
+      setBusy(false);
+      setMessage('The next question could not be loaded. Please try again.');
       return;
     }
     setRound({ ...round, ...data });

@@ -293,7 +293,7 @@ export default function Profile({ onNavigate })
     .toUpperCase();
 
   const memberSince = user?.createdAt
-    ? new Date(user.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short' })
+    ? new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })
     : '—';
 
   const studentId = useMemo(() => formatUserId(user?.id), [user?.id]);

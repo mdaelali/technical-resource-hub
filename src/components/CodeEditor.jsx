@@ -342,8 +342,8 @@ export default function CodeEditor({ value, onChange, language = 'java' })
   }
 
   return (
-    <div className="flex bg-[#0a0c14] font-mono text-xs leading-[1.55] min-h-0 flex-1 overflow-hidden">
-      <div ref={lineNumbersRef} className="select-none px-3 py-3 text-right text-slate-600 border-r border-white/5 shrink-0 will-change-transform">
+    <div className="flex bg-[var(--code-bg)] font-mono text-xs leading-[1.55] min-h-0 flex-1 overflow-hidden">
+      <div ref={lineNumbersRef} className="select-none px-3 py-3 text-right text-[var(--gutter-text)] border-r border-[var(--border-color)] shrink-0 will-change-transform">
         {Array.from({ length: lineCount }, (_, i) => (
           <div key={i}>{i + 1}</div>
         ))}

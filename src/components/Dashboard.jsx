@@ -50,7 +50,7 @@ export default function Dashboard({ onNavigate })
             <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.08] px-3 py-1.5 text-[11px] font-medium tracking-wide text-emerald-100">
               <Sparkles size={13} /> A little progress, every day
             </div>
-            <p className="mt-6 text-sm font-medium text-slate-300">{new Intl.DateTimeFormat(undefined, { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date())}</p>
+            <p className="mt-6 text-sm font-medium text-slate-300">{new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date())}</p>
             <h2 className="mt-2 text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl lg:text-[2.8rem]">
               Make today a <span className="text-emerald-300">good day to learn.</span>
             </h2>

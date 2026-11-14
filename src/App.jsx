@@ -10,6 +10,7 @@ import useTheme from './hooks/useTheme.js';
 import './App.css';
 import './components/learning-pages.css';
 
+import SectionErrorBoundary from './components/SectionErrorBoundary.jsx';
 const DocumentationViewer = lazy(() => import('./components/DocumentationViewer.jsx'));
 const CodePlayground = lazy(() => import('./components/CodePlayground.jsx'));
 const CodeCompiler = lazy(() => import('./components/CodeCompiler.jsx'));
@@ -221,9 +222,11 @@ export default function App()
               transition={{ duration: 0.2 }}
               className="min-h-full"
             >
-              <Suspense fallback={<SectionFallback />}>
-                {renderSection()}
-              </Suspense>
+              <SectionErrorBoundary key={section} onHome={() => handleNavigate('dashboard')}>
+                <Suspense fallback={<SectionFallback />}>
+                  {renderSection()}
+                </Suspense>
+              </SectionErrorBoundary>
             </motion.div>
           </AnimatePresence>
         </div>
