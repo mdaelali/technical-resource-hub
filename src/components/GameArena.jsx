@@ -22,48 +22,56 @@ export default function GameArena({ onNavigate })
   useEffect(() => {
     let active = true;
     if (!configured) return () => { active = false; };
-    supabase.rpc('get_weekly_game_standings').then(async (boardResult) => {
-      const awardResult = boardResult.error ? { data: null, error: boardResult.error } : await supabase.rpc('get_public_game_awards');
-      if (!active) return;
-      if (boardResult.error || awardResult.error)
-      {
+    const loadBoard = async () => {
+      try {
+        const [boardResult, awardResult] = await Promise.all([
+          supabase.rpc('get_weekly_game_standings'),
+          supabase.rpc('get_public_game_awards')
+        ]);
+        if (!active) return;
         const error = boardResult.error || awardResult.error;
-        setMessage(`Standings request failed (${error.code || 'Supabase error'}): ${error.message}. If you recently changed the database, run the full latest supabase/competition.sql migration.`);
-        return;
+        if (error)
+        {
+          setMessage(`Standings request failed (${error.code || 'Supabase error'}): ${error.message}.`);
+          return;
+        }
+        setStandings(boardResult.data || []);
+        setAwards(awardResult.data || []);
+        setMessage('');
+      } catch (error) {
+        if (active) setMessage(`Standings request failed: ${error.message || 'network error'}.`);
       }
-      setStandings(boardResult.data || []);
-      setAwards(awardResult.data || []);
-    });
-    return () => { active = false; };
-  }, [configured]);
-
-  useEffect(() => {
-    if (!configured) return undefined;
-    const interval = window.setInterval(() => {
-      supabase.rpc('get_weekly_game_standings').then(async ({ data, error }) => {
-        if (error) return;
-        setStandings(data || []);
-        const publicAwards = await supabase.rpc('get_public_game_awards');
-        if (!publicAwards.error) setAwards(publicAwards.data || []);
-      });
-    }, 30_000);
-    return () => window.clearInterval(interval);
+    };
+    void loadBoard();
+    const interval = window.setInterval(loadBoard, 30_000);
+    return () => {
+      active = false;
+      window.clearInterval(interval);
+    };
   }, [configured]);
 
   const refreshBoard = useCallback(async () => {
     if (!configured) return;
     setRefreshing(true);
-    const boardResult = await supabase.rpc('get_weekly_game_standings');
-    const awardResult = boardResult.error ? { data: null, error: boardResult.error } : await supabase.rpc('get_public_game_awards');
-    setRefreshing(false);
-    if (boardResult.error || awardResult.error)
-    {
+    try {
+      const [boardResult, awardResult] = await Promise.all([
+        supabase.rpc('get_weekly_game_standings'),
+        supabase.rpc('get_public_game_awards')
+      ]);
       const error = boardResult.error || awardResult.error;
-      setMessage(`Could not refresh standings (${error.code || 'Supabase error'}): ${error.message}.`);
-      return;
+      if (error)
+      {
+        setMessage(`Could not refresh standings (${error.code || 'Supabase error'}): ${error.message}.`);
+        return;
+      }
+      setStandings(boardResult.data || []);
+      setAwards(awardResult.data || []);
+      setMessage('');
+    } catch (error) {
+      setMessage(`Could not refresh standings: ${error.message || 'network error'}.`);
+    } finally {
+      setRefreshing(false);
     }
-    setStandings(boardResult.data || []);
-    setAwards(awardResult.data || []);
   }, [configured]);
 
   async function startRound()
@@ -178,7 +186,7 @@ export default function GameArena({ onNavigate })
                   <span className="w-8 shrink-0 font-mono text-xs dashboard-muted">#{row.place}</span><span className="min-w-0 flex-1 truncate font-medium">{row.alias}{row.is_self ? ' · you' : ''}</span><span className="font-mono text-xs">{row.points} pts</span>
                 </li>)}
               </ol>
-              {!standings.length && <p className="py-4 text-sm dashboard-muted">No completed rounds yet. Be the first on the board.</p>}
+              {!standings.length && <p className="py-4 text-sm dashboard-muted">No eligible scores yet. Finish a ranked round this week to appear here; practice rounds are not included.</p>}
             </section>
 
             <section className="dashboard-panel rounded-3xl p-5" aria-labelledby="sprint-awards-title">
