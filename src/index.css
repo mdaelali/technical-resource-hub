@@ -438,6 +438,17 @@ html.light .btn-primary
     0 1px 2px rgba(0,0,0,0.12) !important;
 }
 
+html.light .exam-question-nav-control:disabled
+{
+  filter: grayscale(0.35);
+  opacity: 0.58;
+}
+html.light .exam-question-nav-control:focus-visible
+{
+  outline: 3px solid #0f766e;
+  outline-offset: 2px;
+}
+
 /* ── Code / pre ─────────────────────────────────────────────────────────── */
 html.light pre,
 html.light code
@@ -530,6 +541,11 @@ html
 }
 
 /* ── Custom scrollbars ────────────────────────────────────────────────────── */
+html
+{
+  scrollbar-color: rgba(255, 255, 255, 0.32) rgba(255, 255, 255, 0.06);
+  scrollbar-width: thin;
+}
 ::-webkit-scrollbar
 {
   width: 8px;
@@ -541,10 +557,26 @@ html
 }
 ::-webkit-scrollbar-thumb
 {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.32);
   border-radius: 8px;
 }
 ::-webkit-scrollbar-thumb:hover
 {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.52);
+}
+html.light
+{
+  scrollbar-color: #94a3b8 #e2e8f0;
+}
+html.light ::-webkit-scrollbar-track
+{
+  background: #e2e8f0;
+}
+html.light ::-webkit-scrollbar-thumb
+{
+  background: #94a3b8;
+}
+html.light ::-webkit-scrollbar-thumb:hover
+{
+  background: #64748b;
 }

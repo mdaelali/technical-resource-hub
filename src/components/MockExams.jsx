@@ -270,6 +270,32 @@ function BluebookRunner({ exam, onExit, onComplete })
   const rightPanelRef = useRef(null);
   const explanationRef = useRef(null);
 
+  useEffect(() =>
+  {
+    function handleQuestionArrow(event)
+    {
+      if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+      const target = event.target;
+      const isEditing = target instanceof HTMLElement && (
+        target.isContentEditable || target.closest('input, textarea, select, [role="textbox"]')
+      );
+      if (isEditing) return;
+      if (event.key === 'ArrowLeft')
+      {
+        event.preventDefault();
+        setCurrent((index) => Math.max(0, index - 1));
+      }
+      else if (event.key === 'ArrowRight')
+      {
+        event.preventDefault();
+        setCurrent((index) => Math.min(totalQ - 1, index + 1));
+      }
+    }
+
+    window.addEventListener('keydown', handleQuestionArrow);
+    return () => window.removeEventListener('keydown', handleQuestionArrow);
+  }, [totalQ]);
+
   const { display: timerDisplay, timerHidden, setTimerHidden, pct: timerPct } = useTimer(exam.minutes, !submitted, handleSubmit);
 
   const q = questions[current];
@@ -625,27 +651,35 @@ function BluebookRunner({ exam, onExit, onComplete })
       {/* ── Bottom navigation bar ─────────────────── */}
       <footer className="glass border-t border-white/10 px-4 py-2.5 flex items-center justify-between gap-3 shrink-0">
         <button
+          type="button"
           onClick={() => setCurrent((c) => Math.max(0, c - 1))}
           disabled={current === 0}
-          className="btn-ghost disabled:opacity-40"
+          aria-label="Previous question"
+          title="Previous question (←)"
+          className="exam-question-nav-control btn-ghost min-h-11 min-w-28 justify-center gap-2 rounded-xl border border-white/20 bg-white/[0.06] px-4 py-2.5 text-sm font-semibold text-slate-100 shadow-sm hover:bg-white/[0.12] disabled:cursor-not-allowed disabled:opacity-40"
         >
-          <ArrowLeft size={13} /><span>Back</span>
+          <ArrowLeft size={19} strokeWidth={2.5} /><span>Previous</span>
         </button>
 
         <button
+          type="button"
           onClick={() => setShowNav((v) => !v)}
-          className="flex items-center gap-1.5 text-[11px] text-slate-300 hover:text-white transition"
+          aria-label="Open question navigator"
+          className="flex min-h-11 items-center gap-2 rounded-xl px-3 text-sm font-semibold text-slate-200 hover:bg-white/[0.07] hover:text-white transition"
         >
           <span className="font-medium">Question {current + 1} of {totalQ}</span>
-          {showNav ? <ChevronDown size={12} /> : <ChevronUp size={12} />}
+          {showNav ? <ChevronDown size={17} strokeWidth={2.5} /> : <ChevronUp size={17} strokeWidth={2.5} />}
         </button>
 
         <button
+          type="button"
           onClick={() => setCurrent((c) => Math.min(totalQ - 1, c + 1))}
           disabled={current === totalQ - 1}
-          className="btn-primary disabled:opacity-40"
+          aria-label="Next question"
+          title="Next question (→)"
+          className="exam-question-nav-control btn-primary min-h-11 min-w-28 justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-md disabled:cursor-not-allowed disabled:opacity-40"
         >
-          <span>Next</span><ArrowRight size={13} />
+          <span>Next</span><ArrowRight size={19} strokeWidth={2.5} />
         </button>
       </footer>
 
@@ -660,7 +694,7 @@ function BluebookRunner({ exam, onExit, onComplete })
             className="glass-strong rounded-2xl p-4 max-w-md w-full mx-4 flex flex-col gap-3"
           >
             <div className="text-xs text-slate-400 uppercase tracking-wider">Question navigator</div>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-2">
               {questions.map((qn, i) =>
               {
                 const ans = answers[qn.id];
@@ -672,7 +706,7 @@ function BluebookRunner({ exam, onExit, onComplete })
                   <button
                     key={qn.id}
                     onClick={() => { setCurrent(i); setShowNav(false); }}
-                    className={`w-8 h-8 rounded-lg text-xs font-semibold grid place-items-center border transition
+                    className={`w-10 h-10 rounded-xl text-sm font-semibold grid place-items-center border transition
                       ${i === current ? 'border-violet-400 bg-violet-500/30 text-white' :
                         isWrong ? 'border-rose-400/60 bg-rose-500/20 text-rose-200' :
                         isUnanswered ? 'border-amber-400/30 bg-amber-500/10 text-amber-100' :
