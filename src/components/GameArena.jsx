@@ -27,7 +27,8 @@ export default function GameArena({ onNavigate })
       if (!active) return;
       if (boardResult.error || awardResult.error)
       {
-        setMessage('Apply supabase/competition.sql in your Supabase SQL Editor to enable games and standings.');
+        const error = boardResult.error || awardResult.error;
+        setMessage(`Standings request failed (${error.code || 'Supabase error'}): ${error.message}. If you recently changed the database, run the full latest supabase/competition.sql migration.`);
         return;
       }
       setStandings(boardResult.data || []);
@@ -57,7 +58,8 @@ export default function GameArena({ onNavigate })
     setRefreshing(false);
     if (boardResult.error || awardResult.error)
     {
-      setMessage('Could not refresh standings. Check your connection and Supabase setup.');
+      const error = boardResult.error || awardResult.error;
+      setMessage(`Could not refresh standings (${error.code || 'Supabase error'}): ${error.message}.`);
       return;
     }
     setStandings(boardResult.data || []);
@@ -133,7 +135,7 @@ export default function GameArena({ onNavigate })
       <header className="learning-page-header flex flex-wrap items-center justify-between gap-4 px-5 py-5 sm:px-7">
         <div className="flex items-start gap-3">
           <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-emerald-300/15 text-emerald-200"><Gamepad2 size={22} /></span>
-          <div><p className="dashboard-eyebrow">WEEKLY CS LEAGUE</p><h1 className="mt-1 text-2xl font-semibold tracking-tight">Code Sprint</h1><p className="mt-1 max-w-2xl text-sm text-slate-300">Ten original Java questions. Twelve seconds each. Fast, correct answers earn more points.</p></div>
+          <div><p className="page-header-eyebrow dashboard-eyebrow">WEEKLY CS LEAGUE</p><h1 className="page-header-title mt-1 text-2xl font-semibold tracking-tight">Code Sprint</h1><p className="page-header-description mt-1 max-w-2xl text-sm">Ten original Java questions. Twelve seconds each. Fast, correct answers earn more points.</p></div>
         </div>
         <div className="rounded-xl border border-white/10 bg-slate-950/30 px-3 py-2 text-xs text-slate-200">Top three earn a public weekly award</div>
       </header>

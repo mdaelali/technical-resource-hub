@@ -110,8 +110,8 @@ function ExamList({ results, onStart, allExams })
           <div className="flex items-center gap-2 min-w-0">
             <ClipboardList size={18} className="text-emerald-200" />
             <div className="min-w-0">
-              <h2 className="text-lg font-semibold text-white tracking-tight">Mock Exams</h2>
-              <p className="text-xs text-slate-400">
+              <h2 className="page-header-title text-lg font-semibold tracking-tight">Mock Exams</h2>
+              <p className="page-header-description text-xs">
                 {allExams.length} original AP-style exams · Easy, Medium, and Hard
               </p>
             </div>

@@ -49,6 +49,10 @@
 .learning-page .learning-page-header .text-white { color: #f7faf9; }
 .learning-page .learning-page-header .text-slate-300 { color: #c2d1d7; }
 .learning-page .learning-page-header .text-slate-400 { color: #a6bbc3; }
+.learning-page .learning-page-header .page-header-title { color:#f7faf9 !important; }
+.learning-page .learning-page-header .page-header-description,
+.learning-page .learning-page-header .page-header-meta { color:#d7e2e6 !important; }
+.learning-page .learning-page-header .page-header-eyebrow { color:#75dfb8 !important; }
 .docs-page .learning-page-header { padding: 1.25rem 1.5rem; }
 .docs-page .learning-page-header > p { font-size: .9rem; line-height: 1.6; }
 .docs-page article {

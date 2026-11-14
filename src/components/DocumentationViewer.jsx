@@ -173,16 +173,16 @@ export default function DocumentationViewer({
           className="flex flex-col gap-3"
         >
           <div className="learning-page-header px-5 py-4">
-            <div className="text-[10px] uppercase tracking-widest text-slate-300">Section</div>
+            <div className="page-header-eyebrow text-[10px] uppercase tracking-widest">Section</div>
             <div className="flex flex-wrap items-center justify-between gap-1">
-              <div className="text-base font-semibold text-white tracking-tight">{category.title}</div>
+              <div className="page-header-title text-base font-semibold tracking-tight">{category.title}</div>
               {searchQuery && (
-                <span className="text-[11px] text-slate-300">
+                <span className="page-header-meta text-[11px]">
                   {filteredCards.length} of {category.cards.length} match
                 </span>
               )}
             </div>
-            <p className="text-xs text-slate-300 mt-0.5">{category.description}</p>
+            <p className="page-header-description text-xs mt-0.5">{category.description}</p>
           </div>
 
           {category.id.startsWith('ap-csa-unit-') && (
