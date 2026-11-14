@@ -3,10 +3,10 @@ import { Eye, EyeOff, AlertCircle, Loader2, LogIn } from 'lucide-react';
 import AuthShell from './AuthShell.jsx';
 import { useAuth } from '../../auth/AuthContext.jsx';
 
-export default function LoginPage({ onSwitchToSignup, onForgotPassword, onBack })
+export default function LoginPage({ initialEmail = '', onSwitchToSignup, onForgotPassword, onBack })
 {
   const { signIn } = useAuth();
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(null);
@@ -63,7 +63,7 @@ export default function LoginPage({ onSwitchToSignup, onForgotPassword, onBack }
             {onForgotPassword && (
               <button
                 type="button"
-                onClick={onForgotPassword}
+                onClick={() => onForgotPassword(email)}
                 className="text-[11px] text-violet-300 hover:text-white transition"
               >
                 Forgot password?

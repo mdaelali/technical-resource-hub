@@ -103,6 +103,7 @@ export default function DocumentationViewer({
 
   function toggleExpanded(cardKey, card, categoryId, categoryTitle)
   {
+    const wasOpen = expanded.has(cardKey);
     setExpanded((prev) =>
     {
       const next = new Set(prev);
@@ -113,17 +114,14 @@ export default function DocumentationViewer({
       else
       {
         next.add(cardKey);
-        recordRecent({
-          key: cardKey,
-          title: card.title,
-          tag: card.tag,
-          categoryId,
-          categoryTitle
-        });
-        onLogActivity?.();
       }
       return next;
     });
+    if (!wasOpen)
+    {
+      recordRecent({ key: cardKey, title: card.title, tag: card.tag, categoryId, categoryTitle });
+      onLogActivity?.();
+    }
   }
 
   return (
@@ -221,7 +219,7 @@ export default function DocumentationViewer({
               <div className="text-[11px] text-slate-500 mt-1">Try another tab or clear the search.</div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 lg:grid-cols-2 items-start gap-3">
               {filteredCards.map((card) =>
               {
                 const cardKey = `${category.id}:${card.title}`;
@@ -230,7 +228,7 @@ export default function DocumentationViewer({
                 return (
                   <article
                     key={card.title}
-                    className="glass dashboard-panel card-hover rounded-2xl px-4 py-4 flex flex-col gap-2.5"
+                    className="glass dashboard-panel card-hover self-start w-full rounded-2xl px-4 py-4 flex flex-col gap-2.5"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2">
@@ -335,6 +333,7 @@ export default function DocumentationViewer({
                       </div>
                       <button
                         onClick={() => toggleExpanded(cardKey, card, category.id, category.title)}
+                        aria-expanded={isOpen}
                         className="flex items-center gap-1 text-[11px] text-violet-300 hover:text-white px-2 py-1 rounded-lg hover:bg-white/[0.04] transition"
                       >
                         <span>{isOpen ? 'Show less' : 'Read more'}</span>

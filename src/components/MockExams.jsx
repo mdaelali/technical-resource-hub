@@ -413,11 +413,11 @@ function BluebookRunner({ exam, onExit, onComplete })
       </header>
 
       {/* ── Score banner after submit ─────────────── */}
-      {submitted && pct !== null && (
-        <div className={`shrink-0 px-4 py-2 text-xs font-medium flex items-center gap-3 ${pct >= 70 ? 'bg-emerald-500/20 text-emerald-200' : pct >= 50 ? 'bg-amber-500/20 text-amber-200' : 'bg-rose-500/20 text-rose-200'}`}>
+      {submitted && (
+        <div className={`shrink-0 px-4 py-2 text-xs font-medium flex flex-wrap items-center gap-3 ${pct === null ? 'bg-slate-500/15 text-slate-200' : pct >= 70 ? 'bg-emerald-500/20 text-emerald-200' : pct >= 50 ? 'bg-amber-500/20 text-amber-200' : 'bg-rose-500/20 text-rose-200'}`}>
           <Trophy size={13} />
-          Score: {correctCount}/{mcqs.length} MCQ correct ({pct}%)
-          <span className="text-slate-300 ml-2">Review each answer below; missed questions include an explanation.</span>
+          {pct === null ? 'FRQ practice submitted' : `Score: ${correctCount}/${mcqs.length} MCQ correct (${pct}%)`}
+          <span className="text-slate-300">Use Previous/Next to review every MCQ answer and explanation. FRQs are self-reviewed with rubrics and model answers, not included in the MCQ score.</span>
         </div>
       )}
 
@@ -486,7 +486,9 @@ function BluebookRunner({ exam, onExit, onComplete })
             <p className="text-[11px] text-slate-400 -mt-2">
               {answers[q.id] === q.answer
                 ? '✓ Correct — review the explanation below or move on to the next question.'
-                : '✗ Incorrect — review the explanation below, then try the question again.'}
+                : answers[q.id] === undefined
+                  ? 'Not answered — the correct answer and explanation are shown below.'
+                  : '✗ Incorrect — your choice, the correct answer, and the explanation are shown below.'}
             </p>
           )}
 
@@ -609,7 +611,7 @@ function BluebookRunner({ exam, onExit, onComplete })
           )}
 
           {/* Explanation after submit — ref used for auto-scroll when answer clicked */}
-          {submitted && q.type === 'mcq' && answers[q.id] !== undefined && (
+          {submitted && q.type === 'mcq' && (
             <div ref={explanationRef}>
               <ExplanationCard
                 question={q}
@@ -664,7 +666,8 @@ function BluebookRunner({ exam, onExit, onComplete })
                 const ans = answers[qn.id];
                 const done = ans !== undefined || frqCode[qn.id];
                 const marked = markedForReview[qn.id];
-                const isWrong = submitted && qn.type === 'mcq' && ans !== qn.answer;
+                const isWrong = submitted && qn.type === 'mcq' && ans !== undefined && ans !== qn.answer;
+                const isUnanswered = submitted && qn.type === 'mcq' && ans === undefined;
                 return (
                   <button
                     key={qn.id}
@@ -672,6 +675,7 @@ function BluebookRunner({ exam, onExit, onComplete })
                     className={`w-8 h-8 rounded-lg text-xs font-semibold grid place-items-center border transition
                       ${i === current ? 'border-violet-400 bg-violet-500/30 text-white' :
                         isWrong ? 'border-rose-400/60 bg-rose-500/20 text-rose-200' :
+                        isUnanswered ? 'border-amber-400/30 bg-amber-500/10 text-amber-100' :
                         done ? 'border-emerald-400/40 bg-emerald-500/15 text-emerald-200' :
                         marked ? 'border-amber-400/40 bg-amber-500/15 text-amber-200' :
                         'border-white/10 text-slate-400 hover:border-white/30'}`}
@@ -685,7 +689,7 @@ function BluebookRunner({ exam, onExit, onComplete })
               <span><span className="inline-block w-3 h-3 rounded bg-emerald-500/40 mr-1" />Answered</span>
               <span><span className="inline-block w-3 h-3 rounded bg-amber-500/40 mr-1" />Marked</span>
               <span><span className="inline-block w-3 h-3 rounded bg-rose-500/40 mr-1" />Wrong</span>
-              <span><span className="inline-block w-3 h-3 rounded bg-white/10 mr-1" />Unanswered</span>
+              <span><span className="inline-block w-3 h-3 rounded bg-amber-500/30 mr-1" />Unanswered</span>
             </div>
           </div>
         </div>,
@@ -737,11 +741,14 @@ function BluebookRunner({ exam, onExit, onComplete })
 /* ─────────────────────── Explanation + AI chat ──────────────────────────── */
 function ExplanationCard({ question, userAnswer })
 {
-  const isCorrect = userAnswer === question.answer;
+  const hasAnswer = Number.isInteger(userAnswer);
+  const isCorrect = hasAnswer && userAnswer === question.answer;
 
   const explanationBg = isCorrect
     ? 'border-emerald-500/40 bg-emerald-500/10'
-    : 'border-slate-400/30 bg-white/[0.03]';
+    : hasAnswer
+      ? 'border-rose-500/35 bg-rose-500/[0.06]'
+      : 'border-amber-400/30 bg-amber-400/[0.05]';
 
   return (
     <div className={`rounded-xl border text-xs overflow-hidden ${explanationBg}`}>
@@ -750,15 +757,23 @@ function ExplanationCard({ question, userAnswer })
         <div className="flex items-start gap-2.5 min-w-0 flex-1">
           {isCorrect
             ? <CheckCircle2 size={15} className="text-emerald-400 mt-0.5 shrink-0" />
-            : <XCircle size={15} className="text-rose-400 mt-0.5 shrink-0" />}
+            : hasAnswer
+              ? <XCircle size={15} className="text-rose-400 mt-0.5 shrink-0" />
+              : <Clock size={15} className="text-amber-300 mt-0.5 shrink-0" />}
           <div className="min-w-0">
-            <div className={`font-semibold mb-1 ${isCorrect ? 'text-emerald-300' : 'text-rose-300'}`}>
-              {isCorrect
-                ? 'Correct!'
-                : `Incorrect — correct answer: ${LETTERS[question.answer]}) ${question.options[question.answer]}`}
+            <div className={`font-semibold mb-1 ${isCorrect ? 'text-emerald-300' : hasAnswer ? 'text-rose-300' : 'text-amber-200'}`}>
+              {isCorrect ? 'Correct' : hasAnswer ? 'Incorrect' : 'Not answered'}
             </div>
-            {/* Static explanation always shown — no API key needed */}
-            <p className="text-slate-200 leading-relaxed">{question.explanation}</p>
+            <p className="text-slate-300 leading-relaxed">
+              Your answer: {hasAnswer ? `${LETTERS[userAnswer]}) ${question.options[userAnswer]}` : 'Not answered'}
+            </p>
+            <p className="mt-1 text-slate-300 leading-relaxed">
+              Correct answer: {LETTERS[question.answer]}) {question.options[question.answer]}
+            </p>
+            <p className="mt-2 text-slate-200 leading-relaxed">
+              <span className="font-semibold text-white">Explanation: </span>
+              {question.explanation || 'No explanation is available for this question yet.'}
+            </p>
           </div>
         </div>
       </div>

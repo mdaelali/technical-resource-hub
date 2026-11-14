@@ -41,7 +41,7 @@ function friendlyError(error)
   }
   if (msg.includes('user already registered') || msg.includes('already exists'))
   {
-    return 'An account with this email already exists.';
+    return 'An account with this email already exists. Sign in or reset your password.';
   }
   if (msg.includes('invalid login') || msg.includes('invalid credentials'))
   {
@@ -223,7 +223,19 @@ export function AuthProvider({ children })
       });
       if (error)
       {
-        return { ok: false, error: friendlyError(error) };
+        const accountExists = /user already registered|already exists/i.test(error.message || '');
+        return { ok: false, code: accountExists ? 'user_exists' : undefined, error: friendlyError(error) };
+      }
+      // Supabase intentionally returns an obfuscated user for an existing account
+      // when confirmations are enabled. The empty identities list distinguishes it
+      // from a newly created email/password account without using a service key.
+      if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0)
+      {
+        return {
+          ok: false,
+          code: 'user_exists',
+          error: 'An account with this email already exists. Sign in or reset your password.'
+        };
       }
       // If email confirmation is enabled in the Supabase project, no session is
       // returned until the user clicks the confirmation link.

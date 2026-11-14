@@ -3,10 +3,10 @@ import { Mail, AlertCircle, Loader2, ArrowLeft, CheckCircle2 } from 'lucide-reac
 import AuthShell from './AuthShell.jsx';
 import { useAuth } from '../../auth/AuthContext.jsx';
 
-export default function ForgotPasswordPage({ onBack })
+export default function ForgotPasswordPage({ initialEmail = '', onBack })
 {
   const { requestPasswordReset } = useAuth();
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(initialEmail);
   const [error, setError] = useState(null);
   const [sent, setSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);

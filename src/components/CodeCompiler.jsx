@@ -31,7 +31,7 @@ export default function CodeCompiler({ onLogActivity })
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
   // Resizable split — editorPct is the editor column's share of the row (30–85 %).
-  const [editorPct, setEditorPct] = useState(65);
+  const [editorPct, setEditorPct] = useState(58);
   const splitRef = useRef(null);
   const dragging = useRef(false);
 
@@ -184,10 +184,10 @@ export default function CodeCompiler({ onLogActivity })
       </div>
 
       {/* Resizable split — stacked on mobile, side-by-side on lg+ */}
-      <div ref={splitRef} className="flex flex-col lg:flex-row gap-2 relative select-none" style={{ minHeight: '520px' }}>
+      <div ref={splitRef} className="flex flex-col lg:flex-row gap-2 relative select-none overflow-hidden" style={{ height: 'min(72vh, 720px)', minHeight: '480px', maxHeight: '720px' }}>
         <div
-          className="glass rounded-2xl overflow-hidden flex flex-col"
-          style={{ flexBasis: `${editorPct}%`, minWidth: 0, flexShrink: 0, flexGrow: 0, minHeight: '480px' }}
+          className="glass rounded-2xl overflow-hidden flex flex-col min-h-0"
+          style={{ flexBasis: `${editorPct}%`, minWidth: 0, flexShrink: 0, flexGrow: 0 }}
         >
           <div className="flex items-center justify-between px-3 py-1.5 border-b border-white/10 bg-black/20">
             <div className="flex items-center gap-1.5">
@@ -215,8 +215,8 @@ export default function CodeCompiler({ onLogActivity })
           <div className="w-0.5 h-12 rounded-full bg-white/10 group-hover:bg-violet-400/60 transition" />
         </div>
 
-        <div className="flex flex-col gap-2 flex-1" style={{ minWidth: 0, minHeight: '480px' }}>
-          <div className="glass rounded-2xl overflow-hidden flex flex-col flex-1">
+        <div className="flex flex-col gap-2 flex-1 min-h-0" style={{ minWidth: 0 }}>
+          <div className="glass rounded-2xl overflow-hidden flex flex-col flex-1 min-h-0">
             <div className="flex items-center justify-between px-3 py-1.5 border-b border-white/10 bg-black/20">
               <div className="flex items-center gap-1.5 text-xs text-slate-300">
                 <Terminal size={12} className="text-emerald-300" />
@@ -239,7 +239,7 @@ export default function CodeCompiler({ onLogActivity })
                 </div>
               )}
             </div>
-            <div className="flex-1 min-h-0 overflow-auto p-3 font-mono text-[11.5px] leading-[1.55]">
+            <div className="flex-1 min-h-0 overflow-y-auto overflow-x-auto overscroll-contain p-3 font-mono text-[11.5px] leading-[1.55]">
               <AnimatePresence mode="wait">
                 {running && (
                   <motion.div
@@ -307,7 +307,7 @@ export default function CodeCompiler({ onLogActivity })
             </div>
           </div>
 
-          <div className="glass rounded-2xl overflow-hidden flex flex-col">
+          <div className="glass rounded-2xl overflow-hidden flex flex-col shrink-0">
             <div className="px-3 py-1.5 border-b border-white/10 bg-black/20 text-xs text-slate-300">
               stdin <span className="text-slate-500 text-[10px]">(optional)</span>
             </div>
@@ -317,7 +317,7 @@ export default function CodeCompiler({ onLogActivity })
               placeholder="Provide input lines for your program..."
               spellCheck={false}
               maxLength={4000}
-              className="bg-[#0a0c14] font-mono text-[11.5px] leading-[1.55] text-slate-200 px-3 py-2 h-20 resize-none focus:outline-none placeholder:text-slate-600"
+              className="bg-[#0a0c14] font-mono text-[11.5px] leading-[1.55] text-slate-200 px-3 py-2 h-24 resize-none overflow-y-auto overflow-x-auto overscroll-contain focus:outline-none placeholder:text-slate-600"
             />
           </div>
         </div>

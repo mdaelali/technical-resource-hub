@@ -13,6 +13,7 @@ export default function AppRoot()
 {
   const { user, loading, isRecovering, isSupabaseConfigured } = useAuth();
   const [authView, setAuthView] = useState(readAuthView);
+  const [authEmail, setAuthEmail] = useState('');
 
   useEffect(() =>
   {
@@ -64,16 +65,21 @@ export default function AppRoot()
     }
     if (authView === 'signup')
     {
-      return <SignupPage onSwitchToLogin={() => navigateAuth('login')} onBack={() => navigateAuth('home')} />;
+      return <SignupPage
+        onSwitchToLogin={(email) => { setAuthEmail(email); navigateAuth('login'); }}
+        onForgotPassword={(email) => { setAuthEmail(email); navigateAuth('forgot'); }}
+        onBack={() => navigateAuth('home')}
+      />;
     }
     if (authView === 'forgot')
     {
-      return <ForgotPasswordPage onBack={() => navigateAuth('login')} />;
+      return <ForgotPasswordPage initialEmail={authEmail} onBack={() => navigateAuth('login')} />;
     }
     return (
       <LoginPage
+        initialEmail={authEmail}
         onSwitchToSignup={() => navigateAuth('signup')}
-        onForgotPassword={() => navigateAuth('forgot')}
+        onForgotPassword={(email) => { setAuthEmail(email); navigateAuth('forgot'); }}
         onBack={() => navigateAuth('home')}
       />
     );
