@@ -261,8 +261,14 @@ begin
         b.user_id, p.alias, b.score, b.correct_count, b.user_id = auth.uid() as self
       from best b join public.competition_profiles p on p.user_id = b.user_id
     )
-    select r.rank_no, r.alias, r.score, r.correct_count::integer, r.self,
-      coalesce((select array_agg(a.award_type order by a.week_start desc) from public.competition_game_awards a where a.user_id = r.user_id and a.week_start < v_week), array[]::text[])
+    -- Cast every expression to the declared RETURNS TABLE type. Existing projects may
+    -- have created alias or score with a different compatible SQL type before this
+    -- migration was updated; PL/pgSQL RETURN QUERY requires exact type matches.
+    select r.rank_no::bigint, r.alias::text, r.score::integer,
+      r.correct_count::integer, r.self::boolean,
+      coalesce((select array_agg(a.award_type order by a.week_start desc)
+        from public.competition_game_awards a
+        where a.user_id = r.user_id and a.week_start < v_week), array[]::text[])::text[]
     from ranked r where r.rank_no <= 50 or r.self order by r.rank_no;
 end;
 $$;
