@@ -22,13 +22,7 @@
 
 <br />
 
-<!--
-  Live auto-screenshot of the production site via thum.io.
-  No file is committed — the image URL is fetched fresh by GitHub's image
-  proxy, so the README always shows the current state of alihasanli.com.
--->
-
-[![Live screenshot of alihasanli.com](https://image.thum.io/get/maxAge/12/width/1200/noanimate/https://alihasanli.com)](https://alihasanli.com)
+[![Resource Hub dashboard](docs/screenshots/dashboard.png)](https://alihasanli.com)
 
 </div>
 
