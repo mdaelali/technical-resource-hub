@@ -1,5 +1,5 @@
--- Opt-in weekly practice leaderboard. Apply in Supabase SQL Editor.
--- The browser never writes point values or reads event rows directly.
+-- Opt-in weekly CS game league. Apply in Supabase SQL Editor.
+-- Ranked game scores are derived and stored only by server-side functions.
 create table if not exists public.competition_profiles (
   user_id uuid primary key references auth.users(id) on delete cascade,
   alias text not null check (char_length(alias) between 3 and 20 and alias = btrim(alias) and alias ~ '^[[:alnum:] _.-]{3,20}$'),
@@ -8,6 +8,8 @@ create table if not exists public.competition_profiles (
 );
 
 alter table public.competition_profiles enable row level security;
+revoke all on public.competition_profiles from public, anon;
+grant select, insert, update, delete on public.competition_profiles to authenticated;
 create unique index if not exists competition_profiles_alias_unique
   on public.competition_profiles (lower(alias));
 drop policy if exists "Users manage their competition profile" on public.competition_profiles;
@@ -15,20 +17,6 @@ create policy "Users manage their competition profile"
   on public.competition_profiles for all to authenticated
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
-
-create table if not exists public.competition_events (
-  id bigint generated always as identity primary key,
-  user_id uuid not null references auth.users(id) on delete cascade,
-  week_start date not null,
-  event_date date not null,
-  event_type text not null check (event_type in ('topic_mastered', 'exam_completed', 'code_run')),
-  content_key text not null check (char_length(content_key) between 1 and 120),
-  points smallint not null check (points between 1 and 8),
-  created_at timestamptz not null default now(),
-  unique (user_id, week_start, event_type, content_key)
-);
-create unique index if not exists competition_code_once_per_day
-  on public.competition_events (user_id, event_date) where event_type = 'code_run';
 
 -- Timed rounds are server-scored: the client can see answer choices, never the key.
 create table if not exists public.competition_game_questions (
@@ -81,6 +69,8 @@ create table if not exists public.competition_game_sessions (
 );
 create index if not exists competition_game_sessions_week_idx
   on public.competition_game_sessions (week_start, user_id, score desc);
+create index if not exists competition_game_sessions_daily_limit_idx
+  on public.competition_game_sessions (user_id, week_start, created_at);
 
 create table if not exists public.competition_game_awards (
   user_id uuid not null references auth.users(id) on delete cascade,
@@ -100,86 +90,7 @@ alter table public.competition_game_questions enable row level security;
 alter table public.competition_game_sessions enable row level security;
 alter table public.competition_game_awards enable row level security;
 alter table public.competition_game_closed_weeks enable row level security;
-revoke all on public.competition_game_questions, public.competition_game_sessions, public.competition_game_awards, public.competition_game_closed_weeks from anon, authenticated;
-
-alter table public.competition_events enable row level security;
-revoke all on public.competition_events from anon, authenticated;
-revoke all on sequence public.competition_events_id_seq from anon, authenticated;
-
-create or replace function public.record_practice_event(p_event_type text, p_content_key text)
-returns integer
-language plpgsql
-security definer
-set search_path = ''
-as $$
-declare
-  v_user uuid := auth.uid();
-  v_today date := (now() at time zone 'utc')::date;
-  v_week date := date_trunc('week', now() at time zone 'utc')::date;
-  v_points smallint;
-  v_earned integer := 0;
-  v_daily integer;
-begin
-  if v_user is null then raise exception 'Authentication required'; end if;
-  if not exists (
-    select 1 from public.competition_profiles
-    where user_id = v_user and enabled = true
-  ) then return 0; end if;
-  if p_content_key is null or char_length(p_content_key) not between 1 and 120
-     or p_content_key !~ '^[A-Za-z0-9_.:-]+$' then
-    raise exception 'Invalid practice event';
-  end if;
-  if (p_event_type = 'topic_mastered' and p_content_key !~ '^(ap-csa-unit-[1-4]:[1-4]\.[0-9]+-[a-z0-9-]+|algorithms:[a-z0-9-]+|logic:[a-z0-9-]+|exam:[a-z0-9-]+)$')
-     or (p_event_type = 'exam_completed' and p_content_key !~ '^ap-(full-[1-5]|mcq-[1-8]|frq-[1-7]|mixed-(10|[1-9]))$')
-     or (p_event_type = 'code_run' and p_content_key !~ '^compiler-(java|python|cpp)-[0-9]+$') then
-    raise exception 'Invalid practice event';
-  end if;
-  v_points := case p_event_type
-    when 'topic_mastered' then 3
-    when 'exam_completed' then 8
-    when 'code_run' then 1
-    else null
-  end;
-  if v_points is null then raise exception 'Invalid practice event'; end if;
-
-  perform pg_advisory_xact_lock(hashtextextended(v_user::text || v_today::text, 0));
-  select coalesce(sum(points), 0) into v_daily
-    from public.competition_events where user_id = v_user and event_date = v_today;
-  if v_daily >= 24 then return 0; end if;
-
-  insert into public.competition_events(user_id, week_start, event_date, event_type, content_key, points)
-  values (v_user, v_week, v_today, p_event_type, p_content_key, least(v_points, 24 - v_daily))
-  on conflict do nothing;
-  if found then v_earned := least(v_points, 24 - v_daily); end if;
-  return v_earned;
-end;
-$$;
-
-create or replace function public.get_weekly_competition_board()
-returns table(place bigint, alias text, points bigint, is_self boolean)
-language sql
-stable
-security definer
-set search_path = ''
-as $$
-  with totals as (
-    select p.user_id, p.alias, coalesce(sum(e.points), 0)::bigint as points
-    from public.competition_profiles p
-    left join public.competition_events e
-      on e.user_id = p.user_id
-      and e.week_start = date_trunc('week', now() at time zone 'utc')::date
-    where p.enabled = true
-    group by p.user_id, p.alias
-  ), ranked as (
-    select row_number() over (order by points desc, alias asc)::bigint as place,
-           alias, points, user_id = auth.uid() as is_self
-    from totals
-  )
-  select ranked.place, ranked.alias, ranked.points, ranked.is_self
-  from ranked
-  where ranked.place <= 10 or ranked.is_self
-  order by ranked.place;
-$$;
+revoke all on public.competition_game_questions, public.competition_game_sessions, public.competition_game_awards, public.competition_game_closed_weeks from public, anon, authenticated;
 
 create or replace function public.start_cs_sprint()
 returns jsonb
@@ -236,6 +147,7 @@ declare
   v_response jsonb;
 begin
   if v_user is null then raise exception 'Authentication required'; end if;
+  if p_question_id is null then raise exception 'Question is required'; end if;
   if p_answer is not null and p_answer not between 0 and 3 then raise exception 'Invalid answer'; end if;
   select * into v_game from public.competition_game_sessions
     where session_id = p_session_id and user_id = v_user for update;
@@ -321,6 +233,8 @@ begin
     insert into public.competition_game_closed_weeks(week_start) values (v_period.week_start)
       on conflict do nothing;
   end loop;
+  -- The durable award table preserves achievements; raw answer sessions are not student history.
+  delete from public.competition_game_sessions where week_start < v_week - 90;
 end;
 $$;
 
@@ -384,16 +298,12 @@ as $$
   limit 30;
 $$;
 
-revoke all on function public.record_practice_event(text, text) from public, anon;
-revoke all on function public.get_weekly_competition_board() from public, anon;
 revoke all on function public.start_cs_sprint() from public, anon;
 revoke all on function public.answer_cs_sprint(uuid, text, integer) from public, anon;
 revoke all on function public.finalize_weekly_game_awards() from public, anon, authenticated;
 revoke all on function public.get_weekly_game_standings() from public, anon;
 revoke all on function public.get_my_game_awards() from public, anon;
 revoke all on function public.get_public_game_awards() from public, anon;
-grant execute on function public.record_practice_event(text, text) to authenticated;
-grant execute on function public.get_weekly_competition_board() to authenticated;
 grant execute on function public.start_cs_sprint() to authenticated;
 grant execute on function public.answer_cs_sprint(uuid, text, integer) to authenticated;
 grant execute on function public.get_weekly_game_standings() to authenticated;

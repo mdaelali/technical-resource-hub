@@ -11,7 +11,6 @@ import { exams } from '../data/examLibrary.js';
 import { referenceSheet } from '../data/referenceSheet.js';
 import CodeEditor from './CodeEditor.jsx';
 import { localDateKey } from '../utils/dates.js';
-import { recordCompetitionEvent } from '../api/competitionService.js';
 
 const LETTERS = ['A', 'B', 'C', 'D', 'E'];
 
@@ -62,7 +61,6 @@ export default function MockExams({ onLogActivity })
         [examId]: { best, totalMcq, completed: true, takenAt: localDateKey() }
       };
     });
-    void recordCompetitionEvent('exam_completed', examId);
     onLogActivity?.();
   }
 

@@ -19,7 +19,6 @@ import
 } from 'lucide-react';
 import { docCategories } from '../data/docs.js';
 import useUserStorage from '../hooks/useUserStorage.js';
-import { recordCompetitionEvent } from '../api/competitionService.js';
 import useRecentlyViewed from '../hooks/useRecentlyViewed.js';
 
 const ICONS = {
@@ -90,7 +89,6 @@ export default function DocumentationViewer({
 
   function toggleMastered(cardKey)
   {
-    const isNewMastery = !safeMastered.includes(cardKey);
     setMastered((prev) =>
     {
       const list = prev || [];
@@ -100,7 +98,6 @@ export default function DocumentationViewer({
       }
       return [...list, cardKey];
     });
-    if (isNewMastery) void recordCompetitionEvent('topic_mastered', cardKey);
     onLogActivity?.();
   }
 
