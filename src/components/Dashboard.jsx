@@ -3,6 +3,7 @@ import { useAuth } from '../auth/AuthContext.jsx';
 import { docCategories } from '../data/docs.js';
 import useStreak from '../hooks/useStreak.js';
 import useUserStorage from '../hooks/useUserStorage.js';
+import useMidnightTick from '../hooks/useMidnightTick.js';
 import { localDateKey } from '../utils/dates.js';
 import './Dashboard.css';
 
@@ -15,7 +16,7 @@ export default function Dashboard({ onNavigate })
   const [mastered] = useUserStorage('mastered', []);
   const [recent] = useUserStorage('recentlyViewed', []);
   const [plan, setPlan] = useUserStorage('learningPlan', { date: localDateKey(), completed: [] });
-  const today = localDateKey();
+  const today = useMidnightTick();
   const completed = plan?.date === today ? plan.completed || [] : [];
   const completion = Math.round((completed.length / 3) * 100);
   const nextTopic = findNextTopic(mastered || []);

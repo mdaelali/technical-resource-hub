@@ -38,7 +38,15 @@ export async function fetchState(userId)
   return rowToState(data);
 }
 
-export async function upsertState(userId, snapshot)
+function isMissingColumn(error, column)
+{
+  const text = `${error?.message || ''} ${error?.details || ''} ${error?.hint || ''}`;
+  return error?.code === '42703' || error?.code === 'PGRST204' || text.includes(column);
+}
+
+let warnedMissingPlanColumn = false;
+
+export async function upsertState(userId, snapshot, options = {})
 {
   if (!supabase)
   {
@@ -56,9 +64,45 @@ export async function upsertState(userId, snapshot)
     learning_plan: snapshot.learningPlan ?? { date: null, completed: [] },
     updated_at: new Date().toISOString()
   };
+  if (options.keepalive)
+  {
+    // Used while the page is unloading: a plain fetch with keepalive survives
+    // the navigation, the supabase-js client does not.
+    const { data } = await supabase.auth.getSession();
+    const token = data?.session?.access_token;
+    if (!token) return;
+    await fetch(`${import.meta.env.VITE_SUPABASE_URL.trim()}/rest/v1/user_state?on_conflict=user_id`, {
+      method: 'POST',
+      keepalive: true,
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim(),
+        Authorization: `Bearer ${token}`,
+        Prefer: 'resolution=merge-duplicates,return=minimal'
+      },
+      body: JSON.stringify(row)
+    });
+    return;
+  }
   const { error } = await supabase
     .from('user_state')
     .upsert(row, { onConflict: 'user_id' });
+  if (error && isMissingColumn(error, 'learning_plan'))
+  {
+    // Older databases predate the learning_plan column. Save everything else
+    // rather than nothing, and say what to run once.
+    if (!warnedMissingPlanColumn)
+    {
+      warnedMissingPlanColumn = true;
+      console.warn('user_state has no learning_plan column. Run in the Supabase SQL editor: ' +
+        "alter table public.user_state add column if not exists learning_plan jsonb not null default '{\"date\": null, \"completed\": []}'::jsonb;");
+    }
+    const withoutPlan = { ...row };
+    delete withoutPlan.learning_plan;
+    const retry = await supabase.from('user_state').upsert(withoutPlan, { onConflict: 'user_id' });
+    if (retry.error) throw retry.error;
+    return;
+  }
   if (error)
   {
     throw error;

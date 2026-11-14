@@ -57,6 +57,17 @@ export default function useLocalStorage(key, initial)
     initialRef.current = initial;
   }, [initial]);
 
+  // When the key changes (for example guest -> signed-in user), read the value
+  // stored under the new key instead of carrying the old one across.
+  const keyRef = useRef(key);
+  useEffect(() =>
+  {
+    if (keyRef.current === key) return;
+    keyRef.current = key;
+    const cached = readCached(key);
+    setValue(cached === SENTINEL ? initialRef.current : cached);
+  }, [key]);
+
   useEffect(() =>
   {
     function onSync(event)
