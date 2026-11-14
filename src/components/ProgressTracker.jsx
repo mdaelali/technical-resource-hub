@@ -4,6 +4,7 @@ import useUserStorage from '../hooks/useUserStorage.js';
 import { docCategories } from '../data/docs.js';
 import { localDateKey } from '../utils/dates.js';
 import './Dashboard.css';
+import WeeklyCompetition from './WeeklyCompetition.jsx';
 
 const TOTAL_TOPICS = docCategories.reduce((sum, category) => sum + category.cards.length, 0);
 const EMPTY_MASTERED = [];
@@ -58,7 +59,7 @@ export default function ProgressTracker({ compact = false })
           label="Still to explore"
           value={remaining}
           unit={remaining === 1 ? 'topic' : 'topics'}
-          detail="Across algorithms, logic, and exam prep"
+          detail="Across AP CSA and core CS"
           tone="blue"
         />
       )}
@@ -124,6 +125,8 @@ export default function ProgressTracker({ compact = false })
         </div>
         <TrendingUp size={17} className="ml-auto hidden shrink-0 text-emerald-300 sm:block" aria-hidden="true" />
       </aside>
+
+      <WeeklyCompetition />
     </div>
   );
 }

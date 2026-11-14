@@ -50,6 +50,7 @@
 .learning-page .learning-page-header .text-slate-300 { color: #c2d1d7; }
 .learning-page .learning-page-header .text-slate-400 { color: #a6bbc3; }
 .docs-page .learning-page-header { padding: 1.25rem 1.5rem; }
+.docs-page .learning-page-header > p { font-size: .9rem; line-height: 1.6; }
 .docs-page article {
   gap: .9rem;
   padding: clamp(1.1rem, 1.8vw, 1.5rem);
@@ -78,10 +79,17 @@
   gap: .5rem;
 }
 .docs-page article > div.flex.flex-wrap.items-center button { font-size: .8rem; padding: .45rem .6rem; }
-.docs-page .pill { font-size: .7rem; padding: .25rem .55rem; }
+.docs-page .pill { font-size: .75rem; padding: .3rem .6rem; }
+.exam-card > div:first-child p { font-size: .9rem; line-height: 1.6; }
+.exam-format-note { font-size: .9rem; line-height: 1.65; }
 @media (max-width: 640px) {
   .docs-page .learning-page-header { padding: 1rem; }
-  .docs-page article > p { font-size: .95rem; }
+  .docs-page .learning-page-header > p { font-size: .9rem; }
+  .docs-page article > p { font-size: 1rem; line-height: 1.7; }
+  .docs-page article > div.flex.items-start,
+  .docs-page article > ul { font-size: .9rem; line-height: 1.65; }
+  .docs-page article h3 { font-size: 1.05rem; }
+  .exam-card > div:first-child p { font-size: .9rem; }
 }
 html.light .learning-page .learning-page-header { color:#f7faf9; }
 html.light .learning-page .dashboard-panel { background:#ffffffd9; border-color:#dfe7e2; box-shadow:0 6px 24px #1f3e3210; }

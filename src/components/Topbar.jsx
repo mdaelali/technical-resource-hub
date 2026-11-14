@@ -26,6 +26,7 @@ const TITLES = {
   playground: { title: 'Code Playground', subtitle: 'Java reference snippets with syntax highlighting' },
   compiler: { title: 'Online Compiler', subtitle: 'Write and run Java, Python, and C++ in your browser' },
   exams: { title: 'Mock Exams', subtitle: 'Practice tests — auto-graded MCQs and AP-style coding questions' },
+  games: { title: 'Code Sprint', subtitle: 'Timed Java challenges, weekly standings, and player awards' },
   progress: { title: 'Progress Tracker', subtitle: 'Streak, mastery, and topic-level milestones' },
   profile: { title: 'Profile', subtitle: 'Your study identity, badges, and recent activity' }
 };

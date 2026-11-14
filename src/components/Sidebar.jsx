@@ -10,7 +10,8 @@ import
   UserRound,
   X,
   LogOut,
-  ClipboardList
+  ClipboardList,
+  Gamepad2
 } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext.jsx';
 
@@ -20,6 +21,7 @@ const NAV_ITEMS = [
   { id: 'playground', label: 'Code Playground', icon: Code2 },
   { id: 'compiler', label: 'Online Compiler', icon: Terminal },
   { id: 'exams', label: 'Mock Exams', icon: ClipboardList },
+  { id: 'games', label: 'Code Sprint', icon: Gamepad2 },
   { id: 'progress', label: 'Progress', icon: Sparkles },
   { id: 'profile', label: 'Profile', icon: UserRound }
 ];

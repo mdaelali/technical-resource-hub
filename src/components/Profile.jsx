@@ -26,6 +26,7 @@ import useRecentlyViewed from '../hooks/useRecentlyViewed.js';
 import { docCategories } from '../data/docs.js';
 import { useAuth } from '../auth/AuthContext.jsx';
 import { uploadAvatar } from '../api/profileService.js';
+import { supabase } from '../api/supabaseClient.js';
 
 const TOTAL_TOPICS = docCategories.reduce((sum, c) => sum + c.cards.length, 0);
 
@@ -75,7 +76,7 @@ const BADGES = [
   {
     id: 'master-student',
     name: 'Master Student',
-    description: 'Master all 18 topics.',
+    description: 'Master every topic in the learning library.',
     earn: ({ mastered }) => mastered.length >= TOTAL_TOPICS
   },
   {
@@ -92,9 +93,19 @@ export default function Profile({ onNavigate })
   const [mastered] = useUserStorage('mastered', []);
   const [streak] = useUserStorage('streak', { count: 0, last: null });
   const [recent, , clearRecent] = useRecentlyViewed();
+  const [gameAwards, setGameAwards] = useState([]);
 
   const safeMastered = useMemo(() => mastered || [], [mastered]);
   const safeStreak = useMemo(() => streak || { count: 0, last: null }, [streak]);
+
+  useEffect(() => {
+    if (!supabase || !user?.id) return;
+    let active = true;
+    supabase.rpc('get_my_game_awards').then(({ data }) => {
+      if (active) setGameAwards(data || []);
+    });
+    return () => { active = false; };
+  }, [user?.id]);
 
   const [editing, setEditing] = useState(false);
   const [draftName, setDraftName] = useState('');
@@ -507,6 +518,13 @@ export default function Profile({ onNavigate })
           })}
         </div>
       </div>
+
+      <section className="glass dashboard-panel rounded-2xl px-4 py-4" aria-labelledby="game-awards-heading">
+        <div className="mb-3 flex items-center gap-2"><Trophy size={15} className="text-amber-200" /><h3 id="game-awards-heading" className="text-sm font-semibold text-white">Code Sprint awards</h3></div>
+        {gameAwards.length ? <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {gameAwards.map((award) => <li key={`${award.week_start}-${award.award_type}`} className="flex items-center gap-3 rounded-xl border border-amber-200/10 bg-amber-200/[0.04] p-3"><Award size={18} className="shrink-0 text-amber-200" /><span className="min-w-0 flex-1"><span className="block text-sm font-semibold text-white">{{ champion: 'Weekly champion', runner_up: 'Runner-up', third_place: 'Third place' }[award.award_type] || award.award_type}</span><span className="text-xs dashboard-muted">Week of {award.week_start} · {award.score} points</span></span></li>)}
+        </ul> : <p className="text-sm dashboard-muted">Finish in the weekly top three in Code Sprint to earn an award here. Awards are stored with your account.</p>}
+      </section>
 
       <div className="glass rounded-2xl px-4 py-3">
         <div className="flex items-center justify-between mb-2">

@@ -14,6 +14,7 @@ const DocumentationViewer = lazy(() => import('./components/DocumentationViewer.
 const CodePlayground = lazy(() => import('./components/CodePlayground.jsx'));
 const CodeCompiler = lazy(() => import('./components/CodeCompiler.jsx'));
 const MockExams = lazy(() => import('./components/MockExams.jsx'));
+const GameArena = lazy(() => import('./components/GameArena.jsx'));
 const Profile = lazy(() => import('./components/Profile.jsx'));
 
 const PAGE_DWELL_MS = 2 * 60 * 1000;
@@ -23,6 +24,7 @@ const VALID_SECTIONS = new Set([
   'playground',
   'compiler',
   'exams',
+  'games',
   'progress',
   'profile'
 ]);
@@ -177,6 +179,8 @@ export default function App()
         return <CodeCompiler onLogActivity={logActivity} />;
       case 'exams':
         return <MockExams onLogActivity={logActivity} />;
+      case 'games':
+        return <GameArena onNavigate={handleNavigate} />;
       case 'progress':
         return <ProgressTracker />;
       case 'profile':

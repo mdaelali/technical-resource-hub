@@ -12,10 +12,14 @@ import
   AlertTriangle,
   ListChecks,
   Clock,
-  Sparkles
+  Sparkles,
+  Download,
+  ExternalLink,
+  GraduationCap
 } from 'lucide-react';
 import { docCategories } from '../data/docs.js';
 import useUserStorage from '../hooks/useUserStorage.js';
+import { recordCompetitionEvent } from '../api/competitionService.js';
 import useRecentlyViewed from '../hooks/useRecentlyViewed.js';
 
 const ICONS = {
@@ -86,6 +90,7 @@ export default function DocumentationViewer({
 
   function toggleMastered(cardKey)
   {
+    const isNewMastery = !safeMastered.includes(cardKey);
     setMastered((prev) =>
     {
       const list = prev || [];
@@ -95,6 +100,7 @@ export default function DocumentationViewer({
       }
       return [...list, cardKey];
     });
+    if (isNewMastery) void recordCompetitionEvent('topic_mastered', cardKey);
     onLogActivity?.();
   }
 
@@ -128,8 +134,8 @@ export default function DocumentationViewer({
       <div className="flex flex-wrap gap-2">
         {docCategories.map((cat) =>
         {
-          const Icon = ICONS[cat.id];
-          const accent = ACCENTS[cat.id];
+          const Icon = ICONS[cat.id] || GraduationCap;
+          const accent = ACCENTS[cat.id] || 'text-emerald-300';
           const isActive = cat.id === activeCategory;
           const count = counts[cat.id];
           return (
@@ -181,6 +187,33 @@ export default function DocumentationViewer({
             </div>
             <p className="text-xs text-slate-300 mt-0.5">{category.description}</p>
           </div>
+
+          {category.id.startsWith('ap-csa-unit-') && (
+            <section className="dashboard-panel rounded-2xl p-4 sm:p-5" aria-labelledby="ap-csa-resources-title">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div className="max-w-2xl">
+                  <p className="dashboard-eyebrow">OFFICIAL SYLLABUS · OFFLINE STUDY</p>
+                  <h3 id="ap-csa-resources-title" className="mt-1 text-base font-semibold tracking-tight">Use the complete College Board course description</h3>
+                  <p className="mt-1 text-sm leading-relaxed dashboard-muted">
+                    Open the official PDF, then use the PDF viewer’s download button to save it on your phone or computer for offline reading. This topic guide is a study aid; the official document contains the full required knowledge and exclusions.
+                  </p>
+                </div>
+                <a
+                  href="https://apcentral.collegeboard.org/media/pdf/ap-computer-science-a-course-and-exam-description.pdf"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-emerald-500/15 px-4 py-2.5 text-sm font-semibold text-emerald-100 ring-1 ring-emerald-300/20 transition hover:bg-emerald-500/25"
+                >
+                  <Download size={16} /> Open / save official PDF <ExternalLink size={14} />
+                </a>
+              </div>
+              <div className="mt-4 border-t border-white/10 pt-3 text-xs leading-relaxed dashboard-muted">
+                <span className="font-semibold text-slate-200">Barron’s AP Computer Science A Premium, 12th Edition:</span>{' '}
+                use a legally acquired copy for offline book study. The publisher’s online hub can help identify supported editions; the complete textbook file is not hosted here.
+                {' '}<a href="https://www.barronseduc.com/booksonline?search=computer" target="_blank" rel="noreferrer" className="font-medium text-emerald-200 underline decoration-emerald-200/40 underline-offset-4 hover:text-white">Visit Barron’s official book hub <ExternalLink size={11} className="inline" /></a>
+              </div>
+            </section>
+          )}
 
           {filteredCards.length === 0 ? (
             <div className="glass rounded-2xl px-4 py-8 text-center">

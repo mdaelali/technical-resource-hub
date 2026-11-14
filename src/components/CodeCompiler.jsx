@@ -18,6 +18,7 @@ import CodeEditor from './CodeEditor.jsx';
 // at ce.judge0.com still works for our purposes. See src/api/piston.js if we
 // ever self-host a Piston instance and want to switch back.
 import { LANGUAGES, runCode, CompilerError, MAX_SOURCE_LENGTH } from '../api/judge0.js';
+import { recordCompetitionEvent } from '../api/competitionService.js';
 import useUserStorage from '../hooks/useUserStorage.js';
 import { clampCodeLength } from '../utils/security.js';
 
@@ -117,6 +118,7 @@ export default function CodeCompiler({ onLogActivity })
         stdin: typeof stdin === 'string' ? stdin : ''
       });
       setResult({ ...data, finishedAt: new Date() });
+      if (!data.stderr && !data.compileOutput && !data.error) void recordCompetitionEvent('code_run', `compiler-${languageKey}-${Date.now()}`);
     }
     catch (err)
     {

@@ -11,6 +11,7 @@ import { exams } from '../data/examLibrary.js';
 import { referenceSheet } from '../data/referenceSheet.js';
 import CodeEditor from './CodeEditor.jsx';
 import { localDateKey } from '../utils/dates.js';
+import { recordCompetitionEvent } from '../api/competitionService.js';
 
 const LETTERS = ['A', 'B', 'C', 'D', 'E'];
 
@@ -34,6 +35,13 @@ const EXAM_FILTERS = [
   ['mixed', 'Mixed practice']
 ];
 
+const DIFFICULTY_FILTERS = [
+  ['all', 'All levels'],
+  ['easy', 'Easy'],
+  ['medium', 'Medium'],
+  ['hard', 'Hard']
+];
+
 /* ─────────────────────── Root component ─────────────────────────────────── */
 export default function MockExams({ onLogActivity })
 {
@@ -54,6 +62,7 @@ export default function MockExams({ onLogActivity })
         [examId]: { best, totalMcq, completed: true, takenAt: localDateKey() }
       };
     });
+    void recordCompetitionEvent('exam_completed', examId);
     onLogActivity?.();
   }
 
@@ -80,9 +89,12 @@ export default function MockExams({ onLogActivity })
 function ExamList({ results, onStart, allExams })
 {
   const [formatFilter, setFormatFilter] = useState('all');
+  const [difficultyFilter, setDifficultyFilter] = useState('all');
   const visibleExams = useMemo(
-    () => formatFilter === 'all' ? allExams : allExams.filter((exam) => exam.format === formatFilter),
-    [allExams, formatFilter]
+    () => allExams.filter((exam) =>
+      (formatFilter === 'all' || exam.format === formatFilter) &&
+      (difficultyFilter === 'all' || exam.difficulty === difficultyFilter)),
+    [allExams, formatFilter, difficultyFilter]
   );
 
   function countTypes(exam)
@@ -102,7 +114,7 @@ function ExamList({ results, onStart, allExams })
             <div className="min-w-0">
               <h2 className="text-lg font-semibold text-white tracking-tight">Mock Exams</h2>
               <p className="text-xs text-slate-400">
-                {allExams.length} original AP-style practice exams · full, MCQ, FRQ, and mixed formats
+                {allExams.length} original AP-style exams · Easy, Medium, and Hard
               </p>
             </div>
           </div>
@@ -124,6 +136,24 @@ function ExamList({ results, onStart, allExams })
               aria-pressed={formatFilter === id}
               onClick={() => setFormatFilter(id)}
               className={`exam-filter ${formatFilter === id ? 'exam-filter-active' : ''}`}
+            >
+              {label}<span>{count}</span>
+            </button>
+          );
+        })}
+      </nav>
+
+      <nav className="flex flex-wrap gap-2" aria-label="Filter mock exams by difficulty">
+        {DIFFICULTY_FILTERS.map(([id, label]) =>
+        {
+          const count = id === 'all' ? allExams.length : allExams.filter((exam) => exam.difficulty === id).length;
+          return (
+            <button
+              key={id}
+              type="button"
+              aria-pressed={difficultyFilter === id}
+              onClick={() => setDifficultyFilter(id)}
+              className={`exam-filter ${difficultyFilter === id ? 'exam-filter-active' : ''}`}
             >
               {label}<span>{count}</span>
             </button>

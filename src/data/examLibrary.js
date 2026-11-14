@@ -1,7 +1,6 @@
 import { seedExams } from './exams.js';
 
-// Original AP-style practice content. The source bank is filtered to leave
-// out the beginner-only form, then supplemented with more code-tracing items.
+// Original AP-style practice content, aligned to the current AP CSA scope.
 const mcqAdditions = [
   { prompt: 'What is printed?', code: 'int x = 4;\nint y = x++;\nSystem.out.println(x + "," + y);', options: ['4,4', '5,4', '5,5', '4,5'], answer: 1, explanation: 'Post-increment assigns the old value to y, then increments x. The values are x = 5 and y = 4.' },
   { prompt: 'Which expression is equivalent to !(a && b)?', options: ['!a && !b', '!a || !b', 'a || b', 'a && !b'], answer: 1, explanation: 'By De Morgan’s law, negating a conjunction is equivalent to the disjunction of the negated operands.' },
@@ -72,13 +71,40 @@ const additionalChallenges = [
   { prompt: 'What is printed?', code: 'int count = 0;\nfor (int i = 1; i <= 4; i++)\n{\n    for (int j = 1; j <= i; j++)\n    {\n        if ((i + j) % 2 == 0) count++;\n    }\n}\nSystem.out.println(count);', options: ['4', '5', '6', '7'], answer: 2, explanation: 'For i=1 there is 1 matching j; for i=2, 1; i=3, 2; i=4, 2. Total = 6.' }
 ].map((q, index) => ({ ...q, id: `deep-challenge-${index + 1}`, type: 'mcq' }));
 
-const advancedSeeds = seedExams.filter((exam) => exam.difficulty !== 'easy');
-const mcqPool = [
-  ...advancedSeeds.flatMap((exam) => exam.questions.filter((q) => q.type === 'mcq')),
-  ...reviewedAdditions,
-  ...additionalChallenges
-];
-const frqPool = advancedSeeds.flatMap((exam) => exam.questions.filter((q) => q.type === 'frq'));
+const AP_OUT_OF_SCOPE = /\b(inheritance|inheritance hierarchy|polymorphism|polymorphic|interface|abstract class|binary\s+search|merge sort|bubble sort|quick\s?sort|heap|graph|linked list|hashmap|hash map|dynamic programming|Big\s?O|do-while|ternary operator|float|char)\b|\b(stack|queue)\s+(data structure|uses|is a|follows)/i;
+
+function isInApScope(question)
+{
+  const content = [question.prompt, question.code, question.explanation, ...(question.options || [])]
+    .filter(Boolean)
+    .join(' ');
+  return !AP_OUT_OF_SCOPE.test(content) && !/\b(?:O\s*\(\s*(?:log|n\s*log|2\^n)|T\s*\(\s*n\s*\))\b/i.test(content)
+    && !/\bdo\s*\{/i.test(question.code || '')
+    && !(/\?[^?\n]+:\s*[^\n;]+/.test(question.code || '') && !/\?\s*:/.test(question.code || ''));
+}
+
+function uniqueQuestions(questions)
+{
+  const seen = new Set();
+  return questions.filter((question) =>
+  {
+    if (question.type !== 'mcq' || !isInApScope(question)) return false;
+    const key = `${question.prompt}|${question.code || ''}|${(question.options || []).join('|')}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+const seedQuestions = (difficulty, type) => seedExams
+  .filter((exam) => exam.difficulty === difficulty && exam.id !== 'algorithms-advanced')
+  .flatMap((exam) => exam.questions.filter((question) => question.type === type));
+
+const mcqPools = {
+  easy: uniqueQuestions(seedQuestions('easy', 'mcq')),
+  medium: uniqueQuestions([...seedQuestions('medium', 'mcq'), ...reviewedAdditions]),
+  hard: uniqueQuestions([...seedQuestions('hard', 'mcq'), ...additionalChallenges])
+};
 
 const apFrqs = [
   {
@@ -186,11 +212,84 @@ const apFrqs = [
   })[q.id] || ['Correct method or class signature.', 'Correct algorithm and control flow.', 'Correct result and specified edge cases.']
 }));
 
-const allMcq = mcqPool.map((q, index) => ({ ...q, id: `bank-mcq-${index + 1}` }));
-const allFrq = [...frqPool, ...apFrqs].map((q, index) => ({ ...q, id: `bank-frq-${index + 1}` }));
+const easyFrqs = [
+  {
+    id: 'frq-easy-method-count', area: 'methods', type: 'frq', points: 5,
+    prompt: 'Implement `countPassing`, which returns how many scores in an int array are at least 60. The array may be empty and must not be changed.',
+    starter: 'public class ScoreTools\n{\n    public int countPassing(int[] scores)\n    {\n        // your code here\n    }\n}\n',
+    modelAnswer: 'public class ScoreTools\n{\n    public int countPassing(int[] scores)\n    {\n        int count = 0;\n        for (int score : scores)\n        {\n            if (score >= 60) count++;\n        }\n        return count;\n    }\n}\n'
+  },
+  {
+    id: 'frq-easy-class-counter', area: 'class', type: 'frq', points: 5,
+    prompt: 'Write a `StudyTimer` class with a private `minutes` field initialized to 0. Add `record(int amount)`, which adds only positive amounts, and `getMinutes()`.',
+    starter: 'public class StudyTimer\n{\n    // fields, constructor, and methods\n}\n',
+    modelAnswer: 'public class StudyTimer\n{\n    private int minutes;\n\n    public StudyTimer()\n    {\n        minutes = 0;\n    }\n\n    public void record(int amount)\n    {\n        if (amount > 0) minutes += amount;\n    }\n\n    public int getMinutes()\n    {\n        return minutes;\n    }\n}\n'
+  },
+  {
+    id: 'frq-easy-list-total', area: 'list', type: 'frq', points: 5,
+    prompt: 'Implement `sumValues`, which returns the sum of all Integers in an ArrayList<Integer>. An empty list should return 0, and the list must not be changed.',
+    starter: 'import java.util.ArrayList;\n\npublic class ListTools\n{\n    public int sumValues(ArrayList<Integer> values)\n    {\n        // your code here\n    }\n}\n',
+    modelAnswer: 'import java.util.ArrayList;\n\npublic class ListTools\n{\n    public int sumValues(ArrayList<Integer> values)\n    {\n        int sum = 0;\n        for (int value : values) sum += value;\n        return sum;\n    }\n}\n'
+  },
+  {
+    id: 'frq-easy-grid-row', area: 'grid', type: 'frq', points: 5,
+    prompt: 'Implement `rowSum`, which returns the sum of the values in the specified row of a nonempty rectangular 2D int array. Assume the row index is valid.',
+    starter: 'public class GridTools\n{\n    public int rowSum(int[][] grid, int row)\n    {\n        // your code here\n    }\n}\n',
+    modelAnswer: 'public class GridTools\n{\n    public int rowSum(int[][] grid, int row)\n    {\n        int sum = 0;\n        for (int col = 0; col < grid[row].length; col++)\n        {\n            sum += grid[row][col];\n        }\n        return sum;\n    }\n}\n'
+  }
+];
+
+const easyFrqRubrics = {
+  'frq-easy-method-count': [
+    { criterion: 'Uses a count initialized to zero and traverses every score once.', points: 2 },
+    { criterion: 'Counts only scores greater than or equal to 60.', points: 2 },
+    { criterion: 'Returns the count without modifying the input.', points: 1 }
+  ],
+  'frq-easy-class-counter': [
+    { criterion: 'Declares a private minutes field and initializes it to zero.', points: 2 },
+    { criterion: 'Adds amount only when it is positive.', points: 2 },
+    { criterion: 'Returns minutes from the getter.', points: 1 }
+  ],
+  'frq-easy-list-total': [
+    { criterion: 'Initializes the sum to zero and traverses each list element.', points: 2 },
+    { criterion: 'Adds each unboxed Integer value exactly once.', points: 2 },
+    { criterion: 'Returns the sum without changing the list.', points: 1 }
+  ],
+  'frq-easy-grid-row': [
+    { criterion: 'Initializes an accumulator and uses the requested row.', points: 2 },
+    { criterion: 'Traverses every valid column and adds each value.', points: 2 },
+    { criterion: 'Returns the row sum.', points: 1 }
+  ]
+};
+const easyFrqsWithRubrics = easyFrqs.map((question) => ({
+  ...question,
+  rubric: easyFrqRubrics[question.id]
+}));
+
+const difficultyPools = {
+  easy: [...mcqPools.easy],
+  medium: [...mcqPools.medium],
+  hard: [...mcqPools.hard]
+};
+const frqPools = {
+  easy: easyFrqsWithRubrics,
+  medium: apFrqs.filter((q) => ['frq-methods-window', 'frq-class-reading', 'frq-list-streak', 'frq-string-format'].includes(q.id)),
+  hard: apFrqs.filter((q) => ['frq-methods-run', 'frq-class-inventory', 'frq-list-clean', 'frq-grid-neighbors', 'frq-grid-column'].includes(q.id))
+};
+
+const frqByArea = {
+  methods: [...easyFrqsWithRubrics.filter((q) => q.area === 'methods'), ...apFrqs.filter((q) => ['frq-methods-window', 'frq-methods-run', 'frq-string-format'].includes(q.id))],
+  class: [...easyFrqsWithRubrics.filter((q) => q.area === 'class'), ...apFrqs.filter((q) => ['frq-class-reading', 'frq-class-inventory'].includes(q.id))],
+  list: [...easyFrqsWithRubrics.filter((q) => q.area === 'list'), ...apFrqs.filter((q) => ['frq-list-clean', 'frq-list-streak'].includes(q.id))],
+  grid: [...easyFrqsWithRubrics.filter((q) => q.area === 'grid'), ...apFrqs.filter((q) => ['frq-grid-neighbors', 'frq-grid-column'].includes(q.id))]
+};
 
 function take(pool, start, count, formPrefix)
 {
+  if (!pool?.length || count > pool.length)
+  {
+    throw new Error(`Question pool ${formPrefix} has ${pool?.length || 0} items; ${count} are required.`);
+  }
   return Array.from({ length: count }, (_, index) =>
   {
     const source = pool[(start + index) % pool.length];
@@ -198,50 +297,62 @@ function take(pool, start, count, formPrefix)
   });
 }
 
-function makeExam({ id, title, description, tag, format, minutes, difficulty = 'hard', mcqStart = 0, mcqCount, frqStart = 0, frqCount })
+function fullExamFrqs(index)
 {
-  return {
-    id,
-    title,
-    description,
-    tag,
-    format,
-    minutes,
-    difficulty,
-    accent: 'from-emerald-400/20 to-sky-400/15',
-    questions: [
-      ...take(allMcq, mcqStart, mcqCount, `${id}-mcq`),
-      ...take(allFrq, frqStart, frqCount, `${id}-frq`)
-    ]
-  };
+  return ['methods', 'class', 'list', 'grid'].map((area, areaIndex) =>
+  {
+    const pool = frqByArea[area].filter((question) => !question.id.startsWith('frq-easy-'));
+    return { ...pool[(index + areaIndex) % pool.length], id: `full-${index + 1}-frq-${areaIndex + 1}` };
+  });
 }
 
-const fullExams = Array.from({ length: 5 }, (_, index) => makeExam({
+function makeExam({ id, title, description, tag, format, minutes, difficulty, mcqStart = 0, mcqCount = 0, frqStart = 0, frqCount = 0, balancedFrq = false })
+{
+  const questions = [
+    ...take(difficultyPools[difficulty], mcqStart, mcqCount, `${id}-mcq`),
+    ...(balancedFrq
+      ? fullExamFrqs(frqStart)
+      : take(frqPools[difficulty], frqStart, frqCount, `${id}-frq`))
+  ];
+  return { id, title, description, tag, format, minutes, difficulty, questions };
+}
+
+const FULL_LEVELS = ['medium', 'medium', 'hard', 'hard', 'hard'];
+const MCQ_LEVELS = ['easy', 'easy', 'medium', 'medium', 'medium', 'hard', 'hard', 'hard'];
+const FRQ_LEVELS = ['easy', 'easy', 'medium', 'medium', 'hard', 'hard', 'hard'];
+const MIXED_LEVELS = ['easy', 'easy', 'easy', 'medium', 'medium', 'medium', 'medium', 'hard', 'hard', 'hard'];
+
+const fullExams = FULL_LEVELS.map((difficulty, index) => makeExam({
   id: `ap-full-${index + 1}`,
   title: `AP-Style Full Exam ${String(index + 1).padStart(2, '0')}`,
-  description: 'Full simulation: 42 multiple-choice questions and 4 free-response coding tasks.',
-  tag: 'Full exam', format: 'full', minutes: 180, mcqStart: index * 42, mcqCount: 42, frqStart: index * 4, frqCount: 4
+  description: 'Full simulation aligned to AP timing: 42 multiple-choice questions and 4 original FRQs, one from each major coding area.',
+  tag: 'Full exam', format: 'full', difficulty, minutes: 180,
+  mcqStart: index * 11, mcqCount: 42, frqStart: index, balancedFrq: true
 }));
 
-const mcqExams = Array.from({ length: 8 }, (_, index) => makeExam({
+const mcqExams = MCQ_LEVELS.map((difficulty, index) => makeExam({
   id: `ap-mcq-${index + 1}`,
   title: `Multiple-Choice Practice ${String(index + 1).padStart(2, '0')}`,
-  description: 'Timed AP-style code tracing, concepts, and program analysis.',
-  tag: 'MCQ', format: 'mcq', minutes: 50, mcqStart: index * 19 + 7, mcqCount: 24, frqCount: 0
+  description: '24 original, syllabus-aligned questions for focused timed practice.',
+  tag: 'MCQ', format: 'mcq', difficulty, minutes: 50,
+  mcqStart: index * 9 + 3, mcqCount: 24
 }));
 
-const frqExams = Array.from({ length: 7 }, (_, index) => makeExam({
+const frqExams = FRQ_LEVELS.map((difficulty, index) => makeExam({
   id: `ap-frq-${index + 1}`,
   title: `Free-Response Practice ${String(index + 1).padStart(2, '0')}`,
-  description: 'Four Java programming tasks with model solutions and a self-check rubric.',
-  tag: 'FRQ', format: 'frq', minutes: 90, mcqCount: 0, frqStart: index * 3, frqCount: 4
+  description: 'Four original Java coding tasks with model solutions and a self-check rubric.',
+  tag: 'FRQ', format: 'frq', difficulty, minutes: 90,
+  frqStart: index % frqPools[difficulty].length, frqCount: 4
 }));
 
-const mixedExams = Array.from({ length: 10 }, (_, index) => makeExam({
+const mixedExams = MIXED_LEVELS.map((difficulty, index) => makeExam({
   id: `ap-mixed-${index + 1}`,
   title: `Section Practice ${String(index + 1).padStart(2, '0')}`,
-  description: 'A shorter mixed set to practise both code analysis and implementation.',
-  tag: 'Mixed', format: 'mixed', minutes: 55, mcqStart: index * 13 + 11, mcqCount: 14, frqStart: index * 2 + 3, frqCount: 2
+  description: 'A shorter original set combining code analysis and Java implementation.',
+  tag: 'Mixed', format: 'mixed', difficulty, minutes: 55,
+  mcqStart: index * 5 + 2, mcqCount: 14,
+  frqStart: index % frqPools[difficulty].length, frqCount: 2
 }));
 
 export const exams = [...fullExams, ...mcqExams, ...frqExams, ...mixedExams];

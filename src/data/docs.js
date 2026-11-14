@@ -1,4 +1,7 @@
+import { apcsaCategories } from './apcsaCurriculum.js';
+
 export const docCategories = [
+  ...apcsaCategories,
   {
     id: 'algorithms',
     title: 'Algorithms',
