@@ -92,6 +92,12 @@
   .exam-card > div:first-child p { font-size: .9rem; }
 }
 html.light .learning-page .learning-page-header { color:#f7faf9; }
+html.light .learning-page .learning-page-header .text-white { color:#f7faf9 !important; }
+html.light .learning-page .learning-page-header .text-slate-200 { color:#d4e0e3 !important; }
+html.light .learning-page .learning-page-header .text-slate-300 { color:#c2d1d7 !important; }
+html.light .learning-page .learning-page-header .text-slate-400 { color:#a6bbc3 !important; }
+html.light .learning-page .learning-page-header .text-emerald-100,
+html.light .learning-page .learning-page-header .text-emerald-200 { color:#b4e7d2 !important; }
 html.light .learning-page .dashboard-panel { background:#ffffffd9; border-color:#dfe7e2; box-shadow:0 6px 24px #1f3e3210; }
 html.light .learning-page .text-slate-300 { color:var(--text-secondary); }
 html.light .learning-page .text-slate-400 { color:var(--text-muted); }

@@ -21,6 +21,7 @@ html.light .dashboard-page .dashboard-muted { color:#657486; }
 html.light .dashboard-page .dashboard-eyebrow { color:#31765f; }
 html.light .dashboard-page .dashboard-hero .text-white,
 html.light .dashboard-page .dashboard-code-card .text-white { color:#f4f8f6 !important; }
+html.light .dashboard-page .dashboard-hero .text-emerald-100 { color:#b4f1d0 !important; }
 html.light .dashboard-page .dashboard-hero .text-slate-300,
 html.light .dashboard-page .dashboard-code-card .text-slate-300 { color:#d0dcdf !important; }
 html.light .dashboard-page .dashboard-hero .text-slate-400,

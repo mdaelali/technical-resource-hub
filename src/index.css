@@ -337,6 +337,12 @@ html.light .text-slate-300  { color: #334155 !important; }
 html.light .text-slate-400  { color: #475569 !important; }
 html.light .text-slate-500  { color: #64748b !important; }
 html.light .text-slate-600  { color: #94a3b8 !important; }
+html.light .text-emerald-100 { color: #047857 !important; }
+html.light .text-violet-100  { color: #6d28d9 !important; }
+html.light .text-rose-100    { color: #be123c !important; }
+html.light .text-sky-200     { color: #0369a1 !important; }
+html.light .text-orange-200  { color: #c2410c !important; }
+html.light .text-yellow-200  { color: #854d0e !important; }
 
 /* ── Accent text stays vivid but slightly darker in light ────────────────── */
 html.light .text-violet-300  { color: #347c68 !important; }
