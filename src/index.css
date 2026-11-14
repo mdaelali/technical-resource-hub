@@ -457,6 +457,17 @@ html.light code
   color: #1e293b !important;
 }
 
+/* The editor input text is transparent because syntax is drawn underneath it;
+   keep its insertion caret visible against the light code surface. */
+html.light .code-editor-input
+{
+  caret-color: #0f766e !important;
+}
+html.light .code-editor-input::selection
+{
+  background: rgba(15, 118, 110, 0.28);
+}
+
 /* ── Popover / floating dropdowns ───────────────────────────────────────── */
 html.light .popover
 {

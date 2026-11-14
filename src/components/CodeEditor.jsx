@@ -383,7 +383,7 @@ export default function CodeEditor({ value, onChange, language = 'java' })
           autoComplete="off"
           autoCorrect="off"
           autoCapitalize="off"
-          className="absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden px-3 py-3 bg-transparent text-transparent caret-white resize-none focus:outline-none whitespace-pre-wrap break-words font-mono text-xs leading-[1.55] selection:bg-violet-500/40"
+          className="code-editor-input absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden px-3 py-3 bg-transparent text-transparent caret-white resize-none focus:outline-none whitespace-pre-wrap break-words font-mono text-xs leading-[1.55] selection:bg-violet-500/40"
         />
 
         {ac.open && createPortal(
