@@ -86,9 +86,17 @@ export default function MockExams({ onLogActivity })
     {
       const prevRec = (prev || {})[examId] || {};
       const best = totalMcq > 0 ? Math.max(prevRec.best ?? 0, correct) : 0;
+      const history = [...(Array.isArray(prevRec.history) ? prevRec.history : []), { at: new Date().toISOString(), score: correct, total: totalMcq }].slice(-20);
       return {
         ...(prev || {}),
-        [examId]: { best, totalMcq, completed: true, takenAt: localDateKey() }
+        [examId]: {
+          best,
+          totalMcq,
+          completed: true,
+          takenAt: localDateKey(),
+          attempts: (prevRec.attempts || (prevRec.completed ? 1 : 0)) + 1,
+          history
+        }
       };
     });
     completeLearningPlanStep(setLearningPlan, 'quiz');
@@ -222,9 +230,15 @@ function ExamList({ results, onStart, allExams })
 
               <div className="flex items-center justify-between pt-1 mt-auto flex-wrap gap-2">
                 {rec?.completed && rec.totalMcq > 0 ? (
-                  <span className="flex items-center gap-1.5 text-[11px] text-emerald-300"><Trophy size={12} />Best: {rec.best}/{rec.totalMcq}</span>
+                  <span className="flex items-center gap-1.5 text-[11px] text-emerald-300">
+                    <Trophy size={12} />Best: {rec.best}/{rec.totalMcq}
+                    <span className="text-slate-400">· {rec.attempts || 1} attempt{(rec.attempts || 1) === 1 ? '' : 's'}{rec.takenAt ? ` · last ${rec.takenAt}` : ''}</span>
+                  </span>
                 ) : rec?.completed ? (
-                  <span className="flex items-center gap-1.5 text-[11px] text-emerald-300"><CheckCircle2 size={12} />Completed</span>
+                  <span className="flex items-center gap-1.5 text-[11px] text-emerald-300">
+                    <CheckCircle2 size={12} />Completed
+                    <span className="text-slate-400">· {rec.attempts || 1} attempt{(rec.attempts || 1) === 1 ? '' : 's'}</span>
+                  </span>
                 ) : (
                   <span className="text-[11px] text-slate-500">Not attempted</span>
                 )}

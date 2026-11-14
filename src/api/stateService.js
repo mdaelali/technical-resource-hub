@@ -16,6 +16,7 @@ function rowToState(row)
       stdin: row.compiler_stdin || ''
     },
     learningPlan: row.learning_plan || { date: null, completed: [] },
+    examResults: row.exam_results && typeof row.exam_results === 'object' ? row.exam_results : {},
     updatedAt: row.updated_at
   };
 }
@@ -38,13 +39,22 @@ export async function fetchState(userId)
   return rowToState(data);
 }
 
-function isMissingColumn(error, column)
+/* Columns added after the first release, with the SQL that creates them. */
+const OPTIONAL_COLUMNS = {
+  learning_plan: "alter table public.user_state add column if not exists learning_plan jsonb not null default '{\"date\": null, \"completed\": []}'::jsonb;",
+  exam_results: "alter table public.user_state add column if not exists exam_results jsonb not null default '{}'::jsonb;"
+};
+
+function missingColumn(error)
 {
   const text = `${error?.message || ''} ${error?.details || ''} ${error?.hint || ''}`;
-  return error?.code === '42703' || error?.code === 'PGRST204' || text.includes(column);
+  if (error?.code !== '42703' && error?.code !== 'PGRST204' && !/column/i.test(text)) return null;
+  return Object.keys(OPTIONAL_COLUMNS).find((column) => text.includes(column)) || null;
 }
 
-let warnedMissingPlanColumn = false;
+const warnedColumns = new Set();
+/* Columns the database rejected once this session; skipped without a round trip. */
+const droppedColumns = new Set();
 
 export async function upsertState(userId, snapshot, options = {})
 {
@@ -62,6 +72,7 @@ export async function upsertState(userId, snapshot, options = {})
     compiler_sources: snapshot.compiler?.sources ?? {},
     compiler_stdin: snapshot.compiler?.stdin ?? '',
     learning_plan: snapshot.learningPlan ?? { date: null, completed: [] },
+    exam_results: snapshot.examResults ?? {},
     updated_at: new Date().toISOString()
   };
   if (options.keepalive)
@@ -84,27 +95,24 @@ export async function upsertState(userId, snapshot, options = {})
     });
     return;
   }
-  const { error } = await supabase
-    .from('user_state')
-    .upsert(row, { onConflict: 'user_id' });
-  if (error && isMissingColumn(error, 'learning_plan'))
+  // Older databases may predate some columns. Save everything else rather
+  // than nothing, and say once what to run in the Supabase SQL editor.
+  let attempt = { ...row };
+  for (const column of droppedColumns) delete attempt[column];
+  for (let i = 0; i <= Object.keys(OPTIONAL_COLUMNS).length; i++)
   {
-    // Older databases predate the learning_plan column. Save everything else
-    // rather than nothing, and say what to run once.
-    if (!warnedMissingPlanColumn)
+    const { error } = await supabase
+      .from('user_state')
+      .upsert(attempt, { onConflict: 'user_id' });
+    if (!error) return;
+    const column = missingColumn(error);
+    if (!column || !(column in attempt)) throw error;
+    if (!warnedColumns.has(column))
     {
-      warnedMissingPlanColumn = true;
-      console.warn('user_state has no learning_plan column. Run in the Supabase SQL editor: ' +
-        "alter table public.user_state add column if not exists learning_plan jsonb not null default '{\"date\": null, \"completed\": []}'::jsonb;");
+      warnedColumns.add(column);
+      console.warn(`user_state has no ${column} column. Run in the Supabase SQL editor: ${OPTIONAL_COLUMNS[column]}`);
     }
-    const withoutPlan = { ...row };
-    delete withoutPlan.learning_plan;
-    const retry = await supabase.from('user_state').upsert(withoutPlan, { onConflict: 'user_id' });
-    if (retry.error) throw retry.error;
-    return;
-  }
-  if (error)
-  {
-    throw error;
+    droppedColumns.add(column);
+    delete attempt[column];
   }
 }

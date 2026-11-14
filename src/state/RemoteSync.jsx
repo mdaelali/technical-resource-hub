@@ -13,7 +13,8 @@ const STORAGE_FIELDS = [
   { stateKey: 'compilerLang', localKey: 'compiler.lang', initial: 'java' },
   { stateKey: 'compilerSources', localKey: 'compiler.sources', initial: {} },
   { stateKey: 'compilerStdin', localKey: 'compiler.stdin', initial: '' },
-  { stateKey: 'learningPlan', localKey: 'learningPlan', initial: { date: null, completed: [] } }
+  { stateKey: 'learningPlan', localKey: 'learningPlan', initial: { date: null, completed: [] } },
+  { stateKey: 'examResults', localKey: 'exam.results', initial: {} }
 ];
 
 /* When this device last changed any synced value, and when it last pushed. */
@@ -80,7 +81,8 @@ function toSnapshot(values)
       sources: values.compilerSources,
       stdin: values.compilerStdin
     },
-    learningPlan: values.learningPlan
+    learningPlan: values.learningPlan,
+    examResults: values.examResults
   };
 }
 
@@ -159,6 +161,41 @@ function mergeStreaks(a, b)
   return sa.last > sb.last ? sa : sb;
 }
 
+function mergeExamResults(a, b)
+{
+  // Per exam: best score wins, attempts add up to the larger known count,
+  // histories are unioned by timestamp, the later date is kept.
+  const ra = a && typeof a === 'object' ? a : {};
+  const rb = b && typeof b === 'object' ? b : {};
+  const out = {};
+  for (const id of new Set([...Object.keys(ra), ...Object.keys(rb)]))
+  {
+    const x = ra[id];
+    const y = rb[id];
+    if (!x) { out[id] = y; continue; }
+    if (!y) { out[id] = x; continue; }
+    const history = [];
+    const seen = new Set();
+    for (const h of [...(Array.isArray(x.history) ? x.history : []), ...(Array.isArray(y.history) ? y.history : [])])
+    {
+      const k = h?.at || JSON.stringify(h);
+      if (!seen.has(k)) { seen.add(k); history.push(h); }
+    }
+    history.sort((p, q) => String(p.at || '').localeCompare(String(q.at || '')));
+    out[id] = {
+      ...x,
+      ...y,
+      best: Math.max(x.best || 0, y.best || 0),
+      totalMcq: Math.max(x.totalMcq || 0, y.totalMcq || 0),
+      completed: Boolean(x.completed || y.completed),
+      attempts: Math.max(x.attempts || (x.completed ? 1 : 0), y.attempts || (y.completed ? 1 : 0), history.length),
+      takenAt: [x.takenAt, y.takenAt].filter(Boolean).sort().pop() || null,
+      history: history.slice(-20)
+    };
+  }
+  return out;
+}
+
 function mergeRecent(a, b)
 {
   // Items may be strings or {key, at} objects; keep the newest copy of each.
@@ -192,7 +229,8 @@ function mergeLocalAndRemote(local, remote, localChangedAt, remoteUpdatedAt)
     compilerLang: localNewer ? local.compilerLang : remote.compilerLang,
     compilerSources: localNewer ? local.compilerSources : remote.compilerSources,
     compilerStdin: localNewer ? local.compilerStdin : remote.compilerStdin,
-    learningPlan: mergePlans(local.learningPlan, remote.learningPlan)
+    learningPlan: mergePlans(local.learningPlan, remote.learningPlan),
+    examResults: mergeExamResults(local.examResults, remote.examResults)
   };
 }
 
@@ -243,6 +281,7 @@ export default function RemoteSync()
   const [compilerSources] = useUserStorage('compiler.sources', {});
   const [compilerStdin] = useUserStorage('compiler.stdin', '');
   const [learningPlan] = useUserStorage('learningPlan', { date: null, completed: [] });
+  const [examResults] = useUserStorage('exam.results', {});
 
   const initializedFor = useRef(null);
   const lastPushedRef = useRef(null);
@@ -285,7 +324,8 @@ export default function RemoteSync()
           compilerLang: remote.compiler.lang,
           compilerSources: remote.compiler.sources,
           compilerStdin: remote.compiler.stdin,
-          learningPlan: remote.learningPlan
+          learningPlan: remote.learningPlan,
+          examResults: remote.examResults
         }, meta.changedAt || null, remote.updatedAt || null);
       }
       else
@@ -304,7 +344,8 @@ export default function RemoteSync()
         compilerLang: remote.compiler.lang,
         compilerSources: remote.compiler.sources,
         compilerStdin: remote.compiler.stdin,
-        learningPlan: remote.learningPlan
+        learningPlan: remote.learningPlan,
+        examResults: remote.examResults
       }) : null;
       const snapshot = toSnapshot(values);
       lastPushedRef.current = remoteSnapshot;
@@ -349,7 +390,8 @@ export default function RemoteSync()
       compilerLang,
       compilerSources,
       compilerStdin,
-      learningPlan
+      learningPlan,
+      examResults
     });
     if (lastPushedRef.current && sameJson(snapshot, lastPushedRef.current) && !pendingRef.current)
     {
@@ -382,7 +424,8 @@ export default function RemoteSync()
     compilerLang,
     compilerSources,
     compilerStdin,
-    learningPlan
+    learningPlan,
+    examResults
   ]);
 
   // Flush unsaved changes when the tab is being closed or refreshed.
@@ -405,7 +448,8 @@ export default function RemoteSync()
         compilerLang,
         compilerSources,
         compilerStdin,
-        learningPlan
+        learningPlan,
+        examResults
       });
       upsertState(userId, snapshot, { keepalive: true }).catch(() => { /* best effort */ });
     }
@@ -416,7 +460,7 @@ export default function RemoteSync()
       window.removeEventListener('pagehide', flush);
       document.removeEventListener('visibilitychange', flush);
     };
-  }, [userId, streak, mastered, recentlyViewed, compilerLang, compilerSources, compilerStdin, learningPlan]);
+  }, [userId, streak, mastered, recentlyViewed, compilerLang, compilerSources, compilerStdin, learningPlan, examResults]);
 
   return null;
 }

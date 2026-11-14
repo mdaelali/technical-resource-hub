@@ -48,11 +48,15 @@ create table if not exists public.user_state (
   compiler_sources  jsonb default '{}'::jsonb,
   compiler_stdin    text default '',
   learning_plan    jsonb not null default '{"date": null, "completed": []}'::jsonb,
+  exam_results     jsonb not null default '{}'::jsonb,
   updated_at        timestamptz default now()
 );
 
 alter table public.user_state
   add column if not exists learning_plan jsonb not null default '{"date": null, "completed": []}'::jsonb;
+
+alter table public.user_state
+  add column if not exists exam_results jsonb not null default '{}'::jsonb;
 
 alter table public.user_state enable row level security;
 
