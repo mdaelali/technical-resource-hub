@@ -36,7 +36,7 @@ export default function Dashboard({ onNavigate })
 
   const tasks = [
     { id: 'concept', title: 'Learn one concept', detail: nextTopic.card.title, icon: BookOpen, action: () => onNavigate('docs', { categoryId: nextTopic.category.id }) },
-    { id: 'code', title: 'Write a little code', detail: 'Open the code playground', icon: Code2, action: () => onNavigate('playground', { snippetId: lastTopic?.card.snippetId || nextTopic.card.snippetId || 'binary-search' }) },
+    { id: 'code', title: 'Write a little code', detail: 'Open the online compiler', icon: Code2, action: () => onNavigate('compiler') },
     { id: 'quiz', title: 'Check your understanding', detail: 'Try a timed practice exam', icon: Brain, action: () => onNavigate('exams') }
   ];
 

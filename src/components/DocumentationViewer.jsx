@@ -20,6 +20,8 @@ import
 import { docCategories } from '../data/docs.js';
 import useUserStorage from '../hooks/useUserStorage.js';
 import useRecentlyViewed from '../hooks/useRecentlyViewed.js';
+import { localDateKey } from '../utils/dates.js';
+import { completeLearningPlanStep } from '../utils/learningPlan.js';
 
 const ICONS = {
   algorithms: BookOpen,
@@ -71,6 +73,7 @@ export default function DocumentationViewer({
   );
   const [expanded, setExpanded] = useState(() => new Set());
   const [mastered, setMastered] = useUserStorage('mastered', []);
+  const [, setPlan] = useUserStorage('learningPlan', { date: localDateKey(), completed: [] });
   const [, recordRecent] = useRecentlyViewed();
 
   const counts = useMemo(() =>
@@ -89,6 +92,7 @@ export default function DocumentationViewer({
 
   function toggleMastered(cardKey)
   {
+    const alreadyMastered = safeMastered.includes(cardKey);
     setMastered((prev) =>
     {
       const list = prev || [];
@@ -98,6 +102,7 @@ export default function DocumentationViewer({
       }
       return [...list, cardKey];
     });
+    if (!alreadyMastered) completeLearningPlanStep(setPlan, 'concept');
     onLogActivity?.();
   }
 
@@ -120,6 +125,7 @@ export default function DocumentationViewer({
     if (!wasOpen)
     {
       recordRecent({ key: cardKey, title: card.title, tag: card.tag, categoryId, categoryTitle });
+      completeLearningPlanStep(setPlan, 'concept');
       onLogActivity?.();
     }
   }

@@ -11,6 +11,7 @@ import { exams } from '../data/examLibrary.js';
 import { referenceSheet } from '../data/referenceSheet.js';
 import CodeEditor from './CodeEditor.jsx';
 import { localDateKey } from '../utils/dates.js';
+import { completeLearningPlanStep } from '../utils/learningPlan.js';
 
 const LETTERS = ['A', 'B', 'C', 'D', 'E'];
 
@@ -45,10 +46,39 @@ const DIFFICULTY_FILTERS = [
 export default function MockExams({ onLogActivity })
 {
   const [results, setResults] = useUserStorage('exam.results', {});
+  const [, setLearningPlan] = useUserStorage('learningPlan', { date: localDateKey(), completed: [] });
   const [activeId, setActiveId] = useState(null);
+
+  useEffect(() =>
+  {
+    function syncActiveExamFromHistory(event)
+    {
+      setActiveId(event.state?.mockExamId || null);
+    }
+    window.addEventListener('popstate', syncActiveExamFromHistory);
+    return () => window.removeEventListener('popstate', syncActiveExamFromHistory);
+  }, []);
 
   const allAvailableExams = exams;
   const activeExam = activeId ? allAvailableExams.find((e) => e.id === activeId) : null;
+
+  function startExam(examId)
+  {
+    window.history.pushState({ ...(window.history.state || {}), mockExamId: examId }, '', window.location.href);
+    setActiveId(examId);
+  }
+
+  function exitExam()
+  {
+    if (window.history.state?.mockExamId)
+    {
+      window.history.back();
+    }
+    else
+    {
+      setActiveId(null);
+    }
+  }
 
   function handleComplete(examId, correct, totalMcq)
   {
@@ -61,6 +91,7 @@ export default function MockExams({ onLogActivity })
         [examId]: { best, totalMcq, completed: true, takenAt: localDateKey() }
       };
     });
+    completeLearningPlanStep(setLearningPlan, 'quiz');
     onLogActivity?.();
   }
 
@@ -69,7 +100,7 @@ export default function MockExams({ onLogActivity })
     return (
       <BluebookRunner
         exam={activeExam}
-        onExit={() => setActiveId(null)}
+        onExit={exitExam}
         onComplete={handleComplete}
       />
     );
@@ -77,7 +108,7 @@ export default function MockExams({ onLogActivity })
   return (
     <ExamList
       results={results || {}}
-      onStart={setActiveId}
+      onStart={startExam}
       allExams={allAvailableExams}
     />
   );
@@ -269,6 +300,7 @@ function BluebookRunner({ exam, onExit, onComplete })
   const submittedRef = useRef(false);
   const rightPanelRef = useRef(null);
   const explanationRef = useRef(null);
+  const totalQ = questions.length;
 
   useEffect(() =>
   {
@@ -299,8 +331,6 @@ function BluebookRunner({ exam, onExit, onComplete })
   const { display: timerDisplay, timerHidden, setTimerHidden, pct: timerPct } = useTimer(exam.minutes, !submitted, handleSubmit);
 
   const q = questions[current];
-  const totalQ = questions.length;
-
   function setAnswer(qid, val)
   {
     if (!submitted) setAnswers((p) => ({ ...p, [qid]: val }));

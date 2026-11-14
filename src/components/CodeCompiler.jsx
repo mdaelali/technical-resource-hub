@@ -20,12 +20,15 @@ import CodeEditor from './CodeEditor.jsx';
 import { LANGUAGES, runCode, CompilerError, MAX_SOURCE_LENGTH } from '../api/judge0.js';
 import useUserStorage from '../hooks/useUserStorage.js';
 import { clampCodeLength } from '../utils/security.js';
+import { localDateKey } from '../utils/dates.js';
+import { completeLearningPlanStep } from '../utils/learningPlan.js';
 
 export default function CodeCompiler({ onLogActivity })
 {
   const [languageKey, setLanguageKey] = useUserStorage('compiler.lang', 'java');
   const [sources, setSources] = useUserStorage('compiler.sources', {});
   const [stdin, setStdin] = useUserStorage('compiler.stdin', '');
+  const [, setLearningPlan] = useUserStorage('learningPlan', { date: localDateKey(), completed: [] });
   const [running, setRunning] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
@@ -117,6 +120,7 @@ export default function CodeCompiler({ onLogActivity })
         stdin: typeof stdin === 'string' ? stdin : ''
       });
       setResult({ ...data, finishedAt: new Date() });
+      if (data.statusId === 3) completeLearningPlanStep(setLearningPlan, 'code');
     }
     catch (err)
     {
