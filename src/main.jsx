@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { MotionConfig } from 'framer-motion';
+import { Analytics } from '@vercel/analytics/react';
 import './index.css';
 import { AuthProvider } from './auth/AuthContext.jsx';
 import AppRoot from './AppRoot.jsx';
@@ -12,5 +13,6 @@ createRoot(document.getElementById('root')).render(
         <AppRoot />
       </AuthProvider>
     </MotionConfig>
+    <Analytics />
   </StrictMode>
 );
