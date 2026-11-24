@@ -114,7 +114,7 @@ export default function Dashboard({ onNavigate })
           <div className="mt-5 rounded-2xl border border-white/[0.08] bg-white/[0.03] p-4">
             <div className="flex items-center justify-between gap-2"><span className="text-xs font-medium text-[var(--accent)]">{nextTopic.category.title}</span><span className="rounded-md bg-white/[0.06] px-2 py-1 font-mono text-[10px] dashboard-muted">{nextTopic.card.tag}</span></div>
             <h4 className="mt-3 text-lg font-semibold text-white">{focusTopic.card.title}</h4>
-            <p className="mt-2 text-sm leading-6 dashboard-muted">{focusTopic.card.explanation.slice(0, 156)}{focusTopic.card.explanation.length > 156 ? 'вЂ¦' : ''}</p>
+            <p className="mt-2 text-sm leading-6 dashboard-muted">{focusTopic.card.explanation.slice(0, 156)}{focusTopic.card.explanation.length > 156 ? '…' : ''}</p>
             <button onClick={() => onNavigate('docs', { categoryId: focusTopic.category.id })} className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-emerald-300 transition hover:text-emerald-200">Open topic <ArrowRight size={15}/></button>
           </div>
           <div className="mt-4 flex items-center gap-3 rounded-2xl bg-amber-300/[0.07] p-3.5"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-amber-300/10 text-amber-200"><GraduationCap size={17}/></span><p className="text-xs leading-5 dashboard-muted"><strong className="font-semibold text-amber-100">Study tip</strong><br/>Try to explain an algorithm in your own words before you look at its code.</p></div>

@@ -115,7 +115,7 @@ export default function CodeEditor({ value, onChange, language = 'java' })
       return;
     }
 
-    // в”Ђв”Ђ Autocomplete navigation (only when the dropdown is open) в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+    // ── Autocomplete navigation (only when the dropdown is open) ──────────
     if (ac.open && ac.items.length > 0)
     {
       if (event.key === 'ArrowDown')
@@ -144,7 +144,7 @@ export default function CodeEditor({ value, onChange, language = 'java' })
       }
     }
 
-    // в”Ђв”Ђ Auto-pair openers в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+    // ── Auto-pair openers ────────────────────────────────────────────────
     if (PAIR_OPENERS[event.key])
     {
       const { selectionStart, selectionEnd } = el;
@@ -169,7 +169,7 @@ export default function CodeEditor({ value, onChange, language = 'java' })
       }
     }
 
-    // в”Ђв”Ђ Skip over an existing closer в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+    // ── Skip over an existing closer ────────────────────────────────────
     if (PAIR_CLOSERS.has(event.key))
     {
       const { selectionStart, selectionEnd } = el;
@@ -395,7 +395,7 @@ export default function CodeEditor({ value, onChange, language = 'java' })
               <li key={item.label}>
                 <button
                   type="button"
-                  // mousedown fires before blur вЂ” prevent default so the
+                  // mousedown fires before blur — prevent default so the
                   // textarea keeps focus while we insert the completion.
                   onMouseDown={(e) =>
                   {

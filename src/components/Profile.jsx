@@ -196,7 +196,7 @@ export default function Profile({ onNavigate })
       setDeleteError(result.error || 'Could not delete account.');
       return;
     }
-    // AuthContext has already cleared state вЂ” AppRoot will rerender to LoginPage.
+    // AuthContext has already cleared state — AppRoot will rerender to LoginPage.
   }
 
   const earnedBadges = useMemo(
@@ -294,7 +294,7 @@ export default function Profile({ onNavigate })
 
   const memberSince = user?.createdAt
     ? new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })
-    : 'вЂ”';
+    : '—';
 
   const studentId = useMemo(() => formatUserId(user?.id), [user?.id]);
 
@@ -522,7 +522,7 @@ export default function Profile({ onNavigate })
       <section className="glass dashboard-panel rounded-2xl px-4 py-4" aria-labelledby="game-awards-heading">
         <div className="mb-3 flex items-center gap-2"><Trophy size={15} className="text-amber-200" /><h3 id="game-awards-heading" className="text-sm font-semibold text-white">Code Sprint awards</h3></div>
         {gameAwards.length ? <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {gameAwards.map((award) => <li key={`${award.week_start}-${award.award_type}`} className="flex items-center gap-3 rounded-xl border border-amber-200/10 bg-amber-200/[0.04] p-3"><Award size={18} className="shrink-0 text-amber-200" /><span className="min-w-0 flex-1"><span className="block text-sm font-semibold text-white">{{ champion: 'Weekly champion', runner_up: 'Runner-up', third_place: 'Third place' }[award.award_type] || award.award_type}</span><span className="text-xs dashboard-muted">Week of {award.week_start} В· {award.score} points</span></span></li>)}
+          {gameAwards.map((award) => <li key={`${award.week_start}-${award.award_type}`} className="flex items-center gap-3 rounded-xl border border-amber-200/10 bg-amber-200/[0.04] p-3"><Award size={18} className="shrink-0 text-amber-200" /><span className="min-w-0 flex-1"><span className="block text-sm font-semibold text-white">{{ champion: 'Weekly champion', runner_up: 'Runner-up', third_place: 'Third place' }[award.award_type] || award.award_type}</span><span className="text-xs dashboard-muted">Week of {award.week_start} · {award.score} points</span></span></li>)}
         </ul> : <p className="text-sm dashboard-muted">Finish in the weekly top three in Code Sprint to earn an award here. Awards are stored with your account.</p>}
       </section>
 
@@ -729,7 +729,7 @@ function IdField({ label, value, mono = false, icon: Icon })
       <span className="text-[9.5px] uppercase tracking-widest text-slate-500">{label}</span>
       <span className={`text-[11px] text-slate-200 truncate flex items-center gap-1 ${mono ? 'font-mono' : ''}`}>
         {Icon && <Icon size={10} className="text-slate-400 shrink-0" />}
-        {value || 'вЂ”'}
+        {value || '—'}
       </span>
     </div>
   );
@@ -784,7 +784,7 @@ function formatUserId(id)
 {
   if (!id)
   {
-    return 'вЂ”';
+    return '—';
   }
   // Supabase user ids are UUIDs; show the first 8 chars as a friendly student id.
   return id.replace(/-/g, '').slice(0, 8).toUpperCase().match(/.{1,4}/g).join('-');

@@ -13,7 +13,7 @@ import
   Clock
 } from 'lucide-react';
 import CodeEditor from './CodeEditor.jsx';
-// Reverted from Piston back to Judge0 вЂ” Piston's public emkc.org endpoint went
+// Reverted from Piston back to Judge0 — Piston's public emkc.org endpoint went
 // whitelist-only on 2026-02-15 and returns HTTP 401. Judge0 CE public endpoint
 // at ce.judge0.com still works for our purposes. See src/api/piston.js if we
 // ever self-host a Piston instance and want to switch back.
@@ -33,7 +33,7 @@ export default function CodeCompiler({ onLogActivity })
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
-  // Resizable split вЂ” editorPct is the editor column's share of the row (30вЂ“85 %).
+  // Resizable split — editorPct is the editor column's share of the row (30–85 %).
   const [editorPct, setEditorPct] = useState(58);
   const splitRef = useRef(null);
   const dragging = useRef(false);
@@ -187,7 +187,7 @@ export default function CodeCompiler({ onLogActivity })
         </div>
       </div>
 
-      {/* Resizable split вЂ” stacked on mobile, side-by-side on lg+ */}
+      {/* Resizable split — stacked on mobile, side-by-side on lg+ */}
       <div ref={splitRef} className="flex flex-col lg:flex-row gap-2 relative select-none overflow-hidden" style={{ height: 'min(72vh, 720px)', minHeight: '480px', maxHeight: '720px' }}>
         <div
           className="glass rounded-2xl overflow-hidden flex flex-col min-h-0"
@@ -209,7 +209,7 @@ export default function CodeCompiler({ onLogActivity })
           <CodeEditor value={code} onChange={setCode} language={language.key} />
         </div>
 
-        {/* Drag handle вЂ” only visible on lg+ */}
+        {/* Drag handle — only visible on lg+ */}
         <div
           onMouseDown={onDragStart}
           onTouchStart={onDragStart}

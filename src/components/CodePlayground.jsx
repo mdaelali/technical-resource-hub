@@ -130,7 +130,7 @@ export default function CodePlayground({ initialSnippetId })
                   <span>Output</span>
                   {runOutput && (
                     <span className="text-slate-500">
-                      В· {runOutput.when.toLocaleTimeString('en-US')}
+                      · {runOutput.when.toLocaleTimeString('en-US')}
                     </span>
                   )}
                 </div>
@@ -150,8 +150,8 @@ export default function CodePlayground({ initialSnippetId })
         </AnimatePresence>
 
         <div className="px-3 py-1.5 border-t border-white/10 bg-black/20 flex items-center justify-between text-[10px] text-slate-500 gap-2">
-          <span className="truncate">Java 21 В· Allman braces</span>
-          <span className="truncate hidden sm:inline">Read-only В· Run shows expected output</span>
+          <span className="truncate">Java 21 · Allman braces</span>
+          <span className="truncate hidden sm:inline">Read-only · Run shows expected output</span>
         </div>
       </div>
 

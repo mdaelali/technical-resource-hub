@@ -242,6 +242,10 @@ html.light .bg-black\/60 { background-color: rgba(21, 23, 26, 0.45) !important; 
 html.light .bg-black\/70 { background-color: rgba(21, 23, 26, 0.55) !important; }
 html.light .bg-black\/80 { background-color: rgba(21, 23, 26, 0.68) !important; }
 html.light .bg-black\/85 { background-color: rgba(21, 23, 26, 0.75) !important; }
+html.light .bg-black\/45 { background-color: rgba(21, 23, 26, 0.45) !important; }
+/* Dark-mode panel tints: keep them as a faint darker surface on paper */
+html.light .bg-slate-950\/30 { background-color: rgba(21, 23, 26, 0.04) !important; }
+html.light .bg-slate-950\/50 { background-color: rgba(21, 23, 26, 0.06) !important; }
 
 html.light .border-white\/5  { border-color: var(--border-color) !important; }
 html.light .border-white\/10 { border-color: var(--border-color) !important; }

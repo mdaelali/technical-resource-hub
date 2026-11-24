@@ -86,6 +86,19 @@ export default function DocumentationViewer({
     return map;
   }, [searchQuery]);
 
+  // A new search that leaves the open category empty jumps to the first category
+  // with matches. Adjusting state during render (not in an effect) keeps this
+  // to one render and only fires when the query itself changes.
+  const [lastQuery, setLastQuery] = useState(searchQuery);
+  if (searchQuery !== lastQuery)
+  {
+    setLastQuery(searchQuery);
+    if (searchQuery && (counts[activeCategory] ?? 0) === 0)
+    {
+      const firstMatch = docCategories.find((c) => counts[c.id] > 0);
+      if (firstMatch) setActiveCategory(firstMatch.id);
+    }
+  }
   const category = docCategories.find((c) => c.id === activeCategory) || docCategories[0];
   const filteredCards = category.cards.filter((c) => matchesQuery(c, searchQuery));
   const safeMastered = mastered || [];
@@ -193,10 +206,10 @@ export default function DocumentationViewer({
             <section className="dashboard-panel rounded-2xl p-4 sm:p-5" aria-labelledby="ap-csa-resources-title">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="max-w-2xl">
-                  <p className="dashboard-eyebrow">OFFICIAL SYLLABUS В· OFFLINE STUDY</p>
+                  <p className="dashboard-eyebrow">OFFICIAL SYLLABUS · OFFLINE STUDY</p>
                   <h3 id="ap-csa-resources-title" className="mt-1 text-base font-semibold tracking-tight">Use the complete College Board course description</h3>
                   <p className="mt-1 text-sm leading-relaxed dashboard-muted">
-                    Open the official PDF, then use the PDF viewerвЂ™s download button to save it on your phone or computer for offline reading. This topic guide is a study aid; the official document contains the full required knowledge and exclusions.
+                    Open the official PDF, then use the PDF viewer’s download button to save it on your phone or computer for offline reading. This topic guide is a study aid; the official document contains the full required knowledge and exclusions.
                   </p>
                 </div>
                 <a
@@ -209,9 +222,9 @@ export default function DocumentationViewer({
                 </a>
               </div>
               <div className="mt-4 border-t border-white/10 pt-3 text-xs leading-relaxed dashboard-muted">
-                <span className="font-semibold text-slate-200">BarronвЂ™s AP Computer Science A Premium, 12th Edition:</span>{' '}
-                use a legally acquired copy for offline book study. The publisherвЂ™s online hub can help identify supported editions; the complete textbook file is not hosted here.
-                {' '}<a href="https://www.barronseduc.com/booksonline?search=computer" target="_blank" rel="noreferrer" className="font-medium text-emerald-200 underline decoration-emerald-200/40 underline-offset-4 hover:text-white">Visit BarronвЂ™s official book hub <ExternalLink size={11} className="inline" /></a>
+                <span className="font-semibold text-slate-200">Barron’s AP Computer Science A Premium, 12th Edition:</span>{' '}
+                use a legally acquired copy for offline book study. The publisher’s online hub can help identify supported editions; the complete textbook file is not hosted here.
+                {' '}<a href="https://www.barronseduc.com/booksonline?search=computer" target="_blank" rel="noreferrer" className="font-medium text-emerald-200 underline decoration-emerald-200/40 underline-offset-4 hover:text-white">Visit Barron’s official book hub <ExternalLink size={11} className="inline" /></a>
               </div>
             </section>
           )}

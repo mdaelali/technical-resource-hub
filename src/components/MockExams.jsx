@@ -42,7 +42,7 @@ const DIFFICULTY_FILTERS = [
   ['hard', 'Hard']
 ];
 
-/* в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ Root component в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */
+/* ─────────────────────── Root component ─────────────────────────────────── */
 export default function MockExams({ onLogActivity })
 {
   const [results, setResults] = useUserStorage('exam.results', {});
@@ -122,7 +122,7 @@ export default function MockExams({ onLogActivity })
   );
 }
 
-/* в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ Exam list в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */
+/* ─────────────────────── Exam list ─────────────────────────────────────── */
 function ExamList({ results, onStart, allExams })
 {
   const [formatFilter, setFormatFilter] = useState('all');
@@ -151,7 +151,7 @@ function ExamList({ results, onStart, allExams })
             <div className="min-w-0">
               <h2 className="page-header-title text-lg font-semibold tracking-tight">Mock Exams</h2>
               <p className="page-header-description text-xs">
-                {allExams.length} original AP-style exams В· Easy, Medium, and Hard
+                {allExams.length} original AP-style exams · Easy, Medium, and Hard
               </p>
             </div>
           </div>
@@ -232,12 +232,12 @@ function ExamList({ results, onStart, allExams })
                 {rec?.completed && rec.totalMcq > 0 ? (
                   <span className="flex items-center gap-1.5 text-[11px] text-emerald-300">
                     <Trophy size={12} />Best: {rec.best}/{rec.totalMcq}
-                    <span className="text-slate-400">В· {rec.attempts || 1} attempt{(rec.attempts || 1) === 1 ? '' : 's'}{rec.takenAt ? ` В· last ${rec.takenAt}` : ''}</span>
+                    <span className="text-slate-400">· {rec.attempts || 1} attempt{(rec.attempts || 1) === 1 ? '' : 's'}{rec.takenAt ? ` · last ${rec.takenAt}` : ''}</span>
                   </span>
                 ) : rec?.completed ? (
                   <span className="flex items-center gap-1.5 text-[11px] text-emerald-300">
                     <CheckCircle2 size={12} />Completed
-                    <span className="text-slate-400">В· {rec.attempts || 1} attempt{(rec.attempts || 1) === 1 ? '' : 's'}</span>
+                    <span className="text-slate-400">· {rec.attempts || 1} attempt{(rec.attempts || 1) === 1 ? '' : 's'}</span>
                   </span>
                 ) : (
                   <span className="text-[11px] text-slate-500">Not attempted</span>
@@ -255,7 +255,7 @@ function ExamList({ results, onStart, allExams })
   );
 }
 
-/* в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ Bluebook exam runner в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */
+/* ─────────────────────── Bluebook exam runner ───────────────────────────── */
 function useTimer(minutes, running, onExpire)
 {
   const [secondsLeft, setSecondsLeft] = useState(minutes * 60);
@@ -437,7 +437,7 @@ function BluebookRunner({ exam, onExit, onComplete })
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-[var(--bg-base)] overflow-hidden" onMouseUp={handleMouseUp}>
-      {/* в”Ђв”Ђ Top bar в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */}
+      {/* ── Top bar ─────────────────────────────────── */}
       <header className="flex items-center justify-between px-4 py-2 border-b border-white/10 glass shrink-0 relative">
         <div className="flex items-center gap-3 min-w-0">
           <button type="button" onClick={requestExit} className="btn-ghost text-[11px] shrink-0">
@@ -499,7 +499,7 @@ function BluebookRunner({ exam, onExit, onComplete })
         </div>
       </header>
 
-      {/* в”Ђв”Ђ Score banner after submit в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */}
+      {/* ── Score banner after submit ─────────────── */}
       {submitted && (
         <div className={`shrink-0 px-4 py-2 text-xs font-medium flex flex-wrap items-center gap-3 ${pct === null ? 'bg-slate-500/15 text-slate-200' : pct >= 70 ? 'bg-emerald-500/20 text-emerald-200' : pct >= 50 ? 'bg-amber-500/20 text-amber-200' : 'bg-rose-500/20 text-rose-200'}`}>
           <Trophy size={13} />
@@ -508,13 +508,13 @@ function BluebookRunner({ exam, onExit, onComplete })
         </div>
       )}
 
-      {/* в”Ђв”Ђ Body: left (stem) + right (choices) в”Ђв”Ђв”Ђ */}
+      {/* ── Body: left (stem) + right (choices) ─── */}
       <div
         ref={splitRef}
         className="exam-runner-split flex-1 min-h-0 relative"
         style={{ '--exam-left-pane': `${leftPanePercent}%` }}
       >
-        {/* в”Ђв”Ђ Left panel вЂ” always shows the question stem в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+        {/* ── Left panel — always shows the question stem ───────────────────
             For MCQ: prompt (+ code block if any)
             For FRQ: prompt + code block                                     */}
         <div className="min-h-0 min-w-0 overflow-auto p-5 border-r border-white/10">
@@ -552,7 +552,7 @@ function BluebookRunner({ exam, onExit, onComplete })
           )}
         </div>
 
-        {/* в”Ђв”Ђ Right panel вЂ” answer choices (MCQ) or code editor (FRQ) в”Ђв”Ђв”Ђв”Ђв”Ђ */}
+        {/* ── Right panel — answer choices (MCQ) or code editor (FRQ) ───── */}
         <div
           role="separator"
           aria-label="Resize question and answer panels"
@@ -595,10 +595,10 @@ function BluebookRunner({ exam, onExit, onComplete })
           {submitted && q.type === 'mcq' && (
             <p className="text-[11px] text-slate-400 -mt-2">
               {answers[q.id] === q.answer
-                ? 'вњ“ Correct вЂ” review the explanation below or move on to the next question.'
+                ? '✓ Correct — review the explanation below or move on to the next question.'
                 : answers[q.id] === undefined
-                  ? 'Not answered вЂ” the correct answer and explanation are shown below.'
-                  : 'вњ— Incorrect вЂ” your choice, the correct answer, and the explanation are shown below.'}
+                  ? 'Not answered — the correct answer and explanation are shown below.'
+                  : '✗ Incorrect — your choice, the correct answer, and the explanation are shown below.'}
             </p>
           )}
 
@@ -720,7 +720,7 @@ function BluebookRunner({ exam, onExit, onComplete })
             </div>
           )}
 
-          {/* Explanation after submit вЂ” ref used for auto-scroll when answer clicked */}
+          {/* Explanation after submit — ref used for auto-scroll when answer clicked */}
           {submitted && q.type === 'mcq' && (
             <div ref={explanationRef}>
               <ExplanationCard
@@ -732,14 +732,14 @@ function BluebookRunner({ exam, onExit, onComplete })
         </div>
       </div>
 
-      {/* в”Ђв”Ђ Bottom navigation bar в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */}
+      {/* ── Bottom navigation bar ─────────────────── */}
       <footer className="glass border-t border-white/10 px-4 py-2.5 flex items-center justify-between gap-3 shrink-0">
         <button
           type="button"
           onClick={() => setCurrent((c) => Math.max(0, c - 1))}
           disabled={current === 0}
           aria-label="Previous question"
-          title="Previous question (в†ђ)"
+          title="Previous question (←)"
           className="exam-question-nav-control btn-ghost min-h-11 min-w-28 justify-center gap-2 rounded-xl border border-white/20 bg-white/[0.06] px-4 py-2.5 text-sm font-semibold text-slate-100 shadow-sm hover:bg-white/[0.12] disabled:cursor-not-allowed disabled:opacity-40"
         >
           <ArrowLeft size={19} strokeWidth={2.5} /><span>Previous</span>
@@ -760,14 +760,14 @@ function BluebookRunner({ exam, onExit, onComplete })
           onClick={() => setCurrent((c) => Math.min(totalQ - 1, c + 1))}
           disabled={current === totalQ - 1}
           aria-label="Next question"
-          title="Next question (в†’)"
+          title="Next question (→)"
           className="exam-question-nav-control btn-primary min-h-11 min-w-28 justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-md disabled:cursor-not-allowed disabled:opacity-40"
         >
           <span>Next</span><ArrowRight size={19} strokeWidth={2.5} />
         </button>
       </footer>
 
-      {/* в”Ђв”Ђ Question navigator popup в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */}
+      {/* ── Question navigator popup ──────────────── */}
       {showNav && createPortal(
         <div
           onClick={() => setShowNav(false)}
@@ -798,7 +798,7 @@ function BluebookRunner({ exam, onExit, onComplete })
                         marked ? 'border-amber-400/40 bg-amber-500/15 text-amber-200' :
                         'border-white/10 text-slate-400 hover:border-white/30'}`}
                   >
-                    {marked && !done ? 'в…' : i + 1}
+                    {marked && !done ? '★' : i + 1}
                   </button>
                 );
               })}
@@ -814,7 +814,7 @@ function BluebookRunner({ exam, onExit, onComplete })
         document.body
       )}
 
-      {/* в”Ђв”Ђ Reference sheet modal в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */}
+      {/* ── Reference sheet modal ─────────────────── */}
       {showRef && createPortal(
         <div
           onClick={() => setShowRef(false)}
@@ -827,7 +827,7 @@ function BluebookRunner({ exam, onExit, onComplete })
             <div className="flex items-center justify-between px-5 py-3 border-b border-white/10 shrink-0">
               <div className="flex items-center gap-2">
                 <Book size={15} className="text-[var(--accent)]" />
-                <span className="text-sm font-semibold text-white">AP CS A вЂ” Java Quick Reference</span>
+                <span className="text-sm font-semibold text-white">AP CS A — Java Quick Reference</span>
               </div>
               <button onClick={() => setShowRef(false)} className="text-slate-400 hover:text-white">
                 <X size={15} />
@@ -856,7 +856,7 @@ function BluebookRunner({ exam, onExit, onComplete })
   );
 }
 
-/* в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ Explanation + AI chat в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */
+/* ─────────────────────── Explanation + AI chat ──────────────────────────── */
 function ExplanationCard({ question, userAnswer })
 {
   const hasAnswer = Number.isInteger(userAnswer);

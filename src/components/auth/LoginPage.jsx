@@ -35,7 +35,7 @@ export default function LoginPage({ initialEmail = '', onSwitchToSignup, onForgo
       subtitle="Sign in to continue your learning streak."
       footer={(
         <>
-          {onBack && <button onClick={onBack} className="text-slate-400 hover:text-white transition mr-3">в†ђ Home</button>}
+          {onBack && <button onClick={onBack} className="text-slate-400 hover:text-white transition mr-3">← Home</button>}
           New here?{' '}
           <button onClick={onSwitchToSignup} className="text-[var(--accent)] hover:text-white transition font-medium">
             Create an account

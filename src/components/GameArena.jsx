@@ -175,22 +175,22 @@ export default function GameArena({ onNavigate })
           <section className="dashboard-panel min-h-[25rem] rounded-3xl p-5 sm:p-7" aria-labelledby="sprint-round-title">
             {!round ? <div className="flex min-h-[21rem] flex-col items-start justify-center">
               <span className="stat-icon stat-mint grid h-12 w-12 place-items-center rounded-2xl"><Zap size={21} /></span>
-              <p className="mt-5 dashboard-eyebrow">10 QUESTIONS В· 12 SECONDS EACH</p>
+              <p className="mt-5 dashboard-eyebrow">10 QUESTIONS · 12 SECONDS EACH</p>
               <h2 id="sprint-round-title" className="mt-2 text-2xl font-semibold">Ready for a quick round?</h2>
-              <p className="mt-2 max-w-lg text-sm leading-relaxed dashboard-muted">{practiceAvailable ? 'Choose one practice round before your first ranked game, or start ranked immediately. Every later round is ranked.' : 'All new rounds are ranked. Your best completed score counts toward this weekвЂ™s standings.'} The daily limit is 12 rounds.</p>
+              <p className="mt-2 max-w-lg text-sm leading-relaxed dashboard-muted">{practiceAvailable ? 'Choose one practice round before your first ranked game, or start ranked immediately. Every later round is ranked.' : 'All new rounds are ranked. Your best completed score counts toward this week’s standings.'} The daily limit is 12 rounds.</p>
               <div className="mt-6 flex flex-wrap items-center gap-3">
-                <button type="button" onClick={() => startRound(false)} disabled={busy} className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-emerald-300 px-5 py-3 font-semibold text-slate-950 hover:bg-emerald-200 disabled:opacity-50">{busy ? 'StartingвЂ¦' : 'Start ranked round'} <Zap size={17} /></button>
+                <button type="button" onClick={() => startRound(false)} disabled={busy} className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-emerald-300 px-5 py-3 font-semibold text-slate-950 hover:bg-emerald-200 disabled:opacity-50">{busy ? 'Starting…' : 'Start ranked round'} <Zap size={17} /></button>
                 {practiceAvailable && <button type="button" onClick={() => startRound(true)} disabled={busy} className="min-h-12 rounded-xl border border-white/15 px-4 py-3 text-sm font-semibold hover:bg-white/5 disabled:opacity-50">Use one practice round</button>}
               </div>
             </div> : round.finished ? <div className="flex min-h-[21rem] flex-col items-start justify-center">
               <span className="stat-icon stat-mint grid h-12 w-12 place-items-center rounded-2xl"><Trophy size={21} /></span>
               <p className="mt-5 dashboard-eyebrow">ROUND COMPLETE</p>
               <h2 id="sprint-round-title" className="mt-2 text-3xl font-bold">{round.score} points</h2>
-              <p className="mt-2 text-sm dashboard-muted">{round.correct} of {round.total} correct. {round.ranked ? 'Your score can enter this weekвЂ™s standings.' : 'This was a practice round and does not affect this weekвЂ™s standings.'}</p>
+              <p className="mt-2 text-sm dashboard-muted">{round.correct} of {round.total} correct. {round.ranked ? 'Your score can enter this week’s standings.' : 'This was a practice round and does not affect this week’s standings.'}</p>
               <button type="button" onClick={() => { setRound(null); setMessage(''); }} className="mt-6 rounded-xl border border-white/15 px-4 py-2.5 text-sm font-semibold hover:bg-white/5">Play another round</button>
             </div> : <>
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <div><p className="dashboard-eyebrow">{round.ranked ? 'RANKED ROUND' : 'PRACTICE ROUND'} В· QUESTION {round.questionNumber} OF {round.totalQuestions}</p><h2 id="sprint-round-title" className="mt-1 text-xl font-semibold">{round.question.topic}</h2></div>
+                <div><p className="dashboard-eyebrow">{round.ranked ? 'RANKED ROUND' : 'PRACTICE ROUND'} · QUESTION {round.questionNumber} OF {round.totalQuestions}</p><h2 id="sprint-round-title" className="mt-1 text-xl font-semibold">{round.question.topic}</h2></div>
                 <div className={`flex items-center gap-2 rounded-xl px-3 py-2 font-mono text-lg font-bold ${secondsLeft <= 4 ? 'bg-rose-400/15 text-rose-200' : 'bg-emerald-300/10 text-emerald-200'}`}><Clock3 size={17} />{secondsLeft}s</div>
               </div>
               <div className="my-5 h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-[var(--accent)] transition-[width] duration-200" style={{ width: `${(round.questionNumber / round.totalQuestions) * 100}%` }} /></div>
@@ -198,17 +198,17 @@ export default function GameArena({ onNavigate })
               <div className="mt-5 grid gap-2.5">
                 {round.question.options.map((option, index) => <button key={`${round.question.id}-${index}`} type="button" disabled={busy} onClick={() => submitAnswer(index)} className="flex min-h-12 items-center gap-3 rounded-xl border border-white/10 bg-white/[0.025] px-4 py-3 text-left text-sm leading-relaxed text-slate-100 transition hover:border-emerald-300/40 hover:bg-emerald-300/[0.07] disabled:opacity-50"><span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-white/[0.07] font-mono text-xs text-emerald-200">{String.fromCharCode(65 + index)}</span><span className="break-words">{option}</span></button>)}
               </div>
-              <p className="mt-4 text-xs dashboard-muted">Current round: {round.score} points В· {round.correct} correct</p>
+              <p className="mt-4 text-xs dashboard-muted">Current round: {round.score} points · {round.correct} correct</p>
             </>}
           </section>
 
           <div className="flex flex-col gap-4">
             <section className="dashboard-panel rounded-3xl p-5" aria-labelledby="sprint-standings-title">
-              <div className="flex items-center justify-between gap-2"><div className="flex items-center gap-2"><Users size={18} className="text-emerald-200" /><h2 id="sprint-standings-title" className="text-lg font-semibold">This weekвЂ™s standings</h2></div><button type="button" onClick={() => refreshBoard()} disabled={refreshing} aria-label="Refresh standings" className="rounded-lg border border-white/10 p-2 text-slate-300 hover:text-white disabled:opacity-50"><RefreshCw size={15} /></button></div>
-              <p className="mt-1 text-xs dashboard-muted">Top 50 plus your rank В· best ranked round В· refreshes every 30 seconds В· ties use correct answers, then finish time</p>
+              <div className="flex items-center justify-between gap-2"><div className="flex items-center gap-2"><Users size={18} className="text-emerald-200" /><h2 id="sprint-standings-title" className="text-lg font-semibold">This week’s standings</h2></div><button type="button" onClick={() => refreshBoard()} disabled={refreshing} aria-label="Refresh standings" className="rounded-lg border border-white/10 p-2 text-slate-300 hover:text-white disabled:opacity-50"><RefreshCw size={15} /></button></div>
+              <p className="mt-1 text-xs dashboard-muted">Top 50 plus your rank · best ranked round · refreshes every 30 seconds · ties use correct answers, then finish time</p>
               <ol className="mt-4 max-h-[26rem] divide-y divide-white/[0.07] overflow-y-auto pr-1">
                 {standings.map((row) => <li key={`${row.place}-${row.alias}`} className={`flex items-center gap-3 py-3 text-sm ${row.is_self ? 'text-emerald-200' : ''}`}>
-                  <span className="w-8 shrink-0 font-mono text-xs dashboard-muted">#{row.place}</span><span className="min-w-0 flex-1 truncate font-medium">{row.alias}{row.is_self ? ' В· you' : ''}</span><span className="font-mono text-xs">{row.points} pts</span>
+                  <span className="w-8 shrink-0 font-mono text-xs dashboard-muted">#{row.place}</span><span className="min-w-0 flex-1 truncate font-medium">{row.alias}{row.is_self ? ' · you' : ''}</span><span className="font-mono text-xs">{row.points} pts</span>
                 </li>)}
               </ol>
               {!standings.length && <p className="py-4 text-sm dashboard-muted">No eligible scores yet. Finish a ranked round this week to appear here; practice rounds are not included.</p>}
@@ -218,10 +218,10 @@ export default function GameArena({ onNavigate })
               <div className="flex items-center gap-2"><Award size={18} className="text-amber-200" /><h2 id="sprint-awards-title" className="text-lg font-semibold">Award wall</h2></div>
               <p className="mt-1 text-xs dashboard-muted">Weekly awards are added automatically after the week closes.</p>
               <ul className="mt-3 flex flex-col gap-2">
-                {awards.map((award) => <li key={`${award.week_start}-${award.alias}-${award.award_type}`} className="flex flex-wrap items-center gap-2 rounded-xl bg-white/[0.035] px-3 py-2.5 text-sm"><Medal size={16} className="shrink-0 text-amber-200" /><span className="min-w-0 flex-1 font-medium">{award.alias}</span><span className="text-xs text-amber-100">{AWARD_LABELS[award.award_type] || award.award_type}</span><span className="w-full pl-6 text-xs dashboard-muted">{award.week_start} В· {award.score} pts</span></li>)}
+                {awards.map((award) => <li key={`${award.week_start}-${award.alias}-${award.award_type}`} className="flex flex-wrap items-center gap-2 rounded-xl bg-white/[0.035] px-3 py-2.5 text-sm"><Medal size={16} className="shrink-0 text-amber-200" /><span className="min-w-0 flex-1 font-medium">{award.alias}</span><span className="text-xs text-amber-100">{AWARD_LABELS[award.award_type] || award.award_type}</span><span className="w-full pl-6 text-xs dashboard-muted">{award.week_start} · {award.score} pts</span></li>)}
               </ul>
-              {!awards.length && <p className="py-3 text-sm dashboard-muted">The first award will be recorded when this weekвЂ™s league ends.</p>}
-              <button type="button" onClick={() => onNavigate?.('profile')} className="mt-3 text-sm font-medium text-emerald-200 hover:text-white">View your profile awards в†’</button>
+              {!awards.length && <p className="py-3 text-sm dashboard-muted">The first award will be recorded when this week’s league ends.</p>}
+              <button type="button" onClick={() => onNavigate?.('profile')} className="mt-3 text-sm font-medium text-emerald-200 hover:text-white">View your profile awards →</button>
             </section>
           </div>
         </div>
