@@ -42,8 +42,8 @@ export default function ForgotPasswordPage({ initialEmail = '', onBack })
             <CheckCircle2 size={22} className="text-emerald-300" />
           </div>
           <p className="text-xs text-slate-300 leading-relaxed">
-            If an account exists for <span className="font-mono text-cyan-200">{email}</span>, a
-            reset link has been sent. The link is valid for 1 hour — click it on the same browser
+            If an account exists for <span className="font-mono text-[var(--accent)]">{email}</span>, a
+            reset link has been sent. The link is valid for 1 hour вЂ” click it on the same browser
             to set a new password.
           </p>
           <p className="text-[11px] text-slate-500">
@@ -65,12 +65,12 @@ export default function ForgotPasswordPage({ initialEmail = '', onBack })
   return (
     <AuthShell
       title="Forgot your password?"
-      subtitle="Enter the email you used to sign up — we'll send you a reset link."
+      subtitle="Enter the email you used to sign up вЂ” we'll send you a reset link."
       footer={(
         <button
           type="button"
           onClick={onBack}
-          className="text-violet-300 hover:text-white transition font-medium inline-flex items-center gap-1"
+          className="text-[var(--accent)] hover:text-white transition font-medium inline-flex items-center gap-1"
         >
           <ArrowLeft size={11} />
           Back to sign in

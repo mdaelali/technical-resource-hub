@@ -23,10 +23,10 @@ export default {
         }
       },
       boxShadow: {
-        glass: '0 8px 32px 0 rgba(2, 4, 12, 0.55)',
-        glow: '0 0 24px rgba(139, 92, 246, 0.35)',
-        'glow-cyan': '0 0 24px rgba(34, 211, 238, 0.3)',
-        'glow-gold': '0 0 24px rgba(252, 211, 77, 0.25)',
+        glass: 'none',
+        glow: 'none',
+        'glow-cyan': 'none',
+        'glow-gold': 'none',
         'inset-soft': 'inset 0 1px 0 rgba(255, 255, 255, 0.06)'
       },
       backdropBlur: {

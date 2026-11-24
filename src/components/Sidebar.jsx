@@ -41,13 +41,12 @@ function SidebarBody({ active, onSelect, layoutKey, onClose })
     <>
       {/* Brand header */}
       <div className="px-4 py-4 flex items-center gap-2.5 border-b border-white/5">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-600 via-emerald-500 to-sky-500 grid place-items-center shadow-glow shrink-0 relative">
+        <div className="w-9 h-9 rounded-lg bg-[var(--accent-strong)] grid place-items-center shrink-0">
           <GraduationCap size={17} className="text-white" />
-          <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[var(--bg-base)]" />
         </div>
         <div className="leading-tight min-w-0 flex-1">
-          <div className="text-sm font-bold text-white tracking-tight">Resource Hub</div>
-          <div className="text-[9px] text-slate-400 uppercase tracking-widest font-medium">Student Edition</div>
+          <div className="font-display text-[15px] font-semibold text-white">Resource Hub</div>
+          <div className="text-[11px] text-slate-400">Student edition</div>
         </div>
         {onClose && (
           <button
@@ -79,7 +78,7 @@ function SidebarBody({ active, onSelect, layoutKey, onClose })
               {isActive && (
                 <motion.span
                   layoutId={`${layoutKey}-active-bg`}
-                  className="absolute inset-0 rounded-xl bg-gradient-to-r from-emerald-500/20 to-cyan-400/10"
+                  className="absolute inset-0 rounded-xl bg-[var(--accent-soft)]"
                   transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                 />
               )}
@@ -87,7 +86,7 @@ function SidebarBody({ active, onSelect, layoutKey, onClose })
               {isActive && (
                 <motion.span
                   layoutId={`${layoutKey}-indicator`}
-                  className="absolute left-0 top-2 bottom-2 w-0.5 rounded-r-full bg-gradient-to-b from-emerald-400 to-cyan-400"
+                  className="absolute left-0 top-2 bottom-2 w-0.5 rounded-r-full bg-[var(--accent)]"
                   transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                 />
               )}
@@ -114,7 +113,7 @@ function SidebarBody({ active, onSelect, layoutKey, onClose })
           onClick={() => onSelect('profile')}
           className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-white/[0.05] transition group w-full text-left"
         >
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-600 to-sky-500 grid place-items-center text-[11px] font-semibold text-white overflow-hidden border border-white/10 shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-[var(--accent-strong)] grid place-items-center text-[11px] font-semibold text-white overflow-hidden shrink-0">
             {profile?.avatarUrl ? (
               <img
                 src={profile.avatarUrl}
@@ -128,7 +127,7 @@ function SidebarBody({ active, onSelect, layoutKey, onClose })
             )}
           </div>
           <div className="leading-tight min-w-0 flex-1">
-            <div className="text-xs font-semibold text-white truncate group-hover:text-violet-300 transition-colors">
+            <div className="text-xs font-semibold text-white truncate group-hover:text-[var(--accent)] transition-colors">
               {user?.name || 'Student'}
             </div>
             <div className="text-[10px] text-slate-500 truncate">{user?.email}</div>

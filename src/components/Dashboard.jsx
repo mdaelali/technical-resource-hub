@@ -69,8 +69,8 @@ export default function Dashboard({ onNavigate })
               <span className="rounded-full bg-emerald-300/10 px-2 py-1 text-[10px] font-medium text-emerald-200">YOUR NEXT STEP</span>
             </div>
             <div className="py-5 font-mono text-[12px] leading-7 sm:text-[13px]">
-              <div><span className="text-violet-300">int</span> <span className="text-sky-200">curiosity</span> = <span className="text-amber-200">1</span>;</div>
-              <div><span className="text-violet-300">while</span> (curiosity {'>'} <span className="text-amber-200">0</span>) {'{'}</div>
+              <div><span className="text-[var(--accent)]">int</span> <span className="text-[var(--accent)]">curiosity</span> = <span className="text-amber-200">1</span>;</div>
+              <div><span className="text-[var(--accent)]">while</span> (curiosity {'>'} <span className="text-amber-200">0</span>) {'{'}</div>
               <div className="pl-5"><span className="text-emerald-200">learn</span>(<span className="text-orange-200">"{nextTopic.card.title}"</span>);</div>
               <div className="pl-5">curiosity++;</div>
               <div>{'}'}</div>
@@ -92,7 +92,7 @@ export default function Dashboard({ onNavigate })
             <div><p className="dashboard-eyebrow">A SIMPLE ROUTINE</p><h3 className="mt-1 text-xl font-semibold">Your learning plan</h3><p className="mt-1 text-sm dashboard-muted">Three small steps make a focused study session.</p></div>
             <span className="rounded-full bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-300">{completion}% complete</span>
           </div>
-          <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400 transition-all" style={{ width: `${completion}%` }} /></div>
+          <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-[var(--accent)] transition-all" style={{ width: `${completion}%` }} /></div>
           <div className="mt-4 divide-y divide-white/[0.07]">
             {tasks.map(({ id, title, detail, icon: Icon, action }, index) =>
             {
@@ -110,11 +110,11 @@ export default function Dashboard({ onNavigate })
         </section>
 
         <section className="dashboard-panel rounded-3xl p-5 sm:p-6">
-          <div className="flex items-start justify-between"><div><p className="dashboard-eyebrow">PICK UP WHERE YOU LEFT OFF</p><h3 className="mt-1 text-xl font-semibold">A good next topic</h3></div><span className="grid h-10 w-10 place-items-center rounded-2xl bg-sky-400/10 text-sky-300"><BookOpen size={18}/></span></div>
+          <div className="flex items-start justify-between"><div><p className="dashboard-eyebrow">PICK UP WHERE YOU LEFT OFF</p><h3 className="mt-1 text-xl font-semibold">A good next topic</h3></div><span className="grid h-10 w-10 place-items-center rounded-2xl bg-[var(--accent-soft)] text-[var(--accent)]"><BookOpen size={18}/></span></div>
           <div className="mt-5 rounded-2xl border border-white/[0.08] bg-white/[0.03] p-4">
-            <div className="flex items-center justify-between gap-2"><span className="text-xs font-medium text-sky-300">{nextTopic.category.title}</span><span className="rounded-md bg-white/[0.06] px-2 py-1 font-mono text-[10px] dashboard-muted">{nextTopic.card.tag}</span></div>
+            <div className="flex items-center justify-between gap-2"><span className="text-xs font-medium text-[var(--accent)]">{nextTopic.category.title}</span><span className="rounded-md bg-white/[0.06] px-2 py-1 font-mono text-[10px] dashboard-muted">{nextTopic.card.tag}</span></div>
             <h4 className="mt-3 text-lg font-semibold text-white">{focusTopic.card.title}</h4>
-            <p className="mt-2 text-sm leading-6 dashboard-muted">{focusTopic.card.explanation.slice(0, 156)}{focusTopic.card.explanation.length > 156 ? '…' : ''}</p>
+            <p className="mt-2 text-sm leading-6 dashboard-muted">{focusTopic.card.explanation.slice(0, 156)}{focusTopic.card.explanation.length > 156 ? 'вЂ¦' : ''}</p>
             <button onClick={() => onNavigate('docs', { categoryId: focusTopic.category.id })} className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-emerald-300 transition hover:text-emerald-200">Open topic <ArrowRight size={15}/></button>
           </div>
           <div className="mt-4 flex items-center gap-3 rounded-2xl bg-amber-300/[0.07] p-3.5"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-amber-300/10 text-amber-200"><GraduationCap size={17}/></span><p className="text-xs leading-5 dashboard-muted"><strong className="font-semibold text-amber-100">Study tip</strong><br/>Try to explain an algorithm in your own words before you look at its code.</p></div>

@@ -115,7 +115,7 @@ export default function CodeEditor({ value, onChange, language = 'java' })
       return;
     }
 
-    // ── Autocomplete navigation (only when the dropdown is open) ──────────
+    // в”Ђв”Ђ Autocomplete navigation (only when the dropdown is open) в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
     if (ac.open && ac.items.length > 0)
     {
       if (event.key === 'ArrowDown')
@@ -144,7 +144,7 @@ export default function CodeEditor({ value, onChange, language = 'java' })
       }
     }
 
-    // ── Auto-pair openers ────────────────────────────────────────────────
+    // в”Ђв”Ђ Auto-pair openers в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
     if (PAIR_OPENERS[event.key])
     {
       const { selectionStart, selectionEnd } = el;
@@ -169,7 +169,7 @@ export default function CodeEditor({ value, onChange, language = 'java' })
       }
     }
 
-    // ── Skip over an existing closer ────────────────────────────────────
+    // в”Ђв”Ђ Skip over an existing closer в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
     if (PAIR_CLOSERS.has(event.key))
     {
       const { selectionStart, selectionEnd } = el;
@@ -383,7 +383,7 @@ export default function CodeEditor({ value, onChange, language = 'java' })
           autoComplete="off"
           autoCorrect="off"
           autoCapitalize="off"
-          className="code-editor-input absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden px-3 py-3 bg-transparent text-transparent caret-white resize-none focus:outline-none whitespace-pre-wrap break-words font-mono text-xs leading-[1.55] selection:bg-violet-500/40"
+          className="code-editor-input absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden px-3 py-3 bg-transparent text-transparent caret-white resize-none focus:outline-none whitespace-pre-wrap break-words font-mono text-xs leading-[1.55] selection:bg-[var(--accent-soft)]"
         />
 
         {ac.open && createPortal(
@@ -395,7 +395,7 @@ export default function CodeEditor({ value, onChange, language = 'java' })
               <li key={item.label}>
                 <button
                   type="button"
-                  // mousedown fires before blur — prevent default so the
+                  // mousedown fires before blur вЂ” prevent default so the
                   // textarea keeps focus while we insert the completion.
                   onMouseDown={(e) =>
                   {
@@ -408,7 +408,7 @@ export default function CodeEditor({ value, onChange, language = 'java' })
                   }}
                   onMouseEnter={() => setAc((a) => ({ ...a, index: i }))}
                   className={`w-full flex items-center justify-between gap-3 px-2.5 py-1 text-left ${
-                    i === ac.index ? 'bg-violet-500/25' : 'hover:bg-white/[0.04]'
+                    i === ac.index ? 'bg-[var(--accent-soft)]' : 'hover:bg-white/[0.04]'
                   }`}
                 >
                   <span className={`font-mono ${KIND_CLASS[item.kind] || 'text-slate-200'}`}>

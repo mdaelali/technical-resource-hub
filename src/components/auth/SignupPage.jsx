@@ -50,9 +50,9 @@ export default function SignupPage({ onSwitchToLogin, onForgotPassword, onBack }
       subtitle="Sign up to track your progress, mastery, and streak."
       footer={(
         <>
-          {onBack && <button onClick={onBack} className="text-slate-400 hover:text-white transition mr-3">← Home</button>}
+          {onBack && <button onClick={onBack} className="text-slate-400 hover:text-white transition mr-3">в†ђ Home</button>}
           Already have an account?{' '}
-          <button onClick={() => onSwitchToLogin(email)} className="text-violet-300 hover:text-white transition font-medium">
+          <button onClick={() => onSwitchToLogin(email)} className="text-[var(--accent)] hover:text-white transition font-medium">
             Sign in
           </button>
         </>

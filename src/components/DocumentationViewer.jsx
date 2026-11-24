@@ -30,9 +30,9 @@ const ICONS = {
 };
 
 const ACCENTS = {
-  algorithms: 'text-cyan-300',
+  algorithms: 'text-[var(--accent)]',
   logic: 'text-emerald-300',
-  exam: 'text-violet-300'
+  exam: 'text-[var(--accent)]'
 };
 
 function matchesQuery(card, query)
@@ -156,7 +156,7 @@ export default function DocumentationViewer({
               {searchQuery && (
                 <span
                   className={`pill ${
-                    count > 0 ? 'bg-violet-500/30 text-violet-100' : 'bg-white/5 text-slate-500'
+                    count > 0 ? 'bg-[var(--accent-soft)] text-[var(--accent)]' : 'bg-white/5 text-slate-500'
                   }`}
                 >
                   {count}
@@ -193,10 +193,10 @@ export default function DocumentationViewer({
             <section className="dashboard-panel rounded-2xl p-4 sm:p-5" aria-labelledby="ap-csa-resources-title">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="max-w-2xl">
-                  <p className="dashboard-eyebrow">OFFICIAL SYLLABUS · OFFLINE STUDY</p>
+                  <p className="dashboard-eyebrow">OFFICIAL SYLLABUS В· OFFLINE STUDY</p>
                   <h3 id="ap-csa-resources-title" className="mt-1 text-base font-semibold tracking-tight">Use the complete College Board course description</h3>
                   <p className="mt-1 text-sm leading-relaxed dashboard-muted">
-                    Open the official PDF, then use the PDF viewer’s download button to save it on your phone or computer for offline reading. This topic guide is a study aid; the official document contains the full required knowledge and exclusions.
+                    Open the official PDF, then use the PDF viewerвЂ™s download button to save it on your phone or computer for offline reading. This topic guide is a study aid; the official document contains the full required knowledge and exclusions.
                   </p>
                 </div>
                 <a
@@ -209,9 +209,9 @@ export default function DocumentationViewer({
                 </a>
               </div>
               <div className="mt-4 border-t border-white/10 pt-3 text-xs leading-relaxed dashboard-muted">
-                <span className="font-semibold text-slate-200">Barron’s AP Computer Science A Premium, 12th Edition:</span>{' '}
-                use a legally acquired copy for offline book study. The publisher’s online hub can help identify supported editions; the complete textbook file is not hosted here.
-                {' '}<a href="https://www.barronseduc.com/booksonline?search=computer" target="_blank" rel="noreferrer" className="font-medium text-emerald-200 underline decoration-emerald-200/40 underline-offset-4 hover:text-white">Visit Barron’s official book hub <ExternalLink size={11} className="inline" /></a>
+                <span className="font-semibold text-slate-200">BarronвЂ™s AP Computer Science A Premium, 12th Edition:</span>{' '}
+                use a legally acquired copy for offline book study. The publisherвЂ™s online hub can help identify supported editions; the complete textbook file is not hosted here.
+                {' '}<a href="https://www.barronseduc.com/booksonline?search=computer" target="_blank" rel="noreferrer" className="font-medium text-emerald-200 underline decoration-emerald-200/40 underline-offset-4 hover:text-white">Visit BarronвЂ™s official book hub <ExternalLink size={11} className="inline" /></a>
               </div>
             </section>
           )}
@@ -238,7 +238,7 @@ export default function DocumentationViewer({
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-violet-300 font-mono text-xs">##</span>
+                        <span className="text-[var(--accent)] font-mono text-xs">##</span>
                         <h3 className="text-sm font-semibold text-white tracking-tight">
                           {highlight(card.title, searchQuery)}
                         </h3>
@@ -252,7 +252,7 @@ export default function DocumentationViewer({
 
                     {card.complexity && (
                       <div className="flex items-start gap-1.5 text-[11px] text-slate-300">
-                        <Clock size={12} className="mt-0.5 text-cyan-300 shrink-0" />
+                        <Clock size={12} className="mt-0.5 text-[var(--accent)] shrink-0" />
                         <span>
                           <span className="text-slate-400">Complexity:</span> {card.complexity}
                         </span>
@@ -272,7 +272,7 @@ export default function DocumentationViewer({
                       <ul className="text-[11px] text-slate-300 leading-relaxed flex flex-col gap-0.5">
                         {card.bullets.map((b) => (
                           <li key={b} className="flex items-start gap-1.5">
-                            <span className="text-violet-300 mt-1.5 w-1 h-1 rounded-full bg-violet-300 shrink-0" />
+                            <span className="text-[var(--accent)] mt-1.5 w-1 h-1 rounded-full bg-[var(--accent-strong)] shrink-0" />
                             <span>{b}</span>
                           </li>
                         ))}
@@ -292,7 +292,7 @@ export default function DocumentationViewer({
                           <div className="pt-2 mt-1 border-t border-white/10 flex flex-col gap-2.5">
                             <Section
                               icon={ListChecks}
-                              iconColor="text-cyan-300"
+                              iconColor="text-[var(--accent)]"
                               title="Step-by-step"
                               items={card.steps}
                               ordered
@@ -330,7 +330,7 @@ export default function DocumentationViewer({
                         {card.snippetId && onNavigate && (
                           <button
                             onClick={() => onNavigate('playground', { snippetId: card.snippetId })}
-                            className="flex items-center gap-1 text-[11px] px-2 py-1 rounded-lg text-slate-400 hover:text-cyan-200 hover:bg-white/[0.04] transition"
+                            className="flex items-center gap-1 text-[11px] px-2 py-1 rounded-lg text-slate-400 hover:text-[var(--accent)] hover:bg-white/[0.04] transition"
                           >
                             <Code2 size={12} />
                             <span>Open snippet</span>
@@ -340,7 +340,7 @@ export default function DocumentationViewer({
                       <button
                         onClick={() => toggleExpanded(cardKey, card, category.id, category.title)}
                         aria-expanded={isOpen}
-                        className="flex items-center gap-1 text-[11px] text-violet-300 hover:text-white px-2 py-1 rounded-lg hover:bg-white/[0.04] transition"
+                        className="flex items-center gap-1 text-[11px] text-[var(--accent)] hover:text-white px-2 py-1 rounded-lg hover:bg-white/[0.04] transition"
                       >
                         <span>{isOpen ? 'Show less' : 'Read more'}</span>
                         <motion.span animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
@@ -411,7 +411,7 @@ function highlight(text, query)
   return (
     <>
       {text.slice(0, idx)}
-      <mark className="bg-violet-500/40 text-white rounded px-0.5">
+      <mark className="bg-[var(--accent-soft)] text-white rounded px-0.5">
         {text.slice(idx, idx + query.length)}
       </mark>
       {text.slice(idx + query.length)}

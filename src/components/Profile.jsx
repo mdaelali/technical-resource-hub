@@ -196,7 +196,7 @@ export default function Profile({ onNavigate })
       setDeleteError(result.error || 'Could not delete account.');
       return;
     }
-    // AuthContext has already cleared state — AppRoot will rerender to LoginPage.
+    // AuthContext has already cleared state вЂ” AppRoot will rerender to LoginPage.
   }
 
   const earnedBadges = useMemo(
@@ -294,7 +294,7 @@ export default function Profile({ onNavigate })
 
   const memberSince = user?.createdAt
     ? new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })
-    : '—';
+    : 'вЂ”';
 
   const studentId = useMemo(() => formatUserId(user?.id), [user?.id]);
 
@@ -327,7 +327,7 @@ export default function Profile({ onNavigate })
               <button
                 type="button"
                 onClick={() => setLightboxOpen(true)}
-                className="group w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-emerald-700 to-cyan-800 grid place-items-center overflow-hidden border-2 border-white/20 shadow-glass hover:ring-2 hover:ring-emerald-400/40 transition cursor-zoom-in relative"
+                className="group w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-[var(--accent-strong)] grid place-items-center overflow-hidden border-2 border-white/20 shadow-glass hover:ring-2 hover:ring-emerald-400/40 transition cursor-zoom-in relative"
                 aria-label="View profile picture"
               >
                 {avatarUrl ? (
@@ -484,7 +484,7 @@ export default function Profile({ onNavigate })
       <div className="glass dashboard-panel rounded-2xl px-4 py-4">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <Sparkles size={14} className="text-violet-300" />
+            <Sparkles size={14} className="text-[var(--accent)]" />
             <h3 className="text-sm font-semibold text-white tracking-tight">Achievements</h3>
           </div>
           <span className="text-[11px] text-slate-400">
@@ -499,13 +499,13 @@ export default function Profile({ onNavigate })
               <div
                 key={badge.id}
                 className={`glass card-hover rounded-xl px-3 py-2.5 flex flex-col gap-1 border ${
-                  earned ? 'border-violet-400/40' : 'border-white/5 opacity-50'
+                  earned ? 'border-[var(--accent)]' : 'border-white/5 opacity-50'
                 }`}
               >
                 <div
                   className={`w-7 h-7 rounded-lg grid place-items-center ${
                     earned
-                      ? 'bg-gradient-to-br from-violet-500 to-cyan-400'
+                      ? 'bg-[var(--accent-strong)]'
                       : 'bg-white/[0.04]'
                   }`}
                 >
@@ -522,14 +522,14 @@ export default function Profile({ onNavigate })
       <section className="glass dashboard-panel rounded-2xl px-4 py-4" aria-labelledby="game-awards-heading">
         <div className="mb-3 flex items-center gap-2"><Trophy size={15} className="text-amber-200" /><h3 id="game-awards-heading" className="text-sm font-semibold text-white">Code Sprint awards</h3></div>
         {gameAwards.length ? <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {gameAwards.map((award) => <li key={`${award.week_start}-${award.award_type}`} className="flex items-center gap-3 rounded-xl border border-amber-200/10 bg-amber-200/[0.04] p-3"><Award size={18} className="shrink-0 text-amber-200" /><span className="min-w-0 flex-1"><span className="block text-sm font-semibold text-white">{{ champion: 'Weekly champion', runner_up: 'Runner-up', third_place: 'Third place' }[award.award_type] || award.award_type}</span><span className="text-xs dashboard-muted">Week of {award.week_start} · {award.score} points</span></span></li>)}
+          {gameAwards.map((award) => <li key={`${award.week_start}-${award.award_type}`} className="flex items-center gap-3 rounded-xl border border-amber-200/10 bg-amber-200/[0.04] p-3"><Award size={18} className="shrink-0 text-amber-200" /><span className="min-w-0 flex-1"><span className="block text-sm font-semibold text-white">{{ champion: 'Weekly champion', runner_up: 'Runner-up', third_place: 'Third place' }[award.award_type] || award.award_type}</span><span className="text-xs dashboard-muted">Week of {award.week_start} В· {award.score} points</span></span></li>)}
         </ul> : <p className="text-sm dashboard-muted">Finish in the weekly top three in Code Sprint to earn an award here. Awards are stored with your account.</p>}
       </section>
 
       <div className="glass rounded-2xl px-4 py-3">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <History size={14} className="text-cyan-300" />
+            <History size={14} className="text-[var(--accent)]" />
             <h3 className="text-sm font-semibold text-white tracking-tight">Recently Viewed Topics</h3>
           </div>
           {recent.length > 0 && (
@@ -547,7 +547,7 @@ export default function Profile({ onNavigate })
             <button
               type="button"
               onClick={() => onNavigate?.('docs')}
-              className="inline-flex items-center gap-1 text-violet-300 hover:text-white underline-offset-2 hover:underline transition"
+              className="inline-flex items-center gap-1 text-[var(--accent)] hover:text-white underline-offset-2 hover:underline transition"
             >
               Open Documentation
               <ChevronRight size={11} />
@@ -697,7 +697,7 @@ export default function Profile({ onNavigate })
                 className="w-full max-h-[80vh] object-contain rounded-2xl border border-white/15 shadow-glass"
               />
             ) : (
-              <div className="w-full aspect-square max-h-[80vh] rounded-3xl bg-gradient-to-br from-violet-500 to-cyan-400 grid place-items-center border border-white/15 shadow-glass">
+              <div className="w-full aspect-square max-h-[80vh] rounded-3xl bg-[var(--accent-strong)] grid place-items-center border border-white/15 shadow-glass">
                 <span className="text-7xl sm:text-8xl font-bold text-white">{initials}</span>
               </div>
             )}
@@ -729,7 +729,7 @@ function IdField({ label, value, mono = false, icon: Icon })
       <span className="text-[9.5px] uppercase tracking-widest text-slate-500">{label}</span>
       <span className={`text-[11px] text-slate-200 truncate flex items-center gap-1 ${mono ? 'font-mono' : ''}`}>
         {Icon && <Icon size={10} className="text-slate-400 shrink-0" />}
-        {value || '—'}
+        {value || 'вЂ”'}
       </span>
     </div>
   );
@@ -737,22 +737,22 @@ function IdField({ label, value, mono = false, icon: Icon })
 
 const ACCENT_STYLES = {
   amber: {
-    bg: 'from-amber-400/30 via-amber-500/10 to-rose-500/15',
-    text: 'from-amber-200 via-amber-300 to-rose-300',
-    glow: 'bg-amber-400/15',
+    bg: 'bg-amber-400/10',
+    text: 'text-amber-200',
+    glow: 'bg-transparent',
     iconColor: 'text-amber-200'
   },
   emerald: {
-    bg: 'from-emerald-400/25 via-emerald-500/10 to-cyan-500/15',
-    text: 'from-emerald-200 via-emerald-300 to-cyan-200',
-    glow: 'bg-emerald-400/15',
+    bg: 'bg-[var(--accent-soft)]',
+    text: 'text-[var(--accent)]',
+    glow: 'bg-transparent',
     iconColor: 'text-emerald-200'
   },
   violet: {
-    bg: 'from-violet-400/25 via-violet-500/10 to-cyan-400/20',
-    text: 'from-violet-200 via-violet-300 to-cyan-200',
-    glow: 'bg-violet-400/15',
-    iconColor: 'text-violet-200'
+    bg: 'bg-white/[0.04]',
+    text: 'text-slate-100',
+    glow: 'bg-transparent',
+    iconColor: 'text-[var(--accent)]'
   }
 };
 
@@ -760,7 +760,7 @@ function PremiumStat({ icon: Icon, label, value, unit, accent = 'amber' })
 {
   const a = ACCENT_STYLES[accent];
   return (
-    <div className={`glass card-hover gradient-border rounded-2xl px-4 py-3 bg-gradient-to-br ${a.bg} relative overflow-hidden`}>
+    <div className={`glass card-hover rounded-2xl px-4 py-3 ${a.bg} relative overflow-hidden`}>
       <div className={`absolute -top-6 -right-6 w-24 h-24 rounded-full ${a.glow} blur-2xl pointer-events-none`} />
       <div className="relative">
         <div className="flex items-center justify-between">
@@ -769,7 +769,7 @@ function PremiumStat({ icon: Icon, label, value, unit, accent = 'amber' })
         </div>
         <div className="mt-1.5 flex items-baseline gap-1.5">
           <span
-            className={`text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-br ${a.text} bg-clip-text text-transparent leading-none`}
+            className={`text-2xl sm:text-3xl font-bold tracking-tight ${a.text} leading-none`}
           >
             {value}
           </span>
@@ -784,7 +784,7 @@ function formatUserId(id)
 {
   if (!id)
   {
-    return '—';
+    return 'вЂ”';
   }
   // Supabase user ids are UUIDs; show the first 8 chars as a friendly student id.
   return id.replace(/-/g, '').slice(0, 8).toUpperCase().match(/.{1,4}/g).join('-');

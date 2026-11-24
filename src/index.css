@@ -1,45 +1,52 @@
-/* Fonts are now loaded via <link rel="stylesheet"> in index.html — see the
-   preconnect+link block there. Loading from index.html avoids the
-   render-blocking penalty of @import inside the main CSS file. */
+/* Fonts load from index.html. Design system: flat surfaces, one green accent,
+   a warm highlight used sparingly. No gradients, blur, or ambient glow. */
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ── Tokens. Dark is a warm charcoal, light is paper. ───────────────────── */
 :root
 {
   color-scheme: dark;
-  /* Dark theme tokens */
-  --bg-base:          #050813;
-  --bg-surface:       rgba(255,255,255,0.04);
-  --bg-surface-hover: rgba(255,255,255,0.06);
-  --border-color:     rgba(255,255,255,0.08);
-  --text-primary:     #e5e7eb;
-  --text-secondary:   #94a3b8;
-  --text-muted:       #475569;
-  --dot-color:        rgba(255,255,255,0.04);
-  --shadow-glass:     0 8px 32px 0 rgba(2, 4, 12, 0.55);
-  --code-bg:          #0a0c14;
-  --gutter-text:      #334155;
-  --selection-bg:     rgba(63, 180, 137, 0.38);
+  --bg-base:          #121416;
+  --bg-surface:       #1a1d20;
+  --bg-surface-hover: #22262a;
+  --border-color:     #2b3035;
+  --text-primary:     #eceded;
+  --text-secondary:   #a4a9af;
+  --text-muted:       #7d838a;
+  --accent:           #7cc4a6;
+  --accent-strong:    #5fb08f;
+  --accent-soft:      rgba(124, 196, 166, 0.12);
+  --highlight:        #f2c230;
+  --shadow-glass:     none;
+  --shadow-popover:   0 12px 32px rgba(0, 0, 0, 0.45);
+  --code-bg:          #0f1113;
+  --gutter-text:      #4a5058;
+  --selection-bg:     rgba(124, 196, 166, 0.3);
+  --font-display:     Georgia, "Times New Roman", serif;
 }
 
-/* Light mode tokens */
 html.light
 {
   color-scheme: light;
-  --bg-base:          #eef2f9;
-  --bg-surface:       rgba(255,255,255,0.90);
-  --bg-surface-hover: rgba(255,255,255,1);
-  --border-color:     rgba(71,85,105,0.18);
-  --text-primary:     #0f172a;
-  --text-secondary:   #334155;
-  --text-muted:       #64748b;
-  --dot-color:        rgba(58,139,111,0.055);
-  --shadow-glass:     0 2px 12px 0 rgba(15,23,42,0.08), 0 1px 3px 0 rgba(15,23,42,0.06);
-  --code-bg:          #f1f5f9;
-  --gutter-text:      #94a3b8;
-  --selection-bg:     rgba(63,180,137,0.20);
+  --bg-base:          #f4f4f1;
+  --bg-surface:       #ffffff;
+  --bg-surface-hover: #fbfbf9;
+  --border-color:     #dddfd8;
+  --text-primary:     #15171a;
+  --text-secondary:   #4d535b;
+  --text-muted:       #6f757d;
+  --accent:           #2f6f5e;
+  --accent-strong:    #255a4c;
+  --accent-soft:      #e6efea;
+  --highlight:        #f2c230;
+  --shadow-glass:     0 1px 2px rgba(21, 23, 26, 0.04);
+  --shadow-popover:   0 10px 28px rgba(21, 23, 26, 0.12);
+  --code-bg:          #f0f1ed;
+  --gutter-text:      #9aa0a6;
+  --selection-bg:     rgba(47, 111, 94, 0.2);
 }
 
 html, body, #root
@@ -50,211 +57,91 @@ html, body, #root
 
 body
 {
-  font-family: 'Inter', system-ui, sans-serif;
-  font-feature-settings: 'cv11', 'ss01';
-  letter-spacing: -0.01em;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   color: var(--text-primary);
   background-color: var(--bg-base);
-  background-image:
-    radial-gradient(ellipse 50% 40% at 12% 0%, rgba(58, 139, 111, 0.17), transparent 60%),
-    radial-gradient(ellipse 40% 35% at 88% 100%, rgba(54, 115, 164, 0.15), transparent 60%),
-    radial-gradient(circle at 1px 1px, var(--dot-color) 1px, transparent 0);
-  background-size: auto, auto, 32px 32px;
+  letter-spacing: -0.005em;
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background-color 0.2s, color 0.2s;
 }
 
-html.light body
+h1, h2
 {
-  background-image:
-    radial-gradient(ellipse 50% 40% at 12% 0%, rgba(58, 139, 111, 0.09), transparent 60%),
-    radial-gradient(ellipse 40% 35% at 88% 100%, rgba(54, 115, 164, 0.07), transparent 60%),
-    radial-gradient(circle at 1px 1px, var(--dot-color) 1px, transparent 0);
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.015em;
 }
 
-/* Pin the background only on desktop. Mobile browsers repaint heavily on every
-   scroll when background-attachment: fixed is set, which tanks frame rate. */
-@media (min-width: 768px)
-{
-  body
-  {
-    background-attachment: fixed;
-  }
-}
-
-h1, h2, h3, h4
-{
-  letter-spacing: -0.02em;
-}
+::selection { background: var(--selection-bg); }
 
 @layer components
 {
-  .glass
+  .glass,
+  .glass-strong
   {
     background-color: var(--bg-surface);
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow-glass);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    transition: background-color 0.2s, border-color 0.2s;
+    transition: border-color 0.2s, background-color 0.2s;
   }
 
-  .glass-strong
-  {
-    background-color: var(--bg-surface-hover);
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-glass);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    transition: background-color 0.2s, border-color 0.2s;
-  }
-
-  /* Light mode: heavier background, subtle border */
-  html.light .glass,
-  html.light .glass-strong
-  {
-    background-color: rgba(255,255,255,0.80);
-    border-color: rgba(148,163,184,0.25);
-    box-shadow: 0 2px 16px rgba(15,23,42,0.08);
-  }
-
-  /* Use for dropdowns, popovers, and floating menus where the user is reading
-     text *over* whatever else is on screen. Heavier background + bigger shadow
-     than .glass so it stays legible against bright dashboard cards on mobile. */
   .popover
   {
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    background-color: rgb(7 11 26 / 0.96);
-    backdrop-filter: blur(24px) saturate(140%);
-    -webkit-backdrop-filter: blur(24px) saturate(140%);
-    box-shadow:
-      0 24px 48px -12px rgba(0, 0, 0, 0.6),
-      0 0 0 1px rgba(139, 92, 246, 0.08),
-      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-surface);
+    box-shadow: var(--shadow-popover);
   }
 
   .pill
   {
-    @apply text-[10px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full;
+    @apply text-[10px] font-medium tracking-wide px-2 py-0.5 rounded-full;
   }
 
-  .gradient-border
+  /* Kept as a no-op so existing markup still renders cleanly. */
+  .gradient-border::before,
+  .ambient-blob
   {
-    position: relative;
-  }
-  .gradient-border::before
-  {
-    content: '';
-    position: absolute;
-    inset: 0;
-    padding: 1px;
-    border-radius: inherit;
-    background: linear-gradient(
-      135deg,
-      rgba(85, 184, 143, 0.42) 0%,
-      rgba(80, 142, 192, 0.22) 55%,
-      rgba(218, 177, 113, 0.16) 100%
-    );
-    -webkit-mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-            mask-composite: exclude;
-    pointer-events: none;
+    display: none;
   }
 
   .card-hover
   {
-    transition: transform 0.22s cubic-bezier(0.16,1,0.3,1), box-shadow 0.22s cubic-bezier(0.16,1,0.3,1), border-color 0.22s ease;
+    transition: border-color 0.18s ease, background-color 0.18s ease;
     cursor: pointer;
   }
   .card-hover:hover
   {
-    transform: translateY(-3px) scale(1.005);
-    box-shadow:
-      0 16px 40px rgba(2, 4, 12, 0.50),
-      0 0 0 1px rgba(90, 178, 139, 0.28),
-      inset 0 1px 0 rgba(255, 255, 255, 0.10);
+    border-color: color-mix(in srgb, var(--accent) 45%, var(--border-color));
   }
   .card-hover:active
   {
-    transform: translateY(0) scale(0.98);
-    transition-duration: 0.08s;
+    background-color: var(--bg-surface-hover);
   }
 
-  /* Ambient glow blob — decorative accent behind primary surfaces */
-  .ambient-blob
-  {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(40px);
-    pointer-events: none;
-    opacity: 0.12;
-    animation: blobDrift 12s ease-in-out infinite alternate;
-  }
-
-  @keyframes blobDrift
-  {
-    0%   { transform: translate(0,   0)   scale(1);    }
-    33%  { transform: translate(8px, -6px) scale(1.04); }
-    66%  { transform: translate(-5px, 4px) scale(0.97); }
-    100% { transform: translate(4px, 8px)  scale(1.02); }
-  }
-
-  /* Skeleton shimmer for loading states */
   .skeleton
   {
-    background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.6s infinite;
+    background: var(--bg-surface-hover);
     border-radius: 8px;
+    animation: skeleton-pulse 1.6s ease-in-out infinite;
   }
-
-  @keyframes shimmer
+  @keyframes skeleton-pulse
   {
-    0%   { background-position: -200% 0; }
-    100% { background-position:  200% 0; }
-  }
-
-  /* Glow accent for primary action buttons */
-  .btn-primary
-  {
-    position: relative;
-  }
-  .btn-primary::after
-  {
-    content: '';
-    position: absolute;
-    inset: -1px;
-    border-radius: inherit;
-    background: linear-gradient(135deg, rgba(46,128,107,0.4), rgba(52,117,169,0.3));
-    filter: blur(8px);
-    z-index: -1;
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
-  .btn-primary:hover::after
-  {
-    opacity: 1;
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.55; }
   }
 
   .btn-primary
   {
-    @apply inline-flex items-center justify-center gap-1.5 text-xs font-medium text-white px-3 py-1.5 rounded-lg transition;
-    background: linear-gradient(135deg, #328771 0%, #397fa7 100%);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.18),
-      0 4px 14px rgba(51, 135, 111, 0.30),
-      0 1px 2px rgba(0, 0, 0, 0.25);
+    @apply inline-flex items-center justify-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition;
+    color: #ffffff;
+    background-color: var(--accent-strong);
+    border: 1px solid transparent;
   }
   .btn-primary:hover
   {
-    filter: brightness(1.1);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.22),
-      0 6px 18px rgba(51, 135, 111, 0.40),
-      0 1px 2px rgba(0, 0, 0, 0.25);
+    background-color: color-mix(in srgb, var(--accent-strong) 88%, #000);
   }
   .btn-primary:active
   {
@@ -262,245 +149,151 @@ h1, h2, h3, h4
   }
   .btn-primary:disabled
   {
-    opacity: 0.6;
+    opacity: 0.55;
     cursor: not-allowed;
-    filter: grayscale(0.3);
   }
 
   .btn-gold
   {
     @apply inline-flex items-center justify-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition;
-    color: #1a1408;
-    background: linear-gradient(135deg, #fcd34d 0%, #f59e0b 100%);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.35),
-      0 4px 14px rgba(245, 158, 11, 0.3),
-      0 1px 2px rgba(0, 0, 0, 0.25);
+    color: #15171a;
+    background-color: var(--highlight);
   }
   .btn-gold:hover
   {
-    filter: brightness(1.05);
+    filter: brightness(0.96);
   }
 
   .btn-ghost
   {
-    @apply inline-flex items-center gap-1.5 text-xs text-slate-300 px-2.5 py-1.5 rounded-lg transition;
+    @apply inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg transition;
+    color: var(--text-secondary);
   }
   .btn-ghost:hover
   {
-    color: #fff;
-    background-color: rgba(255, 255, 255, 0.06);
+    color: var(--text-primary);
+    background-color: var(--bg-surface-hover);
   }
 
   .input-field
   {
-    @apply w-full bg-white/[0.04] border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-violet-400/60 focus:ring-2 focus:ring-violet-400/10 transition;
+    width: 100%;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .input-field::placeholder { color: var(--text-muted); }
+  .input-field:focus
+  {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
   }
 
   .progress-fill
   {
     height: 100%;
-    background-image: linear-gradient(to right, #42a587, #5794c2);
+    background-color: var(--accent);
     transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
     will-change: width;
   }
 }
 
-/* Stronger glass on desktop where the GPU can absorb the cost. */
-@media (min-width: 768px)
-{
-  .glass
-  {
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-  }
-  .glass-strong
-  {
-    backdrop-filter: blur(28px);
-    -webkit-backdrop-filter: blur(28px);
-  }
-}
-
-/* ══════════════════════════════════════════════════════════════════════════
-   LIGHT MODE — Complete coverage
-   Strategy: remap every dark utility that appears in the codebase so
-   text, backgrounds, borders, buttons, pills, and cards all read cleanly
-   against a light (#eef2f9) background.
-   ══════════════════════════════════════════════════════════════════════════ */
-
-/* ── Neutral text ─────────────────────────────────────────────────────────── */
+/* ── Light theme: remap the dark Tailwind utilities used across components ─ */
 html.light .text-white,
 html.light .text-slate-50,
-html.light .text-slate-100 { color: #0f172a !important; }
-html.light .text-slate-200  { color: #1e293b !important; }
-html.light .text-slate-300  { color: #334155 !important; }
-html.light .text-slate-400  { color: #475569 !important; }
-html.light .text-slate-500  { color: #64748b !important; }
-html.light .text-slate-600  { color: #94a3b8 !important; }
-html.light .text-emerald-100 { color: #047857 !important; }
-html.light .text-violet-100  { color: #6d28d9 !important; }
-html.light .text-rose-100    { color: #be123c !important; }
-html.light .text-sky-200     { color: #0369a1 !important; }
-html.light .text-orange-200  { color: #c2410c !important; }
-html.light .text-yellow-200  { color: #854d0e !important; }
+html.light .text-slate-100 { color: var(--text-primary) !important; }
+html.light .text-slate-200 { color: #22272e !important; }
+html.light .text-slate-300 { color: #353b43 !important; }
+html.light .text-slate-400 { color: var(--text-secondary) !important; }
+html.light .text-slate-500,
+html.light .text-slate-600 { color: var(--text-muted) !important; }
 
-/* ── Accent text stays vivid but slightly darker in light ────────────────── */
-html.light .text-violet-300  { color: #347c68 !important; }
-html.light .text-violet-200  { color: #438c75 !important; }
-html.light .text-cyan-300    { color: #0e7490 !important; }
-html.light .text-cyan-200    { color: #0e7490 !important; }
-html.light .text-emerald-300 { color: #059669 !important; }
-html.light .text-emerald-200 { color: #047857 !important; }
-html.light .text-amber-300   { color: #a16207 !important; }
-html.light .text-amber-200   { color: #a16207 !important; }
+/* Accent text in both hues collapses to the single green accent. */
+html.light .text-violet-300,
+html.light .text-violet-200,
+html.light .text-cyan-300,
+html.light .text-cyan-200,
+html.light .text-emerald-300,
+html.light .text-emerald-200,
+html.light .text-emerald-100 { color: var(--accent) !important; }
+html.light .text-amber-300,
+html.light .text-amber-200 { color: #8a5d00 !important; }
 html.light .text-rose-300,
-html.light .text-rose-200    { color: #be123c !important; }
-html.light .text-pink-300    { color: #be185d !important; }
-html.light .from-violet-500 { --tw-gradient-from: #328771 var(--tw-gradient-from-position); --tw-gradient-to: rgb(50 135 113 / 0) var(--tw-gradient-to-position); }
-html.light .from-violet-600 { --tw-gradient-from: #276e5b var(--tw-gradient-from-position); --tw-gradient-to: rgb(39 110 91 / 0) var(--tw-gradient-to-position); }
-html.light .to-cyan-400 { --tw-gradient-to: #508bac var(--tw-gradient-to-position); }
-html.light .via-cyan-500 { --tw-gradient-to: #508bac var(--tw-gradient-to-position); }
+html.light .text-rose-200,
+html.light .text-pink-300 { color: #b4343a !important; }
 
-/* ── Glass surfaces ─────────────────────────────────────────────────────── */
 html.light .glass,
-html.light .glass-strong
-{
-  background-color: rgba(255,255,255,0.88) !important;
-  border-color: rgba(71,85,105,0.16) !important;
-  box-shadow: 0 1px 8px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04) !important;
-}
-
+html.light .glass-strong,
 html.light aside.glass
 {
-  background-color: rgba(255,255,255,0.94) !important;
-  border-color: rgba(71,85,105,0.14) !important;
+  background-color: var(--bg-surface) !important;
+  border-color: var(--border-color) !important;
+  box-shadow: var(--shadow-glass) !important;
 }
 
-/* ── Dark overlay surfaces (editor chrome, modal header bars) ────────────── */
-html.light .bg-black\/20 { background-color: rgba(241,245,249,0.90) !important; }
-html.light .bg-black\/40 { background-color: rgba(241,245,249,0.97) !important; }
-/* Modal/drawer backdrops stay dark so content reads */
-html.light .bg-black\/60 { background-color: rgba(15,23,42,0.50) !important; }
-html.light .bg-black\/70 { background-color: rgba(15,23,42,0.58) !important; }
-html.light .bg-black\/80 { background-color: rgba(15,23,42,0.68) !important; }
-html.light .bg-black\/85 { background-color: rgba(15,23,42,0.75) !important; }
+html.light .bg-black\/20 { background-color: rgba(244, 244, 241, 0.9) !important; }
+html.light .bg-black\/40 { background-color: rgba(244, 244, 241, 0.97) !important; }
+html.light .bg-black\/60 { background-color: rgba(21, 23, 26, 0.45) !important; }
+html.light .bg-black\/70 { background-color: rgba(21, 23, 26, 0.55) !important; }
+html.light .bg-black\/80 { background-color: rgba(21, 23, 26, 0.68) !important; }
+html.light .bg-black\/85 { background-color: rgba(21, 23, 26, 0.75) !important; }
 
-/* ── Borders ────────────────────────────────────────────────────────────── */
-html.light .border-white\/5  { border-color: rgba(71,85,105,0.12) !important; }
-html.light .border-white\/10 { border-color: rgba(71,85,105,0.18) !important; }
-html.light .border-white\/15 { border-color: rgba(71,85,105,0.24) !important; }
-html.light .border-white\/20 { border-color: rgba(71,85,105,0.32) !important; }
+html.light .border-white\/5  { border-color: var(--border-color) !important; }
+html.light .border-white\/10 { border-color: var(--border-color) !important; }
+html.light .border-white\/15 { border-color: #cfd3cb !important; }
+html.light .border-white\/20 { border-color: #c4c9c0 !important; }
 
-/* ── Pill / badge ───────────────────────────────────────────────────────── */
 html.light .pill
 {
-  background-color: rgba(71,85,105,0.10) !important;
-  color: #334155 !important;
+  background-color: #ececE7 !important;
+  color: var(--text-secondary) !important;
 }
-/* Specific accent pills — keep their own hue but darken bg */
-html.light .bg-white\/10 { background-color: rgba(71,85,105,0.10) !important; }
-html.light .bg-white\/\[0\.08\] { background-color: rgba(71,85,105,0.12) !important; }
-html.light .bg-white\/\[0\.06\] { background-color: rgba(71,85,105,0.08) !important; }
-html.light .bg-white\/\[0\.04\] { background-color: rgba(71,85,105,0.06) !important; }
-html.light .bg-white\/\[0\.03\] { background-color: rgba(71,85,105,0.04) !important; }
+html.light .bg-white\/10,
+html.light .bg-white\/\[0\.08\],
+html.light .bg-white\/\[0\.06\],
+html.light .bg-white\/\[0\.04\],
+html.light .bg-white\/\[0\.03\] { background-color: #ececE7 !important; }
 
-/* ── Form inputs ────────────────────────────────────────────────────────── */
 html.light .input-field
 {
-  background-color: #fff !important;
-  border-color: rgba(71,85,105,0.30) !important;
-  color: #0f172a !important;
-  box-shadow: 0 1px 2px rgba(15,23,42,0.04) !important;
+  background-color: #ffffff !important;
+  border-color: #cfd3cb !important;
+  color: var(--text-primary) !important;
 }
-html.light .input-field::placeholder { color: #94a3b8 !important; }
-html.light .input-field:focus
+html.light .input-field:focus { border-color: var(--accent) !important; }
+
+html.light .btn-ghost { color: var(--text-secondary) !important; }
+html.light .btn-ghost:hover { color: var(--text-primary) !important; background-color: #ececE7 !important; }
+
+html.light .btn-primary { color: #ffffff !important; }
+
+html.light .popover
 {
-  border-color: #38866f !important;
-  box-shadow: 0 0 0 3px rgba(56,134,111,0.14) !important;
+  background-color: #ffffff !important;
+  border-color: var(--border-color) !important;
+  box-shadow: var(--shadow-popover) !important;
+  color: var(--text-primary) !important;
 }
 
-/* ── Buttons ────────────────────────────────────────────────────────────── */
-/* btn-ghost: dark text on light bg */
-html.light .btn-ghost
-{
-  color: #334155 !important;
-}
-html.light .btn-ghost:hover
-{
-  color: #0f172a !important;
-  background-color: rgba(71,85,105,0.10) !important;
-}
-
-/* btn-primary stays gradient — just tweak shadow */
-html.light .btn-primary
-{
-  color: #fff !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.20),
-    0 2px 8px rgba(50,135,113,0.24),
-    0 1px 2px rgba(0,0,0,0.12) !important;
-}
-
-html.light .exam-question-nav-control:disabled
-{
-  filter: grayscale(0.35);
-  opacity: 0.58;
-}
-html.light .exam-question-nav-control:focus-visible
-{
-  outline: 3px solid #0f766e;
-  outline-offset: 2px;
-}
-
-/* ── Code / pre ─────────────────────────────────────────────────────────── */
 html.light pre,
 html.light code
 {
   background-color: var(--code-bg) !important;
-  color: #1e293b !important;
+  color: #1f2328 !important;
 }
 
-/* The editor input text is transparent because syntax is drawn underneath it;
-   keep its insertion caret visible against the light code surface. */
-html.light .code-editor-input
-{
-  caret-color: #0f766e !important;
-}
-html.light .code-editor-input::selection
-{
-  background: rgba(15, 118, 110, 0.28);
-}
+html.light .code-editor-input { caret-color: var(--accent) !important; }
+html.light .code-editor-input::selection { background: rgba(47, 111, 94, 0.25); }
 
-/* ── Popover / floating dropdowns ───────────────────────────────────────── */
-html.light .popover
-{
-  background-color: rgba(255,255,255,0.98) !important;
-  border-color: rgba(71,85,105,0.18) !important;
-  box-shadow:
-    0 8px 24px rgba(15,23,42,0.12),
-    0 2px 6px rgba(15,23,42,0.06),
-    0 0 0 1px rgba(58,139,111,0.08) !important;
-  color: #0f172a !important;
-}
+html.light .exam-question-nav-control:disabled { opacity: 0.55; }
+html.light .exam-question-nav-control:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-/* ── Card hover — lighter lift on light bg ──────────────────────────────── */
-html.light .card-hover:hover
-{
-  box-shadow:
-    0 8px 20px rgba(15,23,42,0.10),
-    0 2px 6px rgba(15,23,42,0.06),
-    0 0 0 1px rgba(58,139,111,0.18) !important;
-}
-
-/* ── Gradient border — subtle on light ─────────────────────────────────── */
-html.light .gradient-border::before { opacity: 0.50; }
-
-/* ── Selection colour ───────────────────────────────────────────────────── */
-html.light ::selection { background: rgba(58,139,111,0.20); color: #0f172a; }
-
-/* Honor system reduced-motion: kill animations and transitions, drop blur,
-   leave layout intact. Pairs with framer-motion's MotionConfig
-   reducedMotion="user". */
+/* ── Motion and interaction ────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce)
 {
   *, *::before, *::after
@@ -510,27 +303,8 @@ html.light ::selection { background: rgba(58,139,111,0.20); color: #0f172a; }
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
-  .glass, .glass-strong
-  {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    background-color: rgba(12, 18, 40, 0.85);
-  }
-  .popover
-  {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    background-color: rgb(7 11 26 / 0.98);
-  }
-  .card-hover:hover
-  {
-    transform: none !important;
-  }
 }
 
-/* ── Global accessibility & interaction polish ────────────────────────────── */
-
-/* Ensure pointer cursor on all interactive elements */
 button:not([disabled]),
 [role="button"],
 a,
@@ -540,57 +314,8 @@ select
   cursor: pointer;
 }
 
-/* Visible focus rings — critical for keyboard nav (WCAG 2.4.7) */
 :focus-visible
 {
-  outline: 2px solid rgba(82, 174, 139, 0.85);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
-  border-radius: 4px;
-}
-
-/* Smooth scroll for anchor navigation */
-html
-{
-  scroll-behavior: smooth;
-}
-
-/* ── Custom scrollbars ────────────────────────────────────────────────────── */
-html
-{
-  scrollbar-color: rgba(255, 255, 255, 0.32) rgba(255, 255, 255, 0.06);
-  scrollbar-width: thin;
-}
-::-webkit-scrollbar
-{
-  width: 8px;
-  height: 8px;
-}
-::-webkit-scrollbar-track
-{
-  background: transparent;
-}
-::-webkit-scrollbar-thumb
-{
-  background: rgba(255, 255, 255, 0.32);
-  border-radius: 8px;
-}
-::-webkit-scrollbar-thumb:hover
-{
-  background: rgba(255, 255, 255, 0.52);
-}
-html.light
-{
-  scrollbar-color: #94a3b8 #e2e8f0;
-}
-html.light ::-webkit-scrollbar-track
-{
-  background: #e2e8f0;
-}
-html.light ::-webkit-scrollbar-thumb
-{
-  background: #94a3b8;
-}
-html.light ::-webkit-scrollbar-thumb:hover
-{
-  background: #64748b;
 }

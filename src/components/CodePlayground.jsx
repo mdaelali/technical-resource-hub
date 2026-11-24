@@ -81,7 +81,7 @@ export default function CodePlayground({ initialSnippetId })
             <button
               onClick={handleRun}
               disabled={running}
-              className="flex items-center gap-1 text-[11px] text-white px-2.5 py-1 rounded bg-gradient-to-r from-violet-500 to-cyan-400 hover:opacity-90 disabled:opacity-60 transition"
+              className="flex items-center gap-1 text-[11px] text-white px-2.5 py-1 rounded bg-[var(--accent-strong)] hover:opacity-90 disabled:opacity-60 transition"
             >
               <Play size={12} />
               <span>{running ? 'Running...' : 'Run'}</span>
@@ -130,7 +130,7 @@ export default function CodePlayground({ initialSnippetId })
                   <span>Output</span>
                   {runOutput && (
                     <span className="text-slate-500">
-                      · {runOutput.when.toLocaleTimeString('en-US')}
+                      В· {runOutput.when.toLocaleTimeString('en-US')}
                     </span>
                   )}
                 </div>
@@ -150,8 +150,8 @@ export default function CodePlayground({ initialSnippetId })
         </AnimatePresence>
 
         <div className="px-3 py-1.5 border-t border-white/10 bg-black/20 flex items-center justify-between text-[10px] text-slate-500 gap-2">
-          <span className="truncate">Java 21 · Allman braces</span>
-          <span className="truncate hidden sm:inline">Read-only · Run shows expected output</span>
+          <span className="truncate">Java 21 В· Allman braces</span>
+          <span className="truncate hidden sm:inline">Read-only В· Run shows expected output</span>
         </div>
       </div>
 
@@ -167,7 +167,7 @@ export default function CodePlayground({ initialSnippetId })
                 isActive ? 'border-emerald-400/40 bg-emerald-500/10' : ''
               }`}
             >
-              <div className="flex items-center gap-1.5 text-xs font-mono text-cyan-200">
+              <div className="flex items-center gap-1.5 text-xs font-mono text-[var(--accent)]">
                 <FileCode2 size={11} />
                 <span className="truncate">{s.name}</span>
               </div>

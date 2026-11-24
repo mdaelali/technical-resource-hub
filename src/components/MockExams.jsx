@@ -23,7 +23,7 @@ const DIFF_STYLE = {
 
 const HIGHLIGHT_COLORS = [
   { id: 'yellow', cls: 'bg-yellow-300/70 text-black', label: 'Yellow' },
-  { id: 'cyan',   cls: 'bg-cyan-300/70 text-black',   label: 'Cyan'   },
+  { id: 'cyan',   cls: 'bg-[var(--accent-soft)] text-black',   label: 'Cyan'   },
   { id: 'pink',   cls: 'bg-pink-300/70 text-black',   label: 'Pink'   },
 ];
 
@@ -42,7 +42,7 @@ const DIFFICULTY_FILTERS = [
   ['hard', 'Hard']
 ];
 
-/* ─────────────────────── Root component ─────────────────────────────────── */
+/* в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ Root component в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */
 export default function MockExams({ onLogActivity })
 {
   const [results, setResults] = useUserStorage('exam.results', {});
@@ -122,7 +122,7 @@ export default function MockExams({ onLogActivity })
   );
 }
 
-/* ─────────────────────── Exam list ─────────────────────────────────────── */
+/* в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ Exam list в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */
 function ExamList({ results, onStart, allExams })
 {
   const [formatFilter, setFormatFilter] = useState('all');
@@ -151,7 +151,7 @@ function ExamList({ results, onStart, allExams })
             <div className="min-w-0">
               <h2 className="page-header-title text-lg font-semibold tracking-tight">Mock Exams</h2>
               <p className="page-header-description text-xs">
-                {allExams.length} original AP-style exams · Easy, Medium, and Hard
+                {allExams.length} original AP-style exams В· Easy, Medium, and Hard
               </p>
             </div>
           </div>
@@ -223,8 +223,8 @@ function ExamList({ results, onStart, allExams })
               </div>
 
               <div className="flex items-center gap-3 text-[11px] text-slate-300 flex-wrap">
-                <span className="flex items-center gap-1"><Clock size={12} className="text-cyan-300" />~{exam.minutes} min</span>
-                {mcq > 0 && <span className="flex items-center gap-1"><ListChecks size={12} className="text-violet-300" />{mcq} MCQ</span>}
+                <span className="flex items-center gap-1"><Clock size={12} className="text-[var(--accent)]" />~{exam.minutes} min</span>
+                {mcq > 0 && <span className="flex items-center gap-1"><ListChecks size={12} className="text-[var(--accent)]" />{mcq} MCQ</span>}
                 {frq > 0 && <span className="flex items-center gap-1"><Code2 size={12} className="text-amber-300" />{frq} FRQ</span>}
               </div>
 
@@ -232,12 +232,12 @@ function ExamList({ results, onStart, allExams })
                 {rec?.completed && rec.totalMcq > 0 ? (
                   <span className="flex items-center gap-1.5 text-[11px] text-emerald-300">
                     <Trophy size={12} />Best: {rec.best}/{rec.totalMcq}
-                    <span className="text-slate-400">· {rec.attempts || 1} attempt{(rec.attempts || 1) === 1 ? '' : 's'}{rec.takenAt ? ` · last ${rec.takenAt}` : ''}</span>
+                    <span className="text-slate-400">В· {rec.attempts || 1} attempt{(rec.attempts || 1) === 1 ? '' : 's'}{rec.takenAt ? ` В· last ${rec.takenAt}` : ''}</span>
                   </span>
                 ) : rec?.completed ? (
                   <span className="flex items-center gap-1.5 text-[11px] text-emerald-300">
                     <CheckCircle2 size={12} />Completed
-                    <span className="text-slate-400">· {rec.attempts || 1} attempt{(rec.attempts || 1) === 1 ? '' : 's'}</span>
+                    <span className="text-slate-400">В· {rec.attempts || 1} attempt{(rec.attempts || 1) === 1 ? '' : 's'}</span>
                   </span>
                 ) : (
                   <span className="text-[11px] text-slate-500">Not attempted</span>
@@ -255,7 +255,7 @@ function ExamList({ results, onStart, allExams })
   );
 }
 
-/* ─────────────────────── Bluebook exam runner ───────────────────────────── */
+/* в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ Bluebook exam runner в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */
 function useTimer(minutes, running, onExpire)
 {
   const [secondsLeft, setSecondsLeft] = useState(minutes * 60);
@@ -437,7 +437,7 @@ function BluebookRunner({ exam, onExit, onComplete })
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-[var(--bg-base)] overflow-hidden" onMouseUp={handleMouseUp}>
-      {/* ── Top bar ─────────────────────────────────── */}
+      {/* в”Ђв”Ђ Top bar в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */}
       <header className="flex items-center justify-between px-4 py-2 border-b border-white/10 glass shrink-0 relative">
         <div className="flex items-center gap-3 min-w-0">
           <button type="button" onClick={requestExit} className="btn-ghost text-[11px] shrink-0">
@@ -449,7 +449,7 @@ function BluebookRunner({ exam, onExit, onComplete })
         <div className="flex items-center gap-2">
           {!timerHidden && (
             <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-white">
-              <Clock size={13} className={timerPct < 20 ? 'text-rose-300' : 'text-cyan-300'} />
+              <Clock size={13} className={timerPct < 20 ? 'text-rose-300' : 'text-[var(--accent)]'} />
               <span className={timerPct < 20 ? 'text-rose-300' : ''}>{timerDisplay}</span>
             </div>
           )}
@@ -499,7 +499,7 @@ function BluebookRunner({ exam, onExit, onComplete })
         </div>
       </header>
 
-      {/* ── Score banner after submit ─────────────── */}
+      {/* в”Ђв”Ђ Score banner after submit в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */}
       {submitted && (
         <div className={`shrink-0 px-4 py-2 text-xs font-medium flex flex-wrap items-center gap-3 ${pct === null ? 'bg-slate-500/15 text-slate-200' : pct >= 70 ? 'bg-emerald-500/20 text-emerald-200' : pct >= 50 ? 'bg-amber-500/20 text-amber-200' : 'bg-rose-500/20 text-rose-200'}`}>
           <Trophy size={13} />
@@ -508,13 +508,13 @@ function BluebookRunner({ exam, onExit, onComplete })
         </div>
       )}
 
-      {/* ── Body: left (stem) + right (choices) ─── */}
+      {/* в”Ђв”Ђ Body: left (stem) + right (choices) в”Ђв”Ђв”Ђ */}
       <div
         ref={splitRef}
         className="exam-runner-split flex-1 min-h-0 relative"
         style={{ '--exam-left-pane': `${leftPanePercent}%` }}
       >
-        {/* ── Left panel — always shows the question stem ───────────────────
+        {/* в”Ђв”Ђ Left panel вЂ” always shows the question stem в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
             For MCQ: prompt (+ code block if any)
             For FRQ: prompt + code block                                     */}
         <div className="min-h-0 min-w-0 overflow-auto p-5 border-r border-white/10">
@@ -552,7 +552,7 @@ function BluebookRunner({ exam, onExit, onComplete })
           )}
         </div>
 
-        {/* ── Right panel — answer choices (MCQ) or code editor (FRQ) ───── */}
+        {/* в”Ђв”Ђ Right panel вЂ” answer choices (MCQ) or code editor (FRQ) в”Ђв”Ђв”Ђв”Ђв”Ђ */}
         <div
           role="separator"
           aria-label="Resize question and answer panels"
@@ -576,7 +576,7 @@ function BluebookRunner({ exam, onExit, onComplete })
           {/* Question header row */}
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2">
-              <span className="w-7 h-7 rounded-full border border-violet-400/60 grid place-items-center text-xs font-semibold text-violet-300">
+              <span className="w-7 h-7 rounded-full border border-[var(--accent)] grid place-items-center text-xs font-semibold text-[var(--accent)]">
                 {current + 1}
               </span>
               <button
@@ -595,10 +595,10 @@ function BluebookRunner({ exam, onExit, onComplete })
           {submitted && q.type === 'mcq' && (
             <p className="text-[11px] text-slate-400 -mt-2">
               {answers[q.id] === q.answer
-                ? '✓ Correct — review the explanation below or move on to the next question.'
+                ? 'вњ“ Correct вЂ” review the explanation below or move on to the next question.'
                 : answers[q.id] === undefined
-                  ? 'Not answered — the correct answer and explanation are shown below.'
-                  : '✗ Incorrect — your choice, the correct answer, and the explanation are shown below.'}
+                  ? 'Not answered вЂ” the correct answer and explanation are shown below.'
+                  : 'вњ— Incorrect вЂ” your choice, the correct answer, and the explanation are shown below.'}
             </p>
           )}
 
@@ -637,16 +637,16 @@ function BluebookRunner({ exam, onExit, onComplete })
                       className={`flex-1 flex items-center gap-3 px-3 py-2.5 rounded-xl border text-left transition text-sm
                         ${isCorrect ? 'bg-emerald-500/20 border-emerald-400/50 text-white' :
                           isWrong ? 'bg-rose-500/20 border-rose-400/50 text-white cursor-pointer hover:border-rose-400/80' :
-                          chosen && submitted ? 'bg-violet-500/15 border-violet-400/40 text-white' :
-                          chosen ? 'bg-violet-500/25 border-violet-400/60 text-white' :
+                          chosen && submitted ? 'bg-[var(--accent-soft)] border-[var(--accent)] text-white' :
+                          chosen ? 'bg-[var(--accent-soft)] border-[var(--accent)] text-white' :
                           submitted ? 'border-white/10 text-slate-300' :
-                          'border-white/10 text-slate-200 hover:border-violet-400/40 hover:bg-white/[0.03]'}
+                          'border-white/10 text-slate-200 hover:border-[var(--accent)] hover:bg-white/[0.03]'}
                         ${elim && !submitted ? 'opacity-40' : ''}`}
                     >
                       <span className={`w-7 h-7 shrink-0 rounded-full border grid place-items-center text-xs font-semibold
                         ${isCorrect ? 'border-emerald-400 text-emerald-300' :
                           isWrong ? 'border-rose-400 text-rose-300' :
-                          chosen ? 'border-violet-400 text-violet-200 bg-violet-500/30' :
+                          chosen ? 'border-[var(--accent)] text-[var(--accent)] bg-[var(--accent-soft)]' :
                           'border-white/20 text-slate-400'}`}>
                         {LETTERS[i]}
                       </span>
@@ -720,7 +720,7 @@ function BluebookRunner({ exam, onExit, onComplete })
             </div>
           )}
 
-          {/* Explanation after submit — ref used for auto-scroll when answer clicked */}
+          {/* Explanation after submit вЂ” ref used for auto-scroll when answer clicked */}
           {submitted && q.type === 'mcq' && (
             <div ref={explanationRef}>
               <ExplanationCard
@@ -732,14 +732,14 @@ function BluebookRunner({ exam, onExit, onComplete })
         </div>
       </div>
 
-      {/* ── Bottom navigation bar ─────────────────── */}
+      {/* в”Ђв”Ђ Bottom navigation bar в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */}
       <footer className="glass border-t border-white/10 px-4 py-2.5 flex items-center justify-between gap-3 shrink-0">
         <button
           type="button"
           onClick={() => setCurrent((c) => Math.max(0, c - 1))}
           disabled={current === 0}
           aria-label="Previous question"
-          title="Previous question (←)"
+          title="Previous question (в†ђ)"
           className="exam-question-nav-control btn-ghost min-h-11 min-w-28 justify-center gap-2 rounded-xl border border-white/20 bg-white/[0.06] px-4 py-2.5 text-sm font-semibold text-slate-100 shadow-sm hover:bg-white/[0.12] disabled:cursor-not-allowed disabled:opacity-40"
         >
           <ArrowLeft size={19} strokeWidth={2.5} /><span>Previous</span>
@@ -760,14 +760,14 @@ function BluebookRunner({ exam, onExit, onComplete })
           onClick={() => setCurrent((c) => Math.min(totalQ - 1, c + 1))}
           disabled={current === totalQ - 1}
           aria-label="Next question"
-          title="Next question (→)"
+          title="Next question (в†’)"
           className="exam-question-nav-control btn-primary min-h-11 min-w-28 justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-md disabled:cursor-not-allowed disabled:opacity-40"
         >
           <span>Next</span><ArrowRight size={19} strokeWidth={2.5} />
         </button>
       </footer>
 
-      {/* ── Question navigator popup ──────────────── */}
+      {/* в”Ђв”Ђ Question navigator popup в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */}
       {showNav && createPortal(
         <div
           onClick={() => setShowNav(false)}
@@ -791,14 +791,14 @@ function BluebookRunner({ exam, onExit, onComplete })
                     key={qn.id}
                     onClick={() => { setCurrent(i); setShowNav(false); }}
                     className={`w-10 h-10 rounded-xl text-sm font-semibold grid place-items-center border transition
-                      ${i === current ? 'border-violet-400 bg-violet-500/30 text-white' :
+                      ${i === current ? 'border-[var(--accent)] bg-[var(--accent-soft)] text-white' :
                         isWrong ? 'border-rose-400/60 bg-rose-500/20 text-rose-200' :
                         isUnanswered ? 'border-amber-400/30 bg-amber-500/10 text-amber-100' :
                         done ? 'border-emerald-400/40 bg-emerald-500/15 text-emerald-200' :
                         marked ? 'border-amber-400/40 bg-amber-500/15 text-amber-200' :
                         'border-white/10 text-slate-400 hover:border-white/30'}`}
                   >
-                    {marked && !done ? '★' : i + 1}
+                    {marked && !done ? 'в…' : i + 1}
                   </button>
                 );
               })}
@@ -814,7 +814,7 @@ function BluebookRunner({ exam, onExit, onComplete })
         document.body
       )}
 
-      {/* ── Reference sheet modal ─────────────────── */}
+      {/* в”Ђв”Ђ Reference sheet modal в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */}
       {showRef && createPortal(
         <div
           onClick={() => setShowRef(false)}
@@ -826,8 +826,8 @@ function BluebookRunner({ exam, onExit, onComplete })
           >
             <div className="flex items-center justify-between px-5 py-3 border-b border-white/10 shrink-0">
               <div className="flex items-center gap-2">
-                <Book size={15} className="text-violet-300" />
-                <span className="text-sm font-semibold text-white">AP CS A — Java Quick Reference</span>
+                <Book size={15} className="text-[var(--accent)]" />
+                <span className="text-sm font-semibold text-white">AP CS A вЂ” Java Quick Reference</span>
               </div>
               <button onClick={() => setShowRef(false)} className="text-slate-400 hover:text-white">
                 <X size={15} />
@@ -836,11 +836,11 @@ function BluebookRunner({ exam, onExit, onComplete })
             <div className="p-5 flex flex-col gap-5 overflow-auto">
               {referenceSheet.map((section) => (
                 <div key={section.section}>
-                  <div className="text-[11px] uppercase tracking-widest text-violet-300 mb-2">{section.section}</div>
+                  <div className="text-[11px] uppercase tracking-widest text-[var(--accent)] mb-2">{section.section}</div>
                   <div className="flex flex-col gap-1.5">
                     {section.items.map((item) => (
                       <div key={item.sig} className="glass rounded-lg px-3 py-2">
-                        <code className="text-[11px] font-mono text-cyan-200">{item.sig}</code>
+                        <code className="text-[11px] font-mono text-[var(--accent)]">{item.sig}</code>
                         <p className="text-[11px] text-slate-300 mt-0.5">{item.desc}</p>
                       </div>
                     ))}
@@ -856,7 +856,7 @@ function BluebookRunner({ exam, onExit, onComplete })
   );
 }
 
-/* ─────────────────────── Explanation + AI chat ──────────────────────────── */
+/* в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ Explanation + AI chat в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */
 function ExplanationCard({ question, userAnswer })
 {
   const hasAnswer = Number.isInteger(userAnswer);

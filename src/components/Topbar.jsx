@@ -205,7 +205,7 @@ export default function Topbar({ section, searchQuery, onSearchChange, onNavigat
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search topics..."
             aria-label="Search learning topics"
-            className="bg-white/[0.04] border border-white/10 rounded-lg pl-7 pr-7 py-1.5 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-violet-400/50 w-32 sm:w-44 md:w-56"
+            className="bg-white/[0.04] border border-white/10 rounded-lg pl-7 pr-7 py-1.5 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-[var(--accent)] w-32 sm:w-44 md:w-56"
           />
           {!searchQuery && <kbd className="pointer-events-none absolute right-2 top-1/2 hidden -translate-y-1/2 rounded border border-white/10 px-1 py-0.5 text-[9px] text-slate-500 md:block">Ctrl / ⌘ K</kbd>}
           {searchQuery && (
@@ -283,7 +283,7 @@ export default function Topbar({ section, searchQuery, onSearchChange, onNavigat
         </button>
         <button
           onClick={() => onNavigate?.('profile')}
-          className="w-7 h-7 grid place-items-center rounded-lg bg-gradient-to-br from-emerald-600 to-sky-500 text-white overflow-hidden border border-white/10 hover:opacity-90 transition"
+          className="w-7 h-7 grid place-items-center rounded-lg bg-[var(--accent-strong)] text-white overflow-hidden hover:opacity-90 transition"
           aria-label="Open profile"
         >
           {profile?.avatarUrl ? (
@@ -299,7 +299,7 @@ export default function Topbar({ section, searchQuery, onSearchChange, onNavigat
 
 const TONES = {
   amber: { bg: 'bg-amber-500/15', icon: 'text-amber-300' },
-  emerald: { bg: 'bg-emerald-500/15', icon: 'text-emerald-300' },
-  violet: { bg: 'bg-violet-500/15', icon: 'text-violet-300' },
-  cyan: { bg: 'bg-cyan-500/15', icon: 'text-cyan-300' }
+  emerald: { bg: 'bg-[var(--accent-soft)]', icon: 'text-[var(--accent)]' },
+  violet: { bg: 'bg-white/[0.06]', icon: 'text-slate-300' },
+  cyan: { bg: 'bg-[var(--accent-soft)]', icon: 'text-[var(--accent)]' }
 };

@@ -35,9 +35,9 @@ export default function LoginPage({ initialEmail = '', onSwitchToSignup, onForgo
       subtitle="Sign in to continue your learning streak."
       footer={(
         <>
-          {onBack && <button onClick={onBack} className="text-slate-400 hover:text-white transition mr-3">← Home</button>}
+          {onBack && <button onClick={onBack} className="text-slate-400 hover:text-white transition mr-3">в†ђ Home</button>}
           New here?{' '}
-          <button onClick={onSwitchToSignup} className="text-violet-300 hover:text-white transition font-medium">
+          <button onClick={onSwitchToSignup} className="text-[var(--accent)] hover:text-white transition font-medium">
             Create an account
           </button>
         </>
@@ -64,7 +64,7 @@ export default function LoginPage({ initialEmail = '', onSwitchToSignup, onForgo
               <button
                 type="button"
                 onClick={() => onForgotPassword(email)}
-                className="text-[11px] text-violet-300 hover:text-white transition"
+                className="text-[11px] text-[var(--accent)] hover:text-white transition"
               >
                 Forgot password?
               </button>
