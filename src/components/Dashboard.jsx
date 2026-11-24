@@ -53,7 +53,7 @@ export default function Dashboard({ onNavigate })
             </div>
             <p className="mt-6 text-sm font-medium text-slate-300">{new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date())}</p>
             <h2 className="mt-2 text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl lg:text-[2.8rem]">
-              Make today a <span className="text-emerald-300">good day to learn.</span>
+              Make today a good day to learn.
             </h2>
             <p className="mt-3 max-w-lg text-sm leading-6 text-slate-300 sm:text-base">
               Welcome back{user?.name ? `, ${user.name.split(' ')[0]}` : ''}. Build a steady CS habit with clear notes, hands-on code, and practice that meets you where you are.
